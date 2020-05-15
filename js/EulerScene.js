@@ -3,7 +3,7 @@
 import * as THREE from './vendor/three.js/build/three.module.js';
 import * as SceneHelpers from "./SceneHelpers.js"
 import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
-import {FatArrow} from "./EulerGeometry.js";
+import * as EulerGeometry from "./EulerGeometry.js";
 
 export class EulerScene {
     static setTrackballControls(trackBallControl) {
@@ -32,8 +32,7 @@ export class EulerScene {
         this.createCamera();
         this.createControls();
         this.createHemisphereLight();
-        this.createArrow();
-        //this.createBox();
+        this.createTriad();
     }
 
     resizeRendererToDisplaySize() {
@@ -61,7 +60,7 @@ export class EulerScene {
         const {aspectRatio} = this.viewGeometry;
         const fov = 75;
         this.camera = new THREE.PerspectiveCamera(fov, aspectRatio, 0.1, 100);
-        this.camera.position.set(0, 0, 10);
+        this.camera.position.set(0, 0, 30);
     }
 
     createControls() {
@@ -80,8 +79,8 @@ export class EulerScene {
         this.scene.add(this.hemisphereLight);
     }
 
-    createArrow() {
-        this.arrow = new FatArrow(3, 10, 6, 6, 0xff0000);
-        this.scene.add(this.arrow);
+    createTriad() {
+        this.triad = new EulerGeometry.Triad(15);
+        this.scene.add(this.triad);
     }
 }
