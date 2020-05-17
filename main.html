@@ -5,10 +5,20 @@
     <title>Euler Animations</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="styles/main.css" rel="stylesheet" type="text/css">
+    <link href="styles/sliderStyle.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-<div id="container">
-    <canvas id="canvas"></canvas>
+<div id="topContainer">
+    <div id="view">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div id="playControls">
+        <div id="timelineCtrl">
+            <div id="playPauseCtrl" class="play"></div>
+            <div id="sliderDiv"><input type="range" min="0" max="99" value="0" step="any" class="slider" id="timeline"></div>
+            <div id="frameNum"></div>
+        </div>
+    </div>
 </div>
 <script src="js/vendor/palette.js"></script>
 <script type="module" src="js/main.js"></script>

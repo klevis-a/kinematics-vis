@@ -5,7 +5,15 @@ body {
     text-align: center;
 }
 
-#container {
+#topContainer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#view {
     position: absolute;
     left: 0;
     top: 0;
@@ -20,4 +28,11 @@ body {
     width: 100%;
     height: 100%;
     display: block;
+}
+
+#playControls {
+    position: absolute;
+    left: 25%;
+    bottom: 0;
+    width: 50%;
 }

@@ -1,0 +1,91 @@
+:root {
+    --timeline-ctrl-height: 24px;
+    --timeline-ctrl-bckg: #d3d3d3;
+    --timeline-ctrl-fore: #000000;
+}
+
+#timelineCtrl {
+    width: 100%;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    background: var(--timeline-ctrl-bckg);
+    border: 3px solid var(--timeline-ctrl-fore);
+    box-sizing: border-box;
+}
+
+#sliderDiv {
+    border-right: 3px solid var(--timeline-ctrl-fore);
+    border-left: 3px solid var(--timeline-ctrl-fore);
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    margin: 0;
+    width: 100%;
+    height: var(--timeline-ctrl-height);
+    background: var(--timeline-ctrl-bckg);
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    display: block;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: var(--timeline-ctrl-height);
+    height: var(--timeline-ctrl-height);
+    background: var(--timeline-ctrl-fore);
+}
+
+.slider::-moz-range-thumb {
+    width: var(--timeline-ctrl-height);
+    height: var(--timeline-ctrl-height);
+    background: var(--timeline-ctrl-fore);
+}
+
+.play {
+    width: 0;
+    height: 0;
+    border-top: calc(var(--timeline-ctrl-height) * 0.5) solid transparent;
+    border-left: calc(var(--timeline-ctrl-height) * 0.75) solid var(--timeline-ctrl-fore);
+    border-bottom: calc(var(--timeline-ctrl-height) * 0.5) solid transparent;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+.pause {
+    width: calc(var(--timeline-ctrl-height) * 0.25);
+    height: var(--timeline-ctrl-height);
+    border-right: calc(var(--timeline-ctrl-height) * 0.25) solid var(--timeline-ctrl-fore);
+    border-left: calc(var(--timeline-ctrl-height) * 0.25) solid var(--timeline-ctrl-fore);
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+#frameNum {
+    width: 3em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 0;
+    flex-shrink: 0;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--timeline-ctrl-fore);
+}

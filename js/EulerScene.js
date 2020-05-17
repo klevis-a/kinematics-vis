@@ -20,9 +20,10 @@ export class EulerScene {
 
     static SCENE_COLOR =  0xDCDCDC;
 
-    constructor(viewElement, canvasElement) {
+    constructor(viewElement, canvasElement, numFrames) {
         this.viewElement = viewElement;
         this.canvasElement = canvasElement;
+        this.numFrames = numFrames;
         this.renderer = new THREE.WebGLRenderer({canvas: canvasElement});
         this.renderer.shadowMap.enabled = true;
         this.scene = new THREE.Scene();
@@ -30,11 +31,30 @@ export class EulerScene {
         this.initScene();
     }
 
+    updateToFrame(frameNum) {
+        const currentFrame = Math.floor(frameNum);
+        if (currentFrame>=this.numFrames) {
+            this.triad2.quaternion.copy(this.triad2_final.quaternion);
+            this.arcE1.geometry.setDrawRange(0, this.numFrames*6);
+            this.arcE2.geometry.setDrawRange(0, this.numFrames*6);
+            this.arcE3.geometry.setDrawRange(0, this.numFrames*6);
+        }
+        else {
+            const interpFactor = frameNum/this.numFrames;
+            THREE.Quaternion.slerp(this.triad1.quaternion, this.triad2_final.quaternion, this.triad2.quaternion, interpFactor);
+            const drawRange = interpFactor*this.numFrames*6;
+            this.arcE1.geometry.setDrawRange(0, drawRange);
+            this.arcE2.geometry.setDrawRange(0, drawRange);
+            this.arcE3.geometry.setDrawRange(0, drawRange);
+        }
+    }
+
     initScene() {
         this.createCamera();
         this.createControls();
         this.createHemisphereLight();
-        this.createTriad();
+        this.createTriads();
+        this.createArcs(this.triad1, this.triad2_final);
     }
 
     resizeRendererToDisplaySize() {
@@ -47,7 +67,7 @@ export class EulerScene {
         return needResize;
     }
 
-    renderScene() {
+    renderSceneGraph() {
         this.resizeRendererToDisplaySize();
         this.camera.updateProjectionMatrix();
         this.controls.update();
@@ -81,72 +101,72 @@ export class EulerScene {
         this.scene.add(this.hemisphereLight);
     }
 
-    createTriad() {
+    createTriads() {
         this.triad1 = new EulerGeometry.Triad(15,0.1,4);
         this.scene.add(this.triad1);
 
         this.triad2 = new EulerGeometry.Triad(15,0.1,3, 0xffffff);
-        const rotX = JSHelpers.getRandom(-Math.PI, Math.PI);
-        this.triad2.rotateX(rotX);
-        this.triad2.updateMatrixWorld(true);
         this.scene.add(this.triad2);
 
-        this.rotate(this.triad1, this.triad2);
-
-        this.triad3 = new EulerGeometry.Triad(15,0.1,2, 0x000000);
+        //create the final triad for now - it's going to make computations easier but can likely remove it later
+        const rotX = JSHelpers.getRandom(-Math.PI, Math.PI);
         const rotY = JSHelpers.getRandom(-Math.PI/2, Math.PI/2);
-        this.triad3.rotateX(rotX);
-        this.triad3.updateMatrixWorld(true);
-        this.triad3.rotateY(rotY);
-        this.triad3.updateMatrixWorld(true);
-        this.scene.add(this.triad3);
-
-        this.rotate(this.triad2, this.triad3);
+        const rotZ = JSHelpers.getRandom(-Math.PI, Math.PI);
+        this.triad2_final = new EulerGeometry.Triad(15,0.1,3, 0xffffff);
+        this.triad2_final.rotateX(rotX);
+        this.triad2_final.updateMatrixWorld(true);
+        this.triad2_final.rotateY(rotY);
+        this.triad2_final.updateMatrixWorld(true);
+        this.triad2_final.rotateZ(rotZ);
+        this.triad2_final.updateMatrixWorld(true);
     }
 
-    rotate(triad1, triad2) {
-        const wedgeMaterialE1 = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad.reds[triad1.colorIntensity])});
-        wedgeMaterialE1.side = THREE.DoubleSide;
-        const wedgeMaterialE2 = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad.greens[triad1.colorIntensity])});
-        wedgeMaterialE2.side = THREE.DoubleSide;
-        const wedgeMaterialE3 = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad.blues[triad1.colorIntensity])});
-        wedgeMaterialE3.side = THREE.DoubleSide;
+    createArcs(triad1, triad2) {
+        const arcMaterialE1 = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad.reds[triad1.colorIntensity])});
+        arcMaterialE1.side = THREE.DoubleSide;
+        const arcMaterialE2 = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad.greens[triad1.colorIntensity])});
+        arcMaterialE2.side = THREE.DoubleSide;
+        const arcMaterialE3 = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad.blues[triad1.colorIntensity])});
+        arcMaterialE3.side = THREE.DoubleSide;
 
         const {axis: axisE1, angle: angleE1} = EulerGeometry.axisAngleFromQuat(new THREE.Quaternion().setFromUnitVectors(triad1.arrowAxis(0), triad2.arrowAxis(0)));
-        const wedgeGeometryE1 = new THREE.RingBufferGeometry(10, 11, 20, 20, 0, angleE1);
-        const wedgeE1 = new THREE.Mesh(wedgeGeometryE1, wedgeMaterialE1);
+        const arcGeometryE1 = new THREE.RingBufferGeometry(10, 11, this.numFrames, 1, 0, angleE1);
+        arcGeometryE1.setDrawRange(0, 0);
+        this.arcE1 = new THREE.Mesh(arcGeometryE1, arcMaterialE1);
         //x-axis of wedge is the starting "point"
-        const wedgeE1_XAxis = triad1.arrowAxis(0);
+        const arcE1_XAxis = triad1.arrowAxis(0);
         //z-axis of wedge is the rotAxis
-        const wedgeE1_ZAxis = axisE1;
+        const arcE1_ZAxis = axisE1;
         //and the y-axis is created from the cross-product
-        const wedgeE1_YAxis = new THREE.Vector3().crossVectors(wedgeE1_ZAxis, wedgeE1_XAxis);
-        wedgeE1.setRotationFromMatrix(new THREE.Matrix4().makeBasis(wedgeE1_XAxis, wedgeE1_YAxis, wedgeE1_ZAxis));
-        this.scene.add(wedgeE1);
+        const arcE1_YAxis = new THREE.Vector3().crossVectors(arcE1_ZAxis, arcE1_XAxis);
+        this.arcE1.setRotationFromMatrix(new THREE.Matrix4().makeBasis(arcE1_XAxis, arcE1_YAxis, arcE1_ZAxis));
+        this.scene.add(this.arcE1);
 
         const {axis: axisE2, angle: angleE2} = EulerGeometry.axisAngleFromQuat(new THREE.Quaternion().setFromUnitVectors(triad1.arrowAxis(1), triad2.arrowAxis(1)));
-        const wedgeGeometryE2 = new THREE.RingBufferGeometry(12, 13, 20, 20, 0, angleE2);
-        const wedgeE2 = new THREE.Mesh(wedgeGeometryE2, wedgeMaterialE2);
+        const arcGeometryE2 = new THREE.RingBufferGeometry(12, 13, this.numFrames, 1, 0, angleE2);
+        arcGeometryE2.setDrawRange(0, 0);
+        this.arcE2 = new THREE.Mesh(arcGeometryE2, arcMaterialE2);
         //x-axis of wedge is the starting "point"
-        const wedgeE2_XAxis = triad1.arrowAxis(1);
+        const arcE2_XAxis = triad1.arrowAxis(1);
         //z-axis of wedge is the rotAxis
-        const wedgeE2_ZAxis = axisE2;
+        const arcE2_ZAxis = axisE2;
         //and the y-axis is created from the cross-product
-        const wedgeE2_YAxis = new THREE.Vector3().crossVectors(wedgeE2_ZAxis, wedgeE2_XAxis);
-        wedgeE2.setRotationFromMatrix(new THREE.Matrix4().makeBasis(wedgeE2_XAxis, wedgeE2_YAxis, wedgeE2_ZAxis));
-        this.scene.add(wedgeE2);
+        const arcE2_YAxis = new THREE.Vector3().crossVectors(arcE2_ZAxis, arcE2_XAxis);
+        this.arcE2.setRotationFromMatrix(new THREE.Matrix4().makeBasis(arcE2_XAxis, arcE2_YAxis, arcE2_ZAxis));
+        this.scene.add(this.arcE2);
 
         const {axis: axisE3, angle: angleE3} = EulerGeometry.axisAngleFromQuat(new THREE.Quaternion().setFromUnitVectors(triad1.arrowAxis(2), triad2.arrowAxis(2)));
-        const wedgeGeometryE3 = new THREE.RingBufferGeometry(14, 15, 20, 20, 0, angleE3);
-        const wedgeE3 = new THREE.Mesh(wedgeGeometryE3, wedgeMaterialE3);
+        const arcGeometryE3 = new THREE.RingBufferGeometry(14, 15, this.numFrames, 1, 0, angleE3);
+        arcGeometryE3.setDrawRange(0, 0);
+        this.arcE3 = new THREE.Mesh(arcGeometryE3, arcMaterialE3);
         //x-axis of wedge is the starting "point"
-        const wedgeE3_XAxis = triad1.arrowAxis(2);
+        const arcE3_XAxis = triad1.arrowAxis(2);
         //z-axis of wedge is the rotAxis
-        const wedgeE3_ZAxis = axisE3;
+        const arcE3_ZAxis = axisE3;
         //and the y-axis is created from the cross-product
-        const wedgeE3_YAxis = new THREE.Vector3().crossVectors(wedgeE3_ZAxis, wedgeE3_XAxis);
-        wedgeE3.setRotationFromMatrix(new THREE.Matrix4().makeBasis(wedgeE3_XAxis, wedgeE3_YAxis, wedgeE3_ZAxis));
-        this.scene.add(wedgeE3);
+        const arcE3_YAxis = new THREE.Vector3().crossVectors(arcE3_ZAxis, arcE3_XAxis);
+        this.arcE3.setRotationFromMatrix(new THREE.Matrix4().makeBasis(arcE3_XAxis, arcE3_YAxis, arcE3_ZAxis));
+        this.scene.add(this.arcE3);
 
         const quat1Quat2Rot = new THREE.Quaternion().multiplyQuaternions(triad2.quaternion, new THREE.Quaternion().copy(triad1.quaternion).conjugate());
         const {axis: rotAxis} = EulerGeometry.axisAngleFromQuat(quat1Quat2Rot);
