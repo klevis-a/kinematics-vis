@@ -76,7 +76,8 @@ export class Triad extends THREE.Object3D{
 
 export function axisAngleFromQuat(quat) {
     quat.normalize();
-    const angle = 2 * Math.acos(quat.w);
+    let angle = 2 * Math.acos(quat.w);
+    angle = angle > Math.PI ? -(2*Math.PI-angle) : angle;
     const s = Math.sqrt(1 - quat.w * quat.w);
     const axis = new THREE.Vector3(quat.x, quat.y, quat.z);
     if (s>=0.001) {
