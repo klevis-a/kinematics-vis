@@ -157,7 +157,7 @@ export class EulerScene {
         this.stripWidth = 1;
         this.arcs = [];
         this.arcArrows = [];
-        this.useConeArrows = false;
+        this.useConeArrows = true;
         this.initScene();
     }
 
@@ -306,7 +306,8 @@ export class EulerScene {
         this.triad1 = new EulerGeometry.Triad(15,0.1,4);
         this.scene.add(this.triad1);
 
-        this.triad2 = new EulerGeometry.Triad(15,0.1,3, 0xffffff);
+        this.triad2 = new EulerGeometry.Triad(15,0.1,3, 1);
+        this.triad2.position.set(0.001,0.001,0.001);
         this.scene.add(this.triad2);
 
         //create the final triad for now - it's going to make computations easier but can likely remove it later
