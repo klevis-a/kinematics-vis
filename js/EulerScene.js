@@ -157,16 +157,17 @@ export class EulerScene {
 
         const triadMaterialColors = ['reds', 'greens', 'blues'];
         for(let dim=0; dim<3; dim++) {
-            const arcMaterial = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad[triadMaterialColors[dim]][triad1.colorIntensity])});
+            const arcMaterial = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad[triadMaterialColors[dim]][triad1.colorIntensity]), depthTest: false});
             arcMaterial.side = THREE.DoubleSide;
             this.arcs[dim] = EulerScene.createArc(triad1, triad2, rotAxis, rotAngle, rotPlane, dim, 10+dim*2, 11+dim*2, this.stripWidth, arcMaterial, this.numFrames, this.arcHeightSegments);
+            this.arcs[dim].renderOrder = 0;
             this.arcs[dim].updateWorldMatrix(true);
             this.scene.add(this.arcs[dim]);
         }
     }
 
     createArcArrows() {
-        const arcArrowMaterial = new THREE.MeshBasicMaterial({color: 0xffffff});
+        const arcArrowMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, depthTest: false});
         arcArrowMaterial.side = THREE.DoubleSide;
 
         for (let dim=0; dim<3; dim++) {
@@ -175,10 +176,7 @@ export class EulerScene {
             this.arrowSegmentLength[dim] = arrowSegmentLength;
             this.arrowSegmentOffset[dim] = arrowSegmentOffsetLength;
             this.arcArrows[dim] = new THREE.Mesh(arrowGeometry, arcArrowMaterial);
-            this.arcArrows[dim].renderOrder = 999;
-            this.arcArrows[dim].onBeforeRender = function (renderer) {
-                renderer.clearDepth();
-            };
+            this.arcArrows[dim].renderOrder = 1;
             this.arcs[dim].add(this.arcArrows[dim]);
             this.arcArrows[dim].visible = false;
         }
