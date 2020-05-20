@@ -1,10 +1,13 @@
 'use strict';
 
 import {TimelineController} from "./TimelineController.js";
+import {divGeometry} from "./SceneHelpers.js"
 
 export class AnimationHelper {
-    constructor(eulerScene, numFrames, framePeriod, playBtn, timeline, frameNumLbl) {
-        this.EulerScene = eulerScene;
+    constructor(eulerScenes, numFrames, framePeriod, playBtn, timeline, frameNumLbl, renderer, parentElement) {
+        this.Renderer = renderer;
+        this.ParentElement = parentElement;
+        this.EulerScenes = eulerScenes;
         this.NumFrames = numFrames;
         this.FramePeriod = framePeriod;
         const playFnc = (frameNum) => this.play(frameNum);
@@ -28,13 +31,20 @@ export class AnimationHelper {
     setFrame(frameNum) {
         this.CurrentAnimationFnc = (t) => this.renderNoAnimate(t);
         this.TimelineController.pausePress();
-        this.EulerScene.updateToFrame(frameNum);
+        this.EulerScenes.forEach(eulerScene => eulerScene.updateToFrame(frameNum));
     }
 
     render(time) {
         this.CurrentAnimationFnc(time);
-        this.EulerScene.renderSceneGraph();
-        this.RequestId = requestAnimationFrame((t) => this.render(t));
+        this.Renderer.setScissorTest(true);
+        this.EulerScenes.forEach((eulerScene) => {
+            const {contentLeft: left, contentTop: top, contentWidth: width, contentHeight: height} = eulerScene.viewGeometry;
+            const {contentHeight: parentHeight} = divGeometry(this.ParentElement);
+            eulerScene.renderer.setScissor(left, parentHeight-top-height, width, height);
+            eulerScene.renderer.setViewport(left, parentHeight-top-height, width, height);
+            eulerScene.renderSceneGraph();
+        });
+        requestAnimationFrame((t) => this.render(t));
     }
 
     renderNoAnimate(time) {
@@ -45,7 +55,7 @@ export class AnimationHelper {
         if (timeDiff > 0) {
             const currentFractionalFrame = (timeDiff/this.FramePeriod) + this.StartFrame;
             const currentFrame = Math.floor(currentFractionalFrame);
-            this.EulerScene.updateToFrame(currentFractionalFrame);
+            this.EulerScenes.forEach(eulerScene => eulerScene.updateToFrame(currentFractionalFrame));
 
             if (currentFrame>=this.NumFrames) {
                 this.TimelineController.updateTimeLine(this.NumFrames);

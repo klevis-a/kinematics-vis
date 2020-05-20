@@ -13,12 +13,22 @@ body {
     height: 100%;
 }
 
-#view {
+#views {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#views > div {
+    width: calc(50% - 2px);
+    height: 50%;
+    border: 1px solid #000000;
+    flex-shrink: 1;
+    flex-grow: 1;
 }
 
 #canvas {
@@ -28,6 +38,7 @@ body {
     width: 100%;
     height: 100%;
     display: block;
+    z-index: -1;
 }
 
 #playControls {
