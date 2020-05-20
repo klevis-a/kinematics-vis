@@ -44,11 +44,14 @@ export class EulerScene {
         return arc;
     }
 
-    static arrowGeometryFromArcGeometry(arcGeometry, numRadialSegments, numHeightSegments, arrowSegmentLength) {
+    static arrowGeometryFromArcGeometry(arcGeometry, numRadialSegments, numHeightSegments, arrowLength, arrowOffsetLength) {
         const arcGeometryPositions = arcGeometry.attributes.position.array;
         const arrowGeometry = new THREE.Geometry();
         // these comprise the base of the triangle
         const v1 = new THREE.Vector3(arcGeometryPositions[0], arcGeometryPositions[1], arcGeometryPositions[2]);
+        const v1_adjacent = new THREE.Vector3(arcGeometryPositions[3], arcGeometryPositions[4], arcGeometryPositions[5]);
+        const segmentDistance = new THREE.Vector3().subVectors(v1_adjacent, v1).length();
+        const arrowSegmentLength = Math.round(arrowLength/segmentDistance);
         const topFirstIndex = ((numRadialSegments+1)*numHeightSegments);
         const v2 = new THREE.Vector3(arcGeometryPositions[topFirstIndex*3], arcGeometryPositions[topFirstIndex*3+1], arcGeometryPositions[topFirstIndex*3+2]);
         // now we compute the tip of the triangle
@@ -74,7 +77,8 @@ export class EulerScene {
 
         //rotation of triangle with respect to coordinate system
         arrowGeometry.applyMatrix4(new THREE.Matrix4().getInverse(new THREE.Matrix4().makeBasis(x_axis, y_axis, z_axis)));
-        return arrowGeometry;
+        const arrowSegmentOffsetLength = Math.ceil(arrowOffsetLength/segmentDistance);
+        return {arrowGeometry, arrowSegmentLength, arrowSegmentOffsetLength};
     }
 
     static setTrackballControls(trackBallControl) {
@@ -87,16 +91,16 @@ export class EulerScene {
         trackBallControl.keys = [65, 83, 68];
     }
 
-    static updateFlatArcArrow(arcArrow, arrowGeometry, drawRange, numRadialSegments, numHeightSegments, arrowSegmentLength) {
-        const arcArrowV1Idx = arrowGeometry.index.array[drawRange - 1] - arrowSegmentLength;
+    static updateFlatArcArrow(arcArrow, arrowGeometry, drawRange, numRadialSegments, numHeightSegments, arrowSegmentLength, arrowSegmentOffset) {
+        const arcArrowV1Idx = arrowGeometry.index.array[drawRange - 1] - arrowSegmentLength - arrowSegmentOffset;
         const arcPositions = arrowGeometry.attributes.position.array;
         const v1 = new THREE.Vector3().set(arcPositions[arcArrowV1Idx * 3], arcPositions[arcArrowV1Idx * 3 + 1], arcPositions[arcArrowV1Idx * 3 + 2]);
         arcArrow.position.copy(v1);
 
         //although it's not necessary to compute the midpoint for determining the orientation of the arrow we do so to mirror the geometry creation step
-        const arcArrowV2Idx =  arrowGeometry.index.array[drawRange - 1] + ((numRadialSegments + 1) * numHeightSegments) - arrowSegmentLength;
-        const arcE1ArrowV3TopIdx = arrowGeometry.index.array[drawRange - 1] + ((numRadialSegments + 1) * numHeightSegments);
-        const arcE1ArrowV3BottomIdx = arrowGeometry.index.array[drawRange - 1];
+        const arcArrowV2Idx =  arcArrowV1Idx + ((numRadialSegments + 1) * numHeightSegments);
+        const arcE1ArrowV3BottomIdx = arrowGeometry.index.array[drawRange - 1] - arrowSegmentOffset;
+        const arcE1ArrowV3TopIdx = arcE1ArrowV3BottomIdx + ((numRadialSegments + 1) * numHeightSegments);
         const v2 = new THREE.Vector3().set(arcPositions[arcArrowV2Idx * 3], arcPositions[arcArrowV2Idx * 3 + 1], arcPositions[arcArrowV2Idx * 3 + 2]);
         const v3Top = new THREE.Vector3().set(arcPositions[arcE1ArrowV3TopIdx * 3], arcPositions[arcE1ArrowV3TopIdx * 3 + 1], arcPositions[arcE1ArrowV3TopIdx * 3 + 2]);
         const v3Bottom = new THREE.Vector3().set(arcPositions[arcE1ArrowV3BottomIdx * 3], arcPositions[arcE1ArrowV3BottomIdx * 3 + 1], arcPositions[arcE1ArrowV3BottomIdx * 3 + 2]);
@@ -105,36 +109,6 @@ export class EulerScene {
         const x_axis = new THREE.Vector3().subVectors(v2,v1);
         const z_axis = new THREE.Vector3().crossVectors(x_axis, new THREE.Vector3().subVectors(v3,v1));
         const y_axis = new THREE.Vector3().crossVectors(z_axis, x_axis);
-        x_axis.normalize();
-        y_axis.normalize();
-        z_axis.normalize();
-        arcArrow.setRotationFromMatrix(new THREE.Matrix4().makeBasis(x_axis, y_axis, z_axis));
-    }
-
-    static updateConeArcArrow(arcArrow, arcGeometry, drawRange, numRadialSegments, numHeightSegments) {
-        /*
-        v3----v2\\
-        |      |  \\
-        |      |   \\
-        |      |  //
-        v4----v1//
-         */
-        const v1Idx = arcGeometry.index.array[drawRange - 1];
-        const v2Idx =  arcGeometry.index.array[drawRange - 1] + ((numRadialSegments + 1) * numHeightSegments);
-        const v3Idx = v2Idx - 1;
-        const v4Idx = v1Idx - 1;
-        const arcPositions = arcGeometry.attributes.position.array;
-        const v1 = new THREE.Vector3().set(arcPositions[v1Idx * 3], arcPositions[v1Idx * 3 + 1], arcPositions[v1Idx * 3 + 2]);
-        const v2 = new THREE.Vector3().set(arcPositions[v2Idx * 3], arcPositions[v2Idx * 3 + 1], arcPositions[v2Idx * 3 + 2]);
-        const v3 = new THREE.Vector3().set(arcPositions[v3Idx * 3], arcPositions[v3Idx * 3 + 1], arcPositions[v3Idx * 3 + 2]);
-        const v4 = new THREE.Vector3().set(arcPositions[v4Idx * 3], arcPositions[v4Idx * 3 + 1], arcPositions[v4Idx * 3 + 2]);
-        const v1v2_mid = new THREE.Vector3().addVectors(v1, v2).multiplyScalar(0.5);
-        const v3v4_mid = new THREE.Vector3().addVectors(v3, v4).multiplyScalar(0.5);
-        arcArrow.position.copy(v1v2_mid);
-        const y_axis = new THREE.Vector3().subVectors(v1v2_mid, v3v4_mid);
-        //the radial symmetry of a cone makes it so we don't have to really care which way the z and x axis face
-        const x_axis = new THREE.Vector3().crossVectors(y_axis, new THREE.Vector3().subVectors(v1, v2));
-        const z_axis = new THREE.Vector3().crossVectors(x_axis, y_axis);
         x_axis.normalize();
         y_axis.normalize();
         z_axis.normalize();
@@ -153,11 +127,11 @@ export class EulerScene {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(EulerScene.SCENE_COLOR);
         this.arcHeightSegments = 1;
-        this.arrowSegmentLength = 4;
+        this.arrowSegmentLength = [];
+        this.arrowSegmentOffset = [];
         this.stripWidth = 1;
         this.arcs = [];
         this.arcArrows = [];
-        this.useConeArrows = true;
         this.triadLength = 15;
         this.triadAspectRatio = 0.1;
         this.initScene();
@@ -165,12 +139,7 @@ export class EulerScene {
 
     updateToFrame(frameNum) {
         this.updateTriad(frameNum);
-        this.updateToFrameArcs(frameNum);
-        // if (this.useConeArrows) {
-        //     this.updateToFrameConeArrows(frameNum);
-        // } else {
-        //     this.updateToFrameFlatArrows(frameNum);
-        // }
+        this.updateToFrameFlatArrows(frameNum);
     }
 
     updateTriad(frameNum) {
@@ -189,63 +158,7 @@ export class EulerScene {
             const drawRange = this.numFrames*this.arcHeightSegments*EulerScene.NUM_INDICES_PER_RADIAL_SEGMENT;
             this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
             this.arcArrows.forEach((arcArrow, idx) => {
-                EulerScene.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments, this.arrowSegmentLength);
-                arcArrow.visible = true;
-            });
-        }
-        else {
-            const interpFactor = frameNum/this.numFrames;
-            const drawRangeContinous = interpFactor*this.numFrames*this.arcHeightSegments*EulerScene.NUM_INDICES_PER_RADIAL_SEGMENT;
-            //restrict drawRange to a complete segment
-            const drawRange = drawRangeContinous - drawRangeContinous % (this.arcHeightSegments*EulerScene.NUM_INDICES_PER_RADIAL_SEGMENT);
-
-            if (drawRange > 0) {
-                this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
-                if (drawRange >= this.arrowSegmentLength*this.arcHeightSegments*EulerScene.NUM_INDICES_PER_RADIAL_SEGMENT) {
-                    this.arcArrows.forEach((arcArrow, idx) => {
-                        EulerScene.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments, this.arrowSegmentLength);
-                        arcArrow.visible = true;
-                    });
-                }
-                else {
-                    this.arcArrows.forEach(arcArrow => arcArrow.visible=false);
-                }
-            }
-            else {
-                this.arcs.forEach(arc => arc.geometry.setDrawRange(0, 0));
-                this.arcArrows.forEach(arcArrow => arcArrow.visible=false);
-            }
-        }
-    }
-
-    updateToFrameArcs(frameNum) {
-        const currentFrame = Math.floor(frameNum);
-        if (currentFrame>=this.numFrames) {
-            const drawRange = this.numFrames*this.arcHeightSegments*EulerScene.NUM_INDICES_PER_RADIAL_SEGMENT;
-            this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
-        }
-        else {
-            const interpFactor = frameNum/this.numFrames;
-            const drawRangeContinous = interpFactor*this.numFrames*this.arcHeightSegments*EulerScene.NUM_INDICES_PER_RADIAL_SEGMENT;
-            //restrict drawRange to a complete segment
-            const drawRange = drawRangeContinous - drawRangeContinous % (this.arcHeightSegments*EulerScene.NUM_INDICES_PER_RADIAL_SEGMENT);
-
-            if (drawRange > 0) {
-                this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
-            }
-            else {
-                this.arcs.forEach(arc => arc.geometry.setDrawRange(0, 0));
-            }
-        }
-    }
-
-    updateToFrameConeArrows(frameNum) {
-        const currentFrame = Math.floor(frameNum);
-        if (currentFrame>=this.numFrames) {
-            const drawRange = this.numFrames*this.arcHeightSegments*EulerScene.NUM_INDICES_PER_RADIAL_SEGMENT;
-            this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
-            this.arcArrows.forEach((arcArrow, idx) => {
-                EulerScene.updateConeArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments);
+                EulerScene.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments, this.arrowSegmentLength[idx], this.arrowSegmentOffset[idx]);
                 arcArrow.visible = true;
             });
         }
@@ -258,8 +171,13 @@ export class EulerScene {
             if (drawRange > 0) {
                 this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
                 this.arcArrows.forEach((arcArrow, idx) => {
-                    EulerScene.updateConeArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments);
-                    arcArrow.visible = true;
+                    if (drawRange >= this.arrowSegmentLength[idx]*this.arcHeightSegments*EulerScene.NUM_INDICES_PER_RADIAL_SEGMENT) {
+                        EulerScene.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments, this.arrowSegmentLength[idx], this.arrowSegmentOffset[idx]);
+                        arcArrow.visible = true;
+                    }
+                    else {
+                        arcArrow.visible=false;
+                    }
                 });
             }
             else {
@@ -275,11 +193,7 @@ export class EulerScene {
         this.createHemisphereLight();
         this.createTriads();
         this.createArcs(this.triad1, this.triad2_final);
-        if (this.useConeArrows) {
-            this.createCylinderArcArrows();
-        } else {
-            this.createArcArrows();
-        }
+        this.createArcArrows();
     }
 
     resizeRendererToDisplaySize() {
@@ -368,65 +282,16 @@ export class EulerScene {
 
         for (let dim=0; dim<3; dim++) {
             // we will need a different arrow geometry for each arc because the radii etc. vary and will change the arrow dimensions
-            const arcArrowGeometry = EulerScene.arrowGeometryFromArcGeometry(this.arcs[dim].geometry, this.numFrames, this.arcHeightSegments, this.arrowSegmentLength);
-            this.arcArrows[dim] = new THREE.Mesh(arcArrowGeometry, arcArrowMaterial);
+            const {arrowGeometry, arrowSegmentLength, arrowSegmentOffsetLength} = EulerScene.arrowGeometryFromArcGeometry(this.arcs[dim].geometry, this.numFrames, this.arcHeightSegments, this.stripWidth, this.triadLength*this.triadAspectRatio/2);
+            this.arrowSegmentLength[dim] = arrowSegmentLength;
+            this.arrowSegmentOffset[dim] = arrowSegmentOffsetLength;
+            this.arcArrows[dim] = new THREE.Mesh(arrowGeometry, arcArrowMaterial);
             this.arcArrows[dim].renderOrder = 999;
             this.arcArrows[dim].onBeforeRender = function (renderer) {
                 renderer.clearDepth();
             };
             this.arcs[dim].add(this.arcArrows[dim]);
             this.arcArrows[dim].visible = false;
-        }
-    }
-
-    createCylinderArcArrows() {
-        /*
-        v3----v4\\
-        |      |  \\
-        |      |   \\
-        |      |  //
-        v1----v2//
-         */
-        const arcArrowMaterial = new THREE.MeshBasicMaterial({color: 0xffffff});
-        const arcArrowGeometry = new THREE.CylinderBufferGeometry(0, this.stripWidth/2, this.stripWidth, 10, 1, false);
-        //set the origin at the base of the cone
-        arcArrowGeometry.translate(0, this.stripWidth/2, 0);
-        for (let dim=0; dim<3; dim++) {
-            this.arcArrows[dim] = new THREE.Mesh(arcArrowGeometry, arcArrowMaterial);
-            const arcGeometry = this.arcs[dim].geometry;
-            const v1Idx = 0;
-            const v2Idx =  1;
-            const v3Idx = (this.numFrames + 1) * this.arcHeightSegments;
-            const v4Idx = v3Idx + 1;
-            const arcPositions = arcGeometry.attributes.position.array;
-            const v1 = new THREE.Vector3().set(arcPositions[v1Idx * 3], arcPositions[v1Idx * 3 + 1], arcPositions[v1Idx * 3 + 2]);
-            const v2 = new THREE.Vector3().set(arcPositions[v2Idx * 3], arcPositions[v2Idx * 3 + 1], arcPositions[v2Idx * 3 + 2]);
-            const v3 = new THREE.Vector3().set(arcPositions[v3Idx * 3], arcPositions[v3Idx * 3 + 1], arcPositions[v3Idx * 3 + 2]);
-            const v4 = new THREE.Vector3().set(arcPositions[v4Idx * 3], arcPositions[v4Idx * 3 + 1], arcPositions[v4Idx * 3 + 2]);
-            const v1v3_mid = new THREE.Vector3().addVectors(v1, v3).multiplyScalar(0.5);
-            const v2v4_mid = new THREE.Vector3().addVectors(v2, v4).multiplyScalar(0.5);
-
-            const origin = new THREE.Vector3().copy(v1v3_mid);
-            const x_axis = new THREE.Vector3().subVectors(v3, v1);
-            const z_axis = new THREE.Vector3().crossVectors(x_axis, new THREE.Vector3().subVectors(v2v4_mid, v1v3_mid));
-            const y_axis = new THREE.Vector3().crossVectors(z_axis, x_axis);
-            x_axis.normalize();
-            y_axis.normalize();
-            z_axis.normalize();
-            this.arcs[dim].localToWorld(origin);
-            this.arcs[dim].localToWorld(x_axis);
-            this.arcs[dim].localToWorld(y_axis);
-            this.arcs[dim].localToWorld(z_axis);
-            this.triad2.arrows[dim].worldToLocal(origin);
-            this.triad2.arrows[dim].worldToLocal(x_axis);
-            this.triad2.arrows[dim].worldToLocal(y_axis);
-            this.triad2.arrows[dim].worldToLocal(z_axis);
-
-            this.arcArrows[dim].position.copy(origin);
-            this.arcArrows[dim].setRotationFromMatrix(new THREE.Matrix4().makeBasis(x_axis, y_axis, z_axis));
-            this.arcArrows[dim].translateOnAxis(new THREE.Vector3(0, 1, 0), -this.stripWidth-this.triadLength*this.triadAspectRatio/2)
-            this.triad2.arrows[dim].add(this.arcArrows[dim]);
-            //this.arcArrows[dim].visible = false;
         }
     }
 }
