@@ -35,4 +35,5 @@ body {
     left: 25%;
     bottom: 0;
     width: 50%;
+    display: flex;
 }

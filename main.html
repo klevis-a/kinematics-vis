@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="styles/main.css" rel="stylesheet" type="text/css">
     <link href="styles/sliderStyle.css" rel="stylesheet" type="text/css">
+    <link href="styles/stateCtrlStyle.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 <div id="topContainer">
@@ -13,6 +14,22 @@
         <canvas id="canvas"></canvas>
     </div>
     <div id="playControls">
+        <div class="stateControl">
+            <form name="stateCtrlForm">
+                <div>
+                    <input type="radio" id="state1" name="rotationStates" value="1" checked>
+                    <label for="state1">1</label>
+                </div>
+                <div>
+                    <input type="radio" id="state2" name="rotationStates" value="2">
+                    <label for="state2">2</label>
+                </div>
+                <div>
+                    <input type="radio" id="state3" name="rotationStates" value="3">
+                    <label for="state3">3</label>
+                </div>
+            </form>
+        </div>
         <div id="timelineCtrl">
             <div id="playPauseCtrl" class="play"></div>
             <div id="sliderDiv"><input type="range" min="0" max="99" value="0" step="any" class="slider" id="timeline"></div>

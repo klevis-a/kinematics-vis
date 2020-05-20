@@ -1,0 +1,68 @@
+.stateControl {
+    margin: 0px 5px 0px 0px;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.stateControl input[type="radio"] {
+    opacity: 0;
+    position: fixed;
+    width: 0;
+    margin: 0px;
+    padding: 0px;
+}
+
+.stateControl form {
+    margin: 0px;
+    padding: 0px;
+    display: flex;
+}
+
+.stateControl div {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.stateControl label {
+    display: inline-block;
+    background-color: var(--timeline-ctrl-bckg);
+    padding: 0px 8px 0px 5px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    height: var(--timeline-ctrl-height);
+    color: var(--timeline-ctrl-fore);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+#state1 + label {
+    border: 3px solid var(--timeline-ctrl-fore);
+}
+
+#state2 + label {
+    border-width: 3px 3px 3px 0px;
+    border-style: solid;
+    border-color: var(--timeline-ctrl-fore);
+}
+
+#state3 + label {
+    border-width: 3px 3px 3px 0px;
+    border-style: solid;
+    border-color: var(--timeline-ctrl-fore);
+}
+
+.stateControl label:hover {
+    background-color: #ffffff;
+}
+
+.stateControl input[type="radio"]:focus + label {
+    background-color: #bfb;
+}
+
+.stateControl input[type="radio"]:checked + label {
+    background-color: #bfb;
+}

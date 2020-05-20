@@ -12,6 +12,8 @@
     background: var(--timeline-ctrl-bckg);
     border: 3px solid var(--timeline-ctrl-fore);
     box-sizing: border-box;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 #sliderDiv {
