@@ -16,7 +16,7 @@ export class FatArrow extends THREE.Object3D {
         this.radialSegments = 10;
         this.heightSegments = 1;
 
-        this.arrowMaterial = new THREE.MeshPhongMaterial({color: color, opacity: 0.9, transparent: true});
+        this.arrowMaterial = new THREE.MeshPhongMaterial({color: color, opacity: 0.5, transparent: true});
 
         switch (markings) {
             case 1:
