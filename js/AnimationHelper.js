@@ -35,6 +35,11 @@ export class AnimationHelper {
         this.EulerScenes.forEach(eulerScene => eulerScene.updateToFrame(frameNum));
     }
 
+    goToStep(stepNum) {
+        this.EulerScenes.forEach(eulerScene => eulerScene.goToStep(parseInt(stepNum)));
+        this.TimelineController.updateTimeLine(0);
+    }
+
     render(time) {
         this.CurrentAnimationFnc(time);
         this.Renderer.setScissorTest(true);

@@ -1,6 +1,6 @@
 import * as THREE from "./vendor/three.js/build/three.module.js";
 
-export function createArc(triad1, triad2, rotAxis, rotAngle, rotPlane, dim, stripBottomDistance, stripTopDistance, stripWidth, arcMaterial, radialSegments, heightSegments) {
+export function createArc(triad1, triad2, rotAxis, rotAngle, rotPlane, dim, stripBottomDistance, stripWidth, arcMaterial, radialSegments, heightSegments) {
     let coneAxis;
     let coneAngle;
     // it's easier to perform the calculations below if the unit vector we are rotating and the unit vector indicating
@@ -12,6 +12,8 @@ export function createArc(triad1, triad2, rotAxis, rotAngle, rotPlane, dim, stri
         coneAxis = new THREE.Vector3().copy(rotAxis).multiplyScalar(-1);
         coneAngle = -rotAngle;
     }
+
+    const stripTopDistance = stripBottomDistance + stripWidth;
     const angleToRotAxis = triad1.arrowAxis(dim).angleTo(coneAxis);
     const radiusTop = stripTopDistance*Math.sin(angleToRotAxis);
     const radiusBottom = stripBottomDistance*Math.sin(angleToRotAxis);
@@ -71,16 +73,6 @@ export function arrowGeometryFromArcGeometry(arcGeometry, numRadialSegments, num
     arrowGeometry.applyMatrix4(new THREE.Matrix4().getInverse(new THREE.Matrix4().makeBasis(x_axis, y_axis, z_axis)));
     const arrowSegmentOffsetLength = Math.ceil(arrowOffsetLength/segmentDistance);
     return {arrowGeometry, arrowSegmentLength, arrowSegmentOffsetLength};
-}
-
-export function setTrackballControls(trackBallControl) {
-    trackBallControl.rotateSpeed = 3.0;
-    trackBallControl.zoomSpeed = 1.2;
-    trackBallControl.panSpeed = 0.8;
-    //65:A - orbiting operations
-    //83:S - zooming operations
-    //68:D - panning operations
-    trackBallControl.keys = [65, 83, 68];
 }
 
 export function updateFlatArcArrow(arcArrow, arrowGeometry, drawRange, numRadialSegments, numHeightSegments, arrowSegmentLength, arrowSegmentOffset) {

@@ -64,6 +64,7 @@ export class Triad extends THREE.Object3D{
     static reds = palette('cb-Reds',5);
     static greens = palette('cb-Greens',5);
     static blues = palette('cb-Blues',5);
+    static triadMaterialColors = ['reds', 'greens', 'blues'];
 
     static intFromColor(col) {
         return parseInt('0x'+col);
