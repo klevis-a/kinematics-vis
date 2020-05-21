@@ -53,20 +53,6 @@ export class EulerScene {
         }, this);
     }
 
-    pruneArrows() {
-        for (let i=0; i<this.steps.length; i++) {
-            for (let j=0; j<3; j++) {
-                if (this.steps[i].startingTriad.arrowAxis(j).dot(this.steps[i].endingTriad.arrowAxis(j)) > 0.999) {
-                    if (i===0) {
-                        this.step0Triad.arrows[j].visible = false;
-                    } else {
-                        this.steps[i - 1].triad.arrows[j].visible = false;
-                    }
-                }
-            }
-        }
-    }
-
     addStepToScene(step) {
         this.scene.add(step.triad);
         step.arcs.forEach(arc => this.scene.add(arc), this);
