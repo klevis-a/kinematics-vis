@@ -4,7 +4,8 @@ import {TimelineController} from "./TimelineController.js";
 import {divGeometry} from "./SceneHelpers.js"
 
 export class AnimationHelper {
-    constructor(eulerScenes, numFrames, framePeriod, playBtn, timeline, frameNumLbl, renderer, parentElement) {
+    constructor(eulerScenes, numFrames, framePeriod, playBtn, timeline, frameNumLbl, renderer, parentElement, updateCamera) {
+        this.UpdateCamera = updateCamera;
         this.Renderer = renderer;
         this.ParentElement = parentElement;
         this.EulerScenes = eulerScenes;
@@ -42,6 +43,7 @@ export class AnimationHelper {
             const {contentHeight: parentHeight} = divGeometry(this.ParentElement);
             eulerScene.renderer.setScissor(left, parentHeight-top-height, width, height);
             eulerScene.renderer.setViewport(left, parentHeight-top-height, width, height);
+            if (this.UpdateCamera) eulerScene.updateCamera();
             eulerScene.renderSceneGraph();
         });
         requestAnimationFrame((t) => this.render(t));

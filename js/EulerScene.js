@@ -18,7 +18,8 @@ export class EulerScene {
     static setTrackballControls = EulerSceneStatic.setTrackballControls;
     static updateFlatArcArrow = EulerSceneStatic.updateFlatArcArrow;
 
-    constructor(viewElement, renderer, numFrames) {
+    constructor(viewElement, renderer, numFrames, camera) {
+        this.camera = camera;
         this.viewElement = viewElement;
         this.numFrames = numFrames;
         this.renderer = renderer;
@@ -86,7 +87,7 @@ export class EulerScene {
     }
 
     initScene() {
-        this.createCamera();
+        if (this.camera == null) this.createCamera();
         this.createControls();
         this.createHemisphereLight();
         this.createTriads();
