@@ -1,4 +1,4 @@
-import {WebGLRenderer, PerspectiveCamera, Quaternion, Vector3} from "./vendor/three.js/build/three.module.js";
+import {WebGLRenderer, PerspectiveCamera, Quaternion, Vector3, Euler} from "./vendor/three.js/build/three.module.js";
 import {EulerScene} from "./EulerScene.js";
 import {AnimationHelper} from "./AnimationHelper.js";
 import {divGeometry} from "./SceneHelpers.js";
@@ -36,22 +36,33 @@ function createCamera(view) {
     return camera;
 }
 
+function createRotations(){
+    const quat1 = new Quaternion().setFromEuler(new Euler(Math.PI/4, 0, 0));
+    const quat2 = new Quaternion().setFromEuler(new Euler(Math.PI/4, Math.PI/4, 0));
+    const quat3 = new Quaternion().setFromEuler(new Euler(Math.PI/4, Math.PI/4, Math.PI/4));
+    return [quat1, quat2, quat3];
+}
+
+function createEulerScenes(view1, view2, view3, view4, renderer, numFrames, camera, rotations) {
+    const eulerScene1 = new EulerScene(view1, renderer, numFrames, camera, rotations);
+    const eulerScene2 = new EulerScene(view2, renderer, numFrames, camera, rotations);
+    const eulerScene3 = new EulerScene(view3, renderer, numFrames, camera, rotations);
+    const eulerScene4 = new EulerScene(view4, renderer, numFrames, camera, rotations);
+    return [eulerScene1, eulerScene2, eulerScene3, eulerScene4];
+}
+
 const numFrames = 100;
 const framePeriod = 30;
 const {canvas, views, view1, view2, view3, view4} = getEulerSceneElements();
 const renderer = new WebGLRenderer({canvas: canvas});
 renderer.setSize(views.clientWidth, views.clientHeight);
 const camera = createCamera(view1);
-const quat1 = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/4);
-const quat2 = new Quaternion().multiplyQuaternions(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI/4), quat1);
-const quat3 = new Quaternion().multiplyQuaternions(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI/4), quat2);
-const eulerScene1 = new EulerScene(view1, renderer, numFrames, camera, [quat1, quat2, quat3]);
-const eulerScene2 = new EulerScene(view2, renderer, numFrames, camera, [quat1, quat2, quat3]);
-const eulerScene3 = new EulerScene(view3, renderer, numFrames, camera, [quat1, quat2, quat3]);
-const eulerScene4 = new EulerScene(view4, renderer, numFrames, camera, [quat1, quat2, quat3]);
-const eulerScenes = [eulerScene1, eulerScene2, eulerScene3, eulerScene4];
+const rotations = createRotations();
+const eulerScenes = createEulerScenes(view1, view2, view3, view4, renderer, numFrames, camera, rotations);
+
 const {playBtn, timeline, frameNumLbl} = getTimelineCtrlElements();
 const animationHelper = new AnimationHelper(eulerScenes, numFrames, framePeriod, playBtn, timeline, frameNumLbl, renderer, views, true);
+
 window.addEventListener('resize', onWindowResize);
 const rotationStateRadios = document.stateCtrlForm.rotationStates;
 const changeHandler = function () {

@@ -17,20 +17,8 @@ export class FatArrow extends THREE.Object3D {
         this.heightSegments = 1;
 
         this.arrowMaterial = new THREE.MeshPhongMaterial({color: color, opacity: 0.9, transparent: true});
-
-        switch (markings) {
-            case 1:
-            case 2:
-            case 3:
-                this.line = new THREE.Mesh(this.createMarkingsGeometry(), this.arrowMaterial);
-                this.add(this.line);
-                break;
-            default:
-                const lineGeometry = new THREE.CylinderBufferGeometry(this.lineWidth/2, this.lineWidth/2, this.lineLength, this.radialSegments, this.heightSegments);
-                lineGeometry.translate(0, this.lineLength*0.5, 0);
-                this.line = new THREE.Mesh(lineGeometry, this.arrowMaterial);
-                this.add(this.line);
-        }
+        this.line = new THREE.Mesh(this.createMarkingsGeometry(), this.arrowMaterial);
+        this.add(this.line);
 
         const coneGeometry = new THREE.CylinderBufferGeometry(0, this.coneRadius, this.coneHeight, this.radialSegments, this.heightSegments);
         coneGeometry.translate(0, this.lineLength+0.5*this.coneHeight, 0);
@@ -44,11 +32,19 @@ export class FatArrow extends THREE.Object3D {
         lineGeometryStart.translate(0, this.markingsStart*0.5, 0);
         geometries.push(lineGeometryStart);
 
-        const blockLength = (this.markingsEnd - this.markingsStart)/(this.markings * 2 + 1);
-        for (let i=0; i<this.markings; i++) {
-            const blockGeometry = new THREE.CylinderBufferGeometry(this.lineWidth/2, this.lineWidth/2, blockLength, this.radialSegments, this.heightSegments);
-            blockGeometry.translate(0, this.markingsStart + blockLength/2 + (i*2+1)*blockLength, 0);
-            geometries.push(blockGeometry);
+        switch (this.markings) {
+            case 1:
+            case 2:
+            case 3:
+                const sectionLength = (this.markingsEnd - this.markingsStart)/3;
+                const sectionStart = this.markingsStart + (this.markings - 1) * sectionLength;
+                const blockLength = sectionLength/(this.markings * 2 + 1);
+                for (let i=0; i<this.markings; i++) {
+                    const blockGeometry = new THREE.CylinderBufferGeometry(this.lineWidth/2, this.lineWidth/2, blockLength, this.radialSegments, this.heightSegments);
+                    blockGeometry.translate(0, sectionStart + blockLength/2 + (i*2+1)*blockLength, 0);
+                    geometries.push(blockGeometry);
+                }
+                break;
         }
 
         const lineGeometryEnd = new THREE.CylinderBufferGeometry(this.lineWidth/2, this.lineWidth/2, this.lineLength-this.markingsEnd, this.radialSegments, this.heightSegments);
@@ -70,20 +66,20 @@ export class Triad extends THREE.Object3D{
         return parseInt('0x'+col);
     }
 
-    constructor(length, aspectRatio=0.2, colorIntensity=4, markings) {
+    constructor(length, aspectRatio=0.2, colorIntensity=4, markings, markingsStart, markingsWidth) {
         super();
         this.length = length;
         this.aspectRatio = aspectRatio;
         this.colorIntensity = colorIntensity;
-        this.markingsStart = this.length/3;
-        this.markingsEnd = this.length/3*2;
+        this.markingsStart = markingsStart
+        this.markingsWidth = markingsWidth;
         this.markings = markings;
 
         const otherDims = this.aspectRatio*this.length;
 
-        this.e1 = new FatArrow(otherDims, this.length, otherDims, otherDims, Triad.intFromColor(Triad.reds[this.colorIntensity]), this.markings, this.markingsStart, this.markingsEnd);
-        this.e2 = new FatArrow(otherDims, this.length, otherDims, otherDims, Triad.intFromColor(Triad.greens[this.colorIntensity]), this.markings, this.markingsStart, this.markingsEnd);
-        this.e3 = new FatArrow(otherDims, this.length, otherDims, otherDims, Triad.intFromColor(Triad.blues[this.colorIntensity]), this.markings, this.markingsStart, this.markingsEnd);
+        this.e1 = new FatArrow(otherDims, this.length, otherDims, otherDims, Triad.intFromColor(Triad.reds[this.colorIntensity]), this.markings, this.markingsStart, this.markingsStart+this.markingsWidth);
+        this.e2 = new FatArrow(otherDims, this.length, otherDims, otherDims, Triad.intFromColor(Triad.greens[this.colorIntensity]), this.markings, this.markingsStart+this.markingsWidth, this.markingsStart+this.markingsWidth*2);
+        this.e3 = new FatArrow(otherDims, this.length, otherDims, otherDims, Triad.intFromColor(Triad.blues[this.colorIntensity]), this.markings, this.markingsStart+this.markingsWidth*2, this.markingsStart+this.markingsWidth*3);
         this.arrows = [this.e1, this.e2, this.e3];
 
         const originGeometry = new THREE.SphereBufferGeometry(otherDims/2, 10, 10);

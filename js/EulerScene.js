@@ -33,6 +33,7 @@ export class EulerScene {
         this.arcStripWidth = 1;
         this.triadLength = 15;
         this.triadAspectRatio = 0.1;
+        this.markingsStart = 5;
         this.currentStep = 1;
         this.initScene();
         this.createSteps();
@@ -46,10 +47,24 @@ export class EulerScene {
     createSteps() {
         this.steps = this.stepQuats.map((quat, idx, array) => {
             const quatStart = idx===0 ? new THREE.Quaternion() : array[idx-1];
-            const eulerStep = new EulerStep(quatStart, quat, this.numFrames, this.triadLength, this.triadAspectRatio, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
+            const eulerStep = new EulerStep(quatStart, quat, this.numFrames, this.triadLength, this.triadAspectRatio, this.markingsStart, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
             this.addStepToScene(eulerStep);
             return eulerStep;
         }, this);
+    }
+
+    pruneArrows() {
+        for (let i=0; i<this.steps.length; i++) {
+            for (let j=0; j<3; j++) {
+                if (this.steps[i].startingTriad.arrowAxis(j).dot(this.steps[i].endingTriad.arrowAxis(j)) > 0.999) {
+                    if (i===0) {
+                        this.step0Triad.arrows[j].visible = false;
+                    } else {
+                        this.steps[i - 1].triad.arrows[j].visible = false;
+                    }
+                }
+            }
+        }
     }
 
     addStepToScene(step) {
@@ -80,7 +95,7 @@ export class EulerScene {
         if (this.camera == null) this.createCamera();
         this.createControls();
         this.createHemisphereLight();
-        this.step0Triad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 4, 0);
+        this.step0Triad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
         this.scene.add(this.step0Triad);
     }
 
@@ -130,12 +145,13 @@ class EulerStep {
     static arrowGeometryFromArcGeometry = EulerStepStatic.arrowGeometryFromArcGeometry;
     static updateFlatArcArrow = EulerStepStatic.updateFlatArcArrow;
 
-    constructor(quatStart, quatEnd, numFrames, triadLength, triadAspectRatio, stepNumber, arcStripWidth, numArcRadialSegments, arcHeightSegments) {
+    constructor(quatStart, quatEnd, numFrames, triadLength, triadAspectRatio, markingsStart, stepNumber, arcStripWidth, numArcRadialSegments, arcHeightSegments) {
         this.quatStart = quatStart;
         this.quatEnd = quatEnd;
         this.numFrames = numFrames;
         this.triadLength = triadLength;
         this.triadAspectRatio = triadAspectRatio;
+        this.markingsStart = markingsStart;
         this.stepNumber = stepNumber;
         this.arcStripWidth = arcStripWidth;
         this.numArcRadialSegments = numArcRadialSegments;
@@ -211,9 +227,10 @@ class EulerStep {
     }
 
     createTriads() {
-        this.startingTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 4-this.stepNumber+1, this.stepNumber-1);
-        this.endingTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 4-this.stepNumber, this.stepNumber);
-        this.triad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 4-this.stepNumber, this.stepNumber);
+        this.startingTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 0, 0, this.markingsStart, this.arcStripWidth*3);
+        this.endingTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 0, 0, this.markingsStart, this.arcStripWidth*3);
+        this.triad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, this.stepNumber+1,
+            this.stepNumber, this.markingsStart, this.arcStripWidth*3);
 
         this.startingTriad.quaternion.copy(this.quatStart);
         this.triad.quaternion.copy(this.quatStart);
@@ -232,12 +249,12 @@ class EulerStep {
         this.rotAngle = rotAngle;
         this.rotPlane = rotPlane;
 
-        const arcsStartingDistance = this.triadLength * (2/3);
+        const arcsStartingDistance = this.markingsStart + this.arcStripWidth;
         for(let dim=0; dim<3; dim++) {
-            const arcMaterial = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad[Triad.triadMaterialColors[dim]][this.startingTriad.colorIntensity]), depthTest: false});
+            const arcMaterial = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad[Triad.triadMaterialColors[dim]][this.triad.colorIntensity]), depthTest: false});
             arcMaterial.side = THREE.DoubleSide;
             this.arcs[dim] = EulerStep.createArc(this.startingTriad, this.endingTriad, this.rotAxis, this.rotAngle, this.rotPlane,
-                dim, arcsStartingDistance+dim*2*this.arcStripWidth, this.arcStripWidth, arcMaterial, this.numArcRadialSegments, this.arcHeightSegments);
+                dim, arcsStartingDistance+3*dim*this.arcStripWidth, this.arcStripWidth, arcMaterial, this.numArcRadialSegments, this.arcHeightSegments);
             this.arcs[dim].renderOrder = 0;
             this.arcs[dim].updateWorldMatrix(true);
         }
