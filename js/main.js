@@ -75,3 +75,31 @@ const changeHandler = function () {
     animationHelper.goToStep(parseInt(this.value));
 };
 rotationStateRadios.forEach(radioBtn => radioBtn.addEventListener('change', changeHandler));
+document.addEventListener('keypress', event => {
+   switch (event.keyCode) {
+       case 49:
+           animationHelper.goToStep(1);
+           animationHelper.setFrame(0);
+           animationHelper.TimelineController.updateTimeLine(0);
+           rotationStateRadios[0].checked = true;
+           break;
+       case 50:
+           animationHelper.goToStep(1);
+           animationHelper.setFrame(numFrames);
+           animationHelper.TimelineController.updateTimeLine(numFrames);
+           rotationStateRadios[0].checked = true;
+           break;
+       case 51:
+           animationHelper.goToStep(2);
+           animationHelper.setFrame(numFrames);
+           animationHelper.TimelineController.updateTimeLine(numFrames);
+           rotationStateRadios[1].checked = true;
+           break;
+       case 52:
+           animationHelper.goToStep(3);
+           animationHelper.setFrame(numFrames);
+           animationHelper.TimelineController.updateTimeLine(numFrames);
+           rotationStateRadios[2].checked = true;
+           break;
+   }
+});

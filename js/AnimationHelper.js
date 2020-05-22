@@ -36,6 +36,8 @@ export class AnimationHelper {
     }
 
     goToStep(stepNum) {
+        this.CurrentAnimationFnc = (t) => this.renderNoAnimate(t);
+        this.TimelineController.pausePress();
         this.EulerScenes.forEach(eulerScene => eulerScene.goToStep(parseInt(stepNum)));
         this.TimelineController.updateTimeLine(0);
     }
