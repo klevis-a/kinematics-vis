@@ -40,6 +40,10 @@ export class AnimationHelper {
         this.TimelineController.updateTimeLine(0);
     }
 
+    setCurrentControl(currentControl) {
+        this.CurrentControl = currentControl;
+    }
+
     render(time) {
         this.CurrentAnimationFnc(time);
         this.Renderer.setScissorTest(true);
@@ -49,6 +53,7 @@ export class AnimationHelper {
             eulerScene.renderer.setScissor(left, parentHeight-top-height, width, height);
             eulerScene.renderer.setViewport(left, parentHeight-top-height, width, height);
             if (this.UpdateCamera) eulerScene.updateCamera();
+            if (this.CurrentControl != null) this.CurrentControl.update();
             eulerScene.renderSceneGraph();
         });
         requestAnimationFrame((t) => this.render(t));

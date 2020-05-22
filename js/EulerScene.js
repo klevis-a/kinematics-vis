@@ -85,7 +85,6 @@ export class EulerScene {
     }
 
     renderSceneGraph() {
-        this.controls.update();
         this.renderer.render(this.scene, this.camera);
     }
 

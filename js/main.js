@@ -62,6 +62,12 @@ const eulerScenes = createEulerScenes(view1, view2, view3, view4, renderer, numF
 
 const {playBtn, timeline, frameNumLbl} = getTimelineCtrlElements();
 const animationHelper = new AnimationHelper(eulerScenes, numFrames, framePeriod, playBtn, timeline, frameNumLbl, renderer, views, true);
+const startEventListener = event => animationHelper.setCurrentControl(event.target);
+const endEventListener = event => {
+  eulerScenes.forEach(eulerScene => eulerScene.controls.target.copy(event.target.target));
+};
+eulerScenes.forEach(eulerScene => eulerScene.controls.addEventListener('start', startEventListener));
+eulerScenes.forEach(eulerScene => eulerScene.controls.addEventListener('end', endEventListener));
 
 window.addEventListener('resize', onWindowResize);
 const rotationStateRadios = document.stateCtrlForm.rotationStates;
