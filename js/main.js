@@ -37,17 +37,27 @@ function createCamera(view) {
 }
 
 function createRotations(){
-    const quat1 = new Quaternion().setFromEuler(new Euler(Math.PI/4, 0, 0));
-    const quat2 = new Quaternion().setFromEuler(new Euler(Math.PI/4, Math.PI/4, 0));
-    const quat3 = new Quaternion().setFromEuler(new Euler(Math.PI/4, Math.PI/4, Math.PI/4));
-    return [quat1, quat2, quat3];
+    //extrinsic rotations
+    const quat1Ext = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/4);
+    const quat2Ext = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI/4).multiply(quat1Ext);
+    const quat3Ext = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI/4).multiply(quat2Ext);
+    const eul = new Euler().setFromQuaternion(quat3Ext);
+    //intrinsic rotations
+    const quat1 = new Quaternion().setFromEuler(new Euler(eul.x, 0, 0));
+    const quat2 = new Quaternion().setFromEuler(new Euler(eul.x, eul.y, 0));
+    const quat3 = new Quaternion().setFromEuler(new Euler(eul.x, eul.y, eul.z));
+    return [
+        [quat1Ext, quat2Ext, quat3Ext],
+        [quat1, quat2, quat3],
+        [quat1Ext, quat2Ext, quat3Ext],
+        [quat1, quat2, quat3]];
 }
 
 function createEulerScenes(view1, view2, view3, view4, renderer, numFrames, camera, rotations) {
-    const eulerScene1 = new EulerScene(view1, renderer, numFrames, camera, rotations);
-    const eulerScene2 = new EulerScene(view2, renderer, numFrames, camera, rotations);
-    const eulerScene3 = new EulerScene(view3, renderer, numFrames, camera, rotations);
-    const eulerScene4 = new EulerScene(view4, renderer, numFrames, camera, rotations);
+    const eulerScene1 = new EulerScene(view1, renderer, numFrames, camera, rotations[0]);
+    const eulerScene2 = new EulerScene(view2, renderer, numFrames, camera, rotations[1]);
+    const eulerScene3 = new EulerScene(view3, renderer, numFrames, camera, rotations[2]);
+    const eulerScene4 = new EulerScene(view4, renderer, numFrames, camera, rotations[3]);
     return [eulerScene1, eulerScene2, eulerScene3, eulerScene4];
 }
 
