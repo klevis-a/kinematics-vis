@@ -4,8 +4,7 @@ import * as THREE from './vendor/three.js/build/three.module.js';
 import * as SceneHelpers from "./SceneHelpers.js"
 import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
 import * as EulerGeometry from "./EulerGeometry.js";
-import {Triad} from "./EulerGeometry.js";
-import * as EulerStepStatic from "./EulerStepStatic.js";
+import * as EulerStep from "./EulerStep.js"
 
 
 export class EulerScene {
@@ -47,7 +46,7 @@ export class EulerScene {
     createSteps() {
         this.steps = this.stepQuats.map((quat, idx, array) => {
             const quatStart = idx===0 ? new THREE.Quaternion() : array[idx-1];
-            const eulerStep = new EulerStep(quatStart, quat, this.numFrames, this.triadLength, this.triadAspectRatio, this.markingsStart, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
+            const eulerStep = new EulerStep.EulerStep(quatStart, quat, this.numFrames, this.triadLength, this.triadAspectRatio, this.markingsStart, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
             this.addStepToScene(eulerStep);
             return eulerStep;
         }, this);
@@ -55,6 +54,7 @@ export class EulerScene {
 
     addStepToScene(step) {
         this.scene.add(step.triad);
+        this.scene.add(step.rotAxis);
         step.arcs.forEach(arc => this.scene.add(arc), this);
     }
 
@@ -81,8 +81,7 @@ export class EulerScene {
         if (this.camera == null) this.createCamera();
         this.createControls();
         this.createHemisphereLight();
-        this.step0Triad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
-        this.scene.add(this.step0Triad);
+        this.createReferenceGeometry();
     }
 
     renderSceneGraph() {
@@ -98,6 +97,39 @@ export class EulerScene {
         const {aspectRatio} = this.viewGeometry;
         this.camera.aspect = aspectRatio;
         this.camera.updateProjectionMatrix();
+    }
+
+    createReferenceGeometry() {
+        this.step0Triad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
+        this.scene.add(this.step0Triad);
+
+        const xAxis_mat = new THREE.LineBasicMaterial({color: 0xff0000});
+        const xAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-this.triadLength*1.25, 0, 0), new THREE.Vector3(this.triadLength*1.25, 0, 0)]);
+        this.xAxis = new THREE.Line(xAxis_geo, xAxis_mat);
+        this.scene.add(this.xAxis);
+
+        const yAxis_mat = new THREE.LineBasicMaterial({color: 0x00ff00});
+        const yAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -this.triadLength*1.25, 0), new THREE.Vector3(0, this.triadLength*1.25, 0)]);
+        this.yAxis = new THREE.Line(yAxis_geo, yAxis_mat);
+        this.scene.add(this.yAxis);
+
+        const zAxis_mat = new THREE.LineBasicMaterial({color: 0x0000ff});
+        const zAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, -this.triadLength*1.25), new THREE.Vector3(0, 0, this.triadLength*1.25)]);
+        this.zAxis = new THREE.Line(zAxis_geo, zAxis_mat);
+        this.scene.add(this.zAxis);
+
+        const planeGeometry = new THREE.PlaneBufferGeometry(this.triadLength*1.25*2, this.triadLength*1.25*2);
+        const planeEdgesGeometry = new THREE.EdgesGeometry(planeGeometry);
+        this.xyPlane = new THREE.LineSegments(planeEdgesGeometry, zAxis_mat);
+        this.scene.add(this.xyPlane);
+
+        this.xzPlane = new THREE.LineSegments(planeEdgesGeometry, yAxis_mat);
+        this.xzPlane.lookAt(new THREE.Vector3(0, 1, 0));
+        this.scene.add(this.xzPlane);
+
+        this.yzPlane = new THREE.LineSegments(planeEdgesGeometry, xAxis_mat);
+        this.yzPlane.lookAt(new THREE.Vector3(1, 0, 0));
+        this.scene.add(this.yzPlane);
     }
 
     createCamera() {
@@ -119,147 +151,8 @@ export class EulerScene {
         this.hemisphereLight = new THREE.HemisphereLight(
             0xffffff, // sky color
             0x000000, // ground color
-            1, // intensity
+            1.25, // intensity
         );
         this.scene.add(this.hemisphereLight);
-    }
-}
-
-class EulerStep {
-    static NUM_INDICES_PER_RADIAL_SEGMENT = 6;
-    static createArc = EulerStepStatic.createArc;
-    static arrowGeometryFromArcGeometry = EulerStepStatic.arrowGeometryFromArcGeometry;
-    static updateFlatArcArrow = EulerStepStatic.updateFlatArcArrow;
-
-    constructor(quatStart, quatEnd, numFrames, triadLength, triadAspectRatio, markingsStart, stepNumber, arcStripWidth, numArcRadialSegments, arcHeightSegments) {
-        this.quatStart = quatStart;
-        this.quatEnd = quatEnd;
-        this.numFrames = numFrames;
-        this.triadLength = triadLength;
-        this.triadAspectRatio = triadAspectRatio;
-        this.markingsStart = markingsStart;
-        this.stepNumber = stepNumber;
-        this.arcStripWidth = arcStripWidth;
-        this.numArcRadialSegments = numArcRadialSegments;
-        this.arcHeightSegments = arcHeightSegments;
-        this.arrowSegmentLength = [];
-        this.arrowSegmentOffset = [];
-        this.arcs = [];
-        this.arcArrows = [];
-
-        this.createTriads();
-        this.createArcs();
-        this.createArcArrows();
-    }
-
-    updateToFrame(frameNum) {
-        this.updateTriad(frameNum);
-        this.updateToFrameFlatArrows(frameNum);
-    }
-
-    updateTriad(frameNum) {
-        const currentFrame = Math.floor(frameNum);
-        if (currentFrame>=this.numFrames) {
-            this.triad.quaternion.copy(this.endingTriad.quaternion);
-        } else {
-            const interpFactor = frameNum/this.numFrames;
-            THREE.Quaternion.slerp(this.startingTriad.quaternion, this.endingTriad.quaternion, this.triad.quaternion, interpFactor);
-        }
-    }
-
-    updateToFrameFlatArrows(frameNum) {
-        const currentFrame = Math.floor(frameNum);
-        if (currentFrame>=this.numFrames) {
-            const drawRange = this.numFrames*this.arcHeightSegments*EulerStep.NUM_INDICES_PER_RADIAL_SEGMENT;
-            this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
-            this.arcArrows.forEach((arcArrow, idx) => {
-                EulerStep.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments, this.arrowSegmentLength[idx], this.arrowSegmentOffset[idx]);
-                arcArrow.visible = true;
-            });
-        }
-        else {
-            const interpFactor = frameNum/this.numFrames;
-            const drawRangeContinous = interpFactor*this.numFrames*this.arcHeightSegments*EulerStep.NUM_INDICES_PER_RADIAL_SEGMENT;
-            //restrict drawRange to a complete segment
-            const drawRange = drawRangeContinous - drawRangeContinous % (this.arcHeightSegments*EulerStep.NUM_INDICES_PER_RADIAL_SEGMENT);
-
-            if (drawRange > 0) {
-                this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
-                this.arcArrows.forEach((arcArrow, idx) => {
-                    if (drawRange >= this.arrowSegmentLength[idx]*this.arcHeightSegments*EulerStep.NUM_INDICES_PER_RADIAL_SEGMENT) {
-                        EulerStep.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments, this.arrowSegmentLength[idx], this.arrowSegmentOffset[idx]);
-                        arcArrow.visible = true;
-                    }
-                    else {
-                        arcArrow.visible=false;
-                    }
-                });
-            }
-            else {
-                this.arcs.forEach(arc => arc.geometry.setDrawRange(0, 0));
-                this.arcArrows.forEach(arcArrow => arcArrow.visible=false);
-            }
-        }
-    }
-
-    deactivate() {
-        this.triad.visible = false;
-        this.arcs.forEach(arc => arc.visible=false);
-    }
-
-    activate() {
-        this.triad.visible = true;
-        this.arcs.forEach(arc => arc.visible=true);
-    }
-
-    createTriads() {
-        this.startingTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 0, 0, this.markingsStart, this.arcStripWidth*3);
-        this.endingTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 0, 0, this.markingsStart, this.arcStripWidth*3);
-        this.triad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, this.stepNumber+1,
-            this.stepNumber, this.markingsStart, this.arcStripWidth*3);
-
-        this.startingTriad.quaternion.copy(this.quatStart);
-        this.triad.quaternion.copy(this.quatStart);
-        this.endingTriad.quaternion.copy(this.quatEnd);
-
-        this.startingTriad.updateMatrixWorld(true);
-        this.triad.updateMatrixWorld(true);
-        this.endingTriad.updateMatrixWorld(true);
-    }
-
-    createArcs() {
-        const quat1Quat2Rot = new THREE.Quaternion().multiplyQuaternions(this.endingTriad.quaternion, new THREE.Quaternion().copy(this.startingTriad.quaternion).conjugate());
-        const {axis: rotAxis, angle: rotAngle} = EulerGeometry.axisAngleFromQuat(quat1Quat2Rot);
-        const rotPlane = new THREE.Plane(rotAxis);
-        this.rotAxis = rotAxis;
-        this.rotAngle = rotAngle;
-        this.rotPlane = rotPlane;
-
-        const arcsStartingDistance = this.markingsStart + this.arcStripWidth;
-        for(let dim=0; dim<3; dim++) {
-            const arcMaterial = new THREE.MeshBasicMaterial({color: Triad.intFromColor(Triad[Triad.triadMaterialColors[dim]][this.triad.colorIntensity]), depthTest: false});
-            arcMaterial.side = THREE.DoubleSide;
-            this.arcs[dim] = EulerStep.createArc(this.startingTriad, this.endingTriad, this.rotAxis, this.rotAngle, this.rotPlane,
-                dim, arcsStartingDistance+3*dim*this.arcStripWidth, this.arcStripWidth, arcMaterial, this.numArcRadialSegments, this.arcHeightSegments);
-            this.arcs[dim].renderOrder = 0;
-            this.arcs[dim].updateWorldMatrix(true);
-        }
-    }
-
-    createArcArrows() {
-        const arcArrowMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, depthTest: false});
-        arcArrowMaterial.side = THREE.DoubleSide;
-
-        for (let dim=0; dim<3; dim++) {
-            // we will need a different arrow geometry for each arc because the radii etc. vary and will change the arrow dimensions
-            const {arrowGeometry, arrowSegmentLength, arrowSegmentOffsetLength} =
-                EulerStep.arrowGeometryFromArcGeometry(this.arcs[dim].geometry, this.numArcRadialSegments, this.arcHeightSegments, this.arcStripWidth, this.triadLength*this.triadAspectRatio/2);
-            this.arrowSegmentLength[dim] = arrowSegmentLength;
-            this.arrowSegmentOffset[dim] = arrowSegmentOffsetLength;
-            this.arcArrows[dim] = new THREE.Mesh(arrowGeometry, arcArrowMaterial);
-            this.arcArrows[dim].renderOrder = 1;
-            this.arcs[dim].add(this.arcArrows[dim]);
-            this.arcArrows[dim].visible = false;
-        }
     }
 }
