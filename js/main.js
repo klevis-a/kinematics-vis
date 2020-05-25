@@ -65,6 +65,7 @@ const numFrames = 100;
 const framePeriod = 30;
 const {canvas, views, view1, view2, view3, view4} = getEulerSceneElements();
 const renderer = new WebGLRenderer({canvas: canvas});
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(views.clientWidth, views.clientHeight);
 const camera = createCamera(view1);
 const rotations = createRotations();
