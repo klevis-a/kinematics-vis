@@ -14,16 +14,13 @@ function getTimelineCtrlElements() {
 function getEulerSceneElements() {
     return {
         canvas: document.getElementById('canvas'),
-        views: document.getElementById('views'),
-        view1: document.getElementById('view1'),
-        view2: document.getElementById('view2'),
-        view3: document.getElementById('view3'),
-        view4: document.getElementById('view4')
+        viewsContainer: document.getElementById('views'),
+        views: [document.getElementById('view1'), document.getElementById('view2'), document.getElementById('view3'), document.getElementById('view4')]
     }
 }
 
 function onWindowResize() {
-    renderer.setSize(views.clientWidth, views.clientHeight);
+    renderer.setSize(viewsContainer.clientWidth, viewsContainer.clientHeight);
     eulerScenes.forEach(eulerScene => eulerScene.updateCamera());
 }
 
@@ -53,26 +50,27 @@ function createRotations(){
         [quat1, quat2, quat3]];
 }
 
-function createEulerScenes(view1, view2, view3, view4, renderer, numFrames, camera, rotations) {
-    const eulerScene1 = new EulerScene(view1, renderer, numFrames, camera, rotations[0]);
-    const eulerScene2 = new EulerScene(view2, renderer, numFrames, camera, rotations[1]);
-    const eulerScene3 = new EulerScene(view3, renderer, numFrames, camera, rotations[2]);
-    const eulerScene4 = new EulerScene(view4, renderer, numFrames, camera, rotations[3]);
-    return [eulerScene1, eulerScene2, eulerScene3, eulerScene4];
+function createEulerScenes(views, renderer, numFrames, camera, rotations) {
+    const scenesMap = new Map();
+    views.forEach((view, idx) => scenesMap.set(view.id, new EulerScene(view, renderer, numFrames, camera, rotations[idx])));
+    return scenesMap;
 }
 
+//initialize
 const numFrames = 100;
 const framePeriod = 30;
-const {canvas, views, view1, view2, view3, view4} = getEulerSceneElements();
+const {canvas, viewsContainer, views} = getEulerSceneElements();
 const renderer = new WebGLRenderer({canvas: canvas});
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(views.clientWidth, views.clientHeight);
-const camera = createCamera(view1);
+renderer.setSize(viewsContainer.clientWidth, viewsContainer.clientHeight);
+const camera = createCamera(views[0]);
 const rotations = createRotations();
-const eulerScenes = createEulerScenes(view1, view2, view3, view4, renderer, numFrames, camera, rotations);
-
+const scenesMap = createEulerScenes(views, renderer, numFrames, camera, rotations);
+const eulerScenes = Array.from(scenesMap.values());
 const {playBtn, timeline, frameNumLbl} = getTimelineCtrlElements();
-const animationHelper = new AnimationHelper(eulerScenes, numFrames, framePeriod, playBtn, timeline, frameNumLbl, renderer, views, true);
+const animationHelper = new AnimationHelper(eulerScenes, numFrames, framePeriod, playBtn, timeline, frameNumLbl, renderer, viewsContainer, true);
+
+//event listeners for trackball controls
 const startEventListener = event => animationHelper.setCurrentControl(event.target);
 const endEventListener = event => {
   eulerScenes.forEach(eulerScene => eulerScene.controls.target.copy(event.target.target));
@@ -80,12 +78,17 @@ const endEventListener = event => {
 eulerScenes.forEach(eulerScene => eulerScene.controls.addEventListener('start', startEventListener));
 eulerScenes.forEach(eulerScene => eulerScene.controls.addEventListener('end', endEventListener));
 
+//window resize event listener
 window.addEventListener('resize', onWindowResize);
+
+//event listeners for rotation states
 const rotationStateRadios = document.stateCtrlForm.rotationStates;
 const changeHandler = function () {
     animationHelper.goToStep(parseInt(this.value));
 };
 rotationStateRadios.forEach(radioBtn => radioBtn.addEventListener('change', changeHandler));
+
+//event listeners for 1,2,3,4
 document.addEventListener('keypress', event => {
    switch (event.keyCode) {
        case 49:
@@ -114,3 +117,26 @@ document.addEventListener('keypress', event => {
            break;
    }
 });
+
+//event listeners for div double click
+let activeDiv = null;
+const dblClickListener = function (event) {
+    if (activeDiv == null) {
+        activeDiv = this;
+        views.forEach(view => {
+            if (view.id === this.id) {
+                view.className = 'full';
+            }
+            else {
+                view.className = 'zero';
+            }
+        });
+        animationHelper.setActiveScene(scenesMap.get(this.id));
+    } else {
+        activeDiv = null;
+        views.forEach(view => view.className='quarter');
+        animationHelper.setActiveScene(null);
+    }
+
+}
+views.forEach(view => view.addEventListener('dblclick', dblClickListener));

@@ -46,18 +46,33 @@ export class AnimationHelper {
         this.CurrentControl = currentControl;
     }
 
+    setActiveScene(activeScene) {
+        this.ActiveScene = activeScene;
+    }
+
     render(time) {
         this.CurrentAnimationFnc(time);
-        this.Renderer.setScissorTest(true);
-        this.EulerScenes.forEach((eulerScene) => {
-            const {contentLeft: left, contentTop: top, contentWidth: width, contentHeight: height} = eulerScene.viewGeometry;
+        if (this.ActiveScene == null) {
+            this.Renderer.setScissorTest(true);
+            this.EulerScenes.forEach((eulerScene) => {
+                const {contentLeft: left, contentTop: top, contentWidth: width, contentHeight: height} = eulerScene.viewGeometry;
+                const {contentHeight: parentHeight} = divGeometry(this.ParentElement);
+                eulerScene.renderer.setScissor(left, parentHeight-top-height, width, height);
+                eulerScene.renderer.setViewport(left, parentHeight-top-height, width, height);
+                if (this.UpdateCamera) eulerScene.updateCamera();
+                if (this.CurrentControl != null) this.CurrentControl.update();
+                eulerScene.renderSceneGraph();
+            });
+        }
+        else {
+            this.Renderer.setScissorTest(false);
+            const {contentLeft: left, contentTop: top, contentWidth: width, contentHeight: height} = this.ActiveScene.viewGeometry;
             const {contentHeight: parentHeight} = divGeometry(this.ParentElement);
-            eulerScene.renderer.setScissor(left, parentHeight-top-height, width, height);
-            eulerScene.renderer.setViewport(left, parentHeight-top-height, width, height);
-            if (this.UpdateCamera) eulerScene.updateCamera();
+            this.Renderer.setViewport(left, parentHeight-top-height, width, height);
+            this.ActiveScene.updateCamera();
             if (this.CurrentControl != null) this.CurrentControl.update();
-            eulerScene.renderSceneGraph();
-        });
+            this.ActiveScene.renderSceneGraph();
+        }
         requestAnimationFrame((t) => this.render(t));
     }
 
