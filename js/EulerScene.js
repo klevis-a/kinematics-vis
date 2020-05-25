@@ -80,11 +80,12 @@ export class EulerScene {
     initScene() {
         if (this.camera == null) this.createCamera();
         this.createControls();
-        this.createHemisphereLight();
         this.createReferenceGeometry();
+        this.createSpotlight();
     }
 
     renderSceneGraph() {
+        this.spotlight.position.addVectors(this.camera.position, new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).multiplyScalar(10));
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -153,5 +154,11 @@ export class EulerScene {
             1.25, // intensity
         );
         this.scene.add(this.hemisphereLight);
+    }
+
+    createSpotlight() {
+        this.spotlight = new THREE.SpotLight(0xffffff, 1, 0, Math.PI / 4, 0, 1);
+        this.scene.add(this.spotlight);
+        this.spotlight.target = this.step0Triad.origin;
     }
 }
