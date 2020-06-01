@@ -1,4 +1,4 @@
-import {WebGLRenderer, PerspectiveCamera, Quaternion, Vector3, Euler} from "./vendor/three.js/build/three.module.js";
+import {WebGLRenderer, PerspectiveCamera, Quaternion, Vector3, Euler, Matrix4} from "./vendor/three.js/build/three.module.js";
 import {EulerScene} from "./EulerScene.js";
 import {AnimationHelper} from "./AnimationHelper.js";
 import {divGeometry} from "./SceneHelpers.js";
@@ -35,19 +35,38 @@ function createCamera(view) {
 
 function createRotations(){
     //extrinsic rotations
-    const quat1Ext = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI/4);
-    const quat2Ext = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI/4).multiply(quat1Ext);
-    const quat3Ext = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI/4).multiply(quat2Ext);
-    const eul = new Euler().setFromQuaternion(quat3Ext);
+    const quat1Ext = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI/4);
+    const quat2Ext = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), 3*Math.PI/8).multiply(quat1Ext);
+    const quat3Ext = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), 3*Math.PI/4).multiply(quat2Ext);
+    const eul1 = new Euler().setFromQuaternion(quat3Ext, 'XYZ');
+    const eul2 = new Euler().setFromQuaternion(quat3Ext, 'YXZ');
+    const eul3 = new Euler().setFromQuaternion(quat3Ext, 'ZXY');
+    const eul4 = new Euler().setFromQuaternion(quat3Ext, 'ZYX');
+    const eul5 = new Euler().setFromQuaternion(quat3Ext, 'YZX');
+    const eul6 = new Euler().setFromQuaternion(quat3Ext, 'XZY');
+    console.log(eul1);
+    console.log(eul2);
+    console.log(eul3);
+    console.log(eul4);
+    console.log(eul5);
+    console.log(eul6);
     //intrinsic rotations
-    const quat1 = new Quaternion().setFromEuler(new Euler(eul.x, 0, 0));
-    const quat2 = new Quaternion().setFromEuler(new Euler(eul.x, eul.y, 0));
-    const quat3 = new Quaternion().setFromEuler(new Euler(eul.x, eul.y, eul.z));
+    const quat1Int = new Quaternion().setFromEuler(new Euler(eul1.x, 0, 0));
+    const quat2Int = new Quaternion().setFromEuler(new Euler(eul1.x, eul1.y, 0));
+    const quat3Int = new Quaternion().setFromEuler(new Euler(eul1.x, eul1.y, eul1.z));
+    //combination 1
+    const quat1Comb1 = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), eul1.y);
+    const quat2Comb1 = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), eul1.x).multiply(quat1Comb1);
+    const quat3Comb1 = new Quaternion().setFromAxisAngle(new Vector3().setFromMatrixColumn(new Matrix4().makeRotationFromQuaternion(quat2Comb1), 2), eul1.z).multiply(quat2Comb1);
+    //combination 2
+    const quat1Comb2 = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), eul1.z);
+    const quat2Comb2 = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), eul1.x).multiply(quat1Comb2);
+    const quat3Comb2 = new Quaternion().setFromAxisAngle(new Vector3().setFromMatrixColumn(new Matrix4().makeRotationFromQuaternion(quat1Int), 1), eul1.y).multiply(quat2Comb2);
     return [
         [quat1Ext, quat2Ext, quat3Ext],
-        [quat1, quat2, quat3],
-        [quat1Ext, quat2Ext, quat3Ext],
-        [quat1, quat2, quat3]];
+        [quat1Int, quat2Int, quat3Int],
+        [quat1Comb1, quat2Comb1, quat3Comb1],
+        [quat1Comb2, quat2Comb2, quat3Comb2]];
 }
 
 function createEulerScenes(views, renderer, numFrames, camera, rotations) {
@@ -120,7 +139,7 @@ document.addEventListener('keypress', event => {
 
 //event listeners for div double click
 let activeDiv = null;
-const dblClickListener = function (event) {
+const dblClickListener = function () {
     if (activeDiv == null) {
         activeDiv = this;
         views.forEach(view => {
@@ -138,5 +157,5 @@ const dblClickListener = function (event) {
         animationHelper.setActiveScene(null);
     }
 
-}
+};
 views.forEach(view => view.addEventListener('dblclick', dblClickListener));
