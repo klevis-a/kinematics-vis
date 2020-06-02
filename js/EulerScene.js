@@ -39,6 +39,21 @@ export class EulerScene {
         this.goToStep(this.currentStep);
     }
 
+    dispose() {
+        this.step0Triad.dispose();
+        this.xAxis.geometry.dispose();
+        this.xAxis.material.dispose();
+        this.yAxis.geometry.dispose();
+        this.yAxis.material.dispose();
+        this.zAxis.geometry.dispose();
+        this.zAxis.material.dispose();
+        // the geometry for the planes is the same so only dispose it for one of them
+        // the material for the planes is inherited from the axes so no need to dispose them
+        this.xyPlane.geometry.dispose();
+        this.steps.forEach(step => step.dispose());
+        this.scene.dispose();
+    }
+
     updateToFrame(frameNum) {
         this.steps[this.currentStep-1].updateToFrame(frameNum);
     }

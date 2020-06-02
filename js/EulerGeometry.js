@@ -16,14 +16,21 @@ export class FatArrow extends THREE.Object3D {
         this.radialSegments = 10;
         this.heightSegments = 1;
 
-        this.arrowMaterial = new THREE.MeshPhongMaterial({color: color, opacity: 0.9, transparent: true});
-        this.line = new THREE.Mesh(this.createMarkingsGeometry(), this.arrowMaterial);
+        const arrowMaterial = new THREE.MeshPhongMaterial({color: color, opacity: 0.9, transparent: true});
+        this.line = new THREE.Mesh(this.createMarkingsGeometry(), arrowMaterial);
         this.add(this.line);
 
         const coneGeometry = new THREE.CylinderBufferGeometry(0, this.coneRadius, this.coneHeight, this.radialSegments, this.heightSegments);
         coneGeometry.translate(0, this.lineLength+0.5*this.coneHeight, 0);
-        this.cone = new THREE.Mesh(coneGeometry, this.arrowMaterial);
+        this.cone = new THREE.Mesh(coneGeometry, arrowMaterial);
         this.add(this.cone);
+    }
+
+    dispose() {
+        this.line.geometry.dispose();
+        this.line.material.dispose();
+        this.cone.geometry.dispose();
+        this.cone.material.dispose();
     }
 
     createMarkingsGeometry() {
@@ -66,12 +73,17 @@ export class Triad extends THREE.Object3D{
         return parseInt('0x'+col);
     }
 
+    static colorFromDimAndIntensity(dim, intensity) {
+        const colorPalette = Triad.triadMaterialColors[dim];
+        return Triad.intFromColor(Triad[colorPalette][intensity]);
+    }
+
     constructor(length, aspectRatio=0.2, colorIntensity=4, markings, markingsStart, markingsWidth) {
         super();
         this.length = length;
         this.aspectRatio = aspectRatio;
         this.colorIntensity = colorIntensity;
-        this.markingsStart = markingsStart
+        this.markingsStart = markingsStart;
         this.markingsWidth = markingsWidth;
         this.markings = markings;
 
@@ -95,11 +107,69 @@ export class Triad extends THREE.Object3D{
         this.updateMatrixWorld(true);
     }
 
+    dispose() {
+        // no need to dispose of the origin material since it is static
+        this.origin.geometry.dispose();
+        this.arrows.forEach(arrow => arrow.dispose());
+    }
+
     arrowAxis(dim) {
         return new THREE.Vector3().setFromMatrixColumn(this.arrows[dim].matrixWorld, 1);
     }
+}
 
+export class RotAxisWithArrow extends THREE.Object3D {
+    constructor(color, axisRadius, axisLength, arrowMainRadius, arrowMinorRadius, rotUnitVector, rotAngle) {
+        super();
+        this.color = color;
+        this.axisRadius = axisRadius;
+        this.axisLength = axisLength;
+        this.arrowMainRadius = arrowMainRadius;
+        this.arrowMinorRadius = arrowMinorRadius;
+        this.axisRadialSegments = 10;
+        this.axisHeightSegments = 1;
+        this.tubularSegments = 20;
+        this.arrowRadialSegments = 10;
+        this.arrowPointerRadialSegments = 10;
+        this.arrowPointerHeightSegments = 1;
 
+        const rotAxisMaterial = new THREE.MeshBasicMaterial({color: this.color});
+        const rotAxisGeometry = new THREE.CylinderBufferGeometry(this.axisRadius, this.axisRadius, this.axisLength, this.axisRadialSegments, this.axisHeightSegments);
+        rotAxisGeometry.translate(0, this.axisLength/2, 0);
+        this.rotAxis = new THREE.Mesh(rotAxisGeometry, rotAxisMaterial);
+        this.rotAxis.updateMatrixWorld(true);
+        this.rotAxis.quaternion.setFromUnitVectors(new THREE.Vector3().setFromMatrixColumn(this.rotAxis.matrixWorld, 1), rotUnitVector);
+        this.rotAxis.updateMatrixWorld(true);
+
+        const arcMaterial = new THREE.MeshPhongMaterial({color: this.color});
+        arcMaterial.side = THREE.DoubleSide;
+        const arcGeometry = new THREE.TubeBufferGeometry(new CustomCircle(this.arrowMainRadius), this.tubularSegments, this.arrowMinorRadius, this.arrowRadialSegments, false);
+        this.arc = new THREE.Mesh(arcGeometry, arcMaterial);
+        this.arc.position.set(0, this.axisLength * 0.95, 0);
+        this.rotAxis.add(this.arc);
+
+        const arrowGeometry = new THREE.CylinderBufferGeometry(0, this.arrowMinorRadius * 2, this.arrowMinorRadius * 2, this.arrowPointerRadialSegments, this.arrowPointerHeightSegments, false);
+        arrowGeometry.translate(0, this.arrowMinorRadius, 0);
+        this.arrow = new THREE.Mesh(arrowGeometry, arcMaterial);
+        this.arc.add(this.arrow);
+        if (rotAngle > 0) {
+            this.arrow.position.set(this.arrowMainRadius, 0, 0);
+            this.arrow.quaternion.setFromUnitVectors(new THREE.Vector3().setFromMatrixColumn(this.arrow.matrixWorld, 1), new THREE.Vector3(0, 0, -1));
+        } else
+        {
+            this.arrow.position.set(0, 0, -this.arrowMainRadius * 0.75);
+            this.arrow.quaternion.setFromUnitVectors(new THREE.Vector3().setFromMatrixColumn(this.arrow.matrixWorld, 1), new THREE.Vector3(1, 0, 0));
+        }
+    }
+
+    dispose() {
+        this.rotAxis.geometry.dispose();
+        this.rotAxis.material.dispose();
+        this.arc.geometry.dispose();
+        this.arc.material.dispose();
+        this.arrow.geometry.dispose();
+        this.arrow.material.dispose();
+    }
 }
 
 export function axisAngleFromQuat(quat) {
@@ -113,4 +183,17 @@ export function axisAngleFromQuat(quat) {
     }
 
     return {axis: axis, angle: angle};
+}
+
+class CustomCircle extends THREE.Curve {
+    constructor(scale) {
+        super();
+        this.scale = scale;
+    }
+    getPoint(t) {
+        const tx = Math.cos(0.75*2*Math.PI*t);
+        const ty = 0;
+        const tz = Math.sin(0.75*2*Math.PI*t);
+        return new THREE.Vector3(tx, ty, tz).multiplyScalar(this.scale);
+    }
 }
