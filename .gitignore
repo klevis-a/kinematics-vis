@@ -2,3 +2,7 @@
 .idea/
 
 js/vendor
+
+csv/
+
+models/
