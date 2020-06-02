@@ -115,24 +115,28 @@ document.addEventListener('keypress', event => {
            animationHelper.setFrame(0);
            animationHelper.TimelineController.updateTimeLine(0);
            rotationStateRadios[0].checked = true;
+           rotationStateRadios[0].focus();
            break;
        case 50:
            animationHelper.goToStep(1);
            animationHelper.setFrame(numFrames);
            animationHelper.TimelineController.updateTimeLine(numFrames);
            rotationStateRadios[0].checked = true;
+           rotationStateRadios[0].focus();
            break;
        case 51:
            animationHelper.goToStep(2);
            animationHelper.setFrame(numFrames);
            animationHelper.TimelineController.updateTimeLine(numFrames);
            rotationStateRadios[1].checked = true;
+           rotationStateRadios[1].focus();
            break;
        case 52:
            animationHelper.goToStep(3);
            animationHelper.setFrame(numFrames);
            animationHelper.TimelineController.updateTimeLine(numFrames);
            rotationStateRadios[2].checked = true;
+           rotationStateRadios[2].focus();
            break;
    }
 });
