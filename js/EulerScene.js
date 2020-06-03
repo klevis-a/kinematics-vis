@@ -20,7 +20,7 @@ export class EulerScene {
         trackBallControl.keys = [65, 83, 68];
     }
 
-    constructor(viewElement, renderer, numFrames, camera, stepQuats) {
+    constructor(viewElement, renderer, numFrames, camera, stepQuats, arcStripWidth = 1, triadLength=15, markingStart=5) {
         this.camera = camera;
         this.stepQuats = stepQuats;
         this.viewElement = viewElement;
@@ -29,10 +29,10 @@ export class EulerScene {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(EulerScene.SCENE_COLOR);
         this.arcHeightSegments = 1;
-        this.arcStripWidth = 1;
-        this.triadLength = 15;
+        this.arcStripWidth = arcStripWidth;
+        this.triadLength = triadLength;
         this.triadAspectRatio = 0.1;
-        this.markingsStart = 5;
+        this.markingsStart = markingStart;
         this.currentStep = 1;
         this.initScene();
         this.createSteps();
