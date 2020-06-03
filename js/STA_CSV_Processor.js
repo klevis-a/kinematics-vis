@@ -62,18 +62,26 @@ export class TimeSeriesSTAInfo {
         return 10;
     }
 
-    static get SCAP_POS() {
+    static get TORSO_POS() {
         return [0, 3];
     }
 
-    static get SCAP_ORIENT() {
+    static get TORSO_ORIENT() {
         return [3, 7];
     }
-    static get HUM_POS() {
+
+    static get SCAP_POS() {
         return [7, 10];
     }
-    static get HUM_ORIENT() {
+
+    static get SCAP_ORIENT() {
         return [10, 14];
+    }
+    static get HUM_POS() {
+        return [14, 17];
+    }
+    static get HUM_ORIENT() {
+        return [17, 21];
     }
 
     constructor(csvResults) {
@@ -85,6 +93,14 @@ export class TimeSeriesSTAInfo {
 
     markerPos(markerName, frameNum) {
         return this.TimeSeries[frameNum].slice(...this.Markers.get(markerName));
+    }
+
+    torsoPos(frameNum) {
+        return this.TimeSeries[frameNum].slice(...TimeSeriesSTAInfo.TORSO_POS);
+    }
+
+    torsoOrient(frameNum) {
+        return this.TimeSeries[frameNum].slice(...TimeSeriesSTAInfo.TORSO_ORIENT);
     }
 
     scapPos(frameNum) {
@@ -112,6 +128,14 @@ export class TimeSeriesSTAInfo {
         else {
             return null;
         }
+    }
+
+    torsoPosVector(frameNum) {
+        return new THREE.Vector3(...this.torsoPos(frameNum));
+    }
+
+    torsoOrientQuat(frameNum) {
+        return new THREE.Quaternion(...this.torsoOrient(frameNum));
     }
 
     scapPosVector(frameNum) {

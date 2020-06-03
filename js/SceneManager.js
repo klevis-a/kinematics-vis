@@ -2,45 +2,25 @@ import {divGeometry} from "./SceneHelpers.js";
 import {WebGLRenderer, Euler, Matrix4, PerspectiveCamera, Quaternion, Vector3} from "./vendor/three.js/build/three.module.js";
 import {AnimationHelper} from "./AnimationHelper.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
+import {EulerDecomposition_RY$$_RZ$_RX} from "./EulerDecompositions.js";
+import * as THREE from "./vendor/three.js/build/three.module.js";
 
 export class SceneManager {
-    static createRotations(){
-        //extrinsic rotations
-        const quat1Ext = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI/4);
-        const quat2Ext = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), 3*Math.PI/8).multiply(quat1Ext);
-        const quat3Ext = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), 3*Math.PI/4).multiply(quat2Ext);
-        const eul1 = new Euler().setFromQuaternion(quat3Ext, 'XYZ');
-        //intrinsic rotations
-        const quat1Int = new Quaternion().setFromEuler(new Euler(eul1.x, 0, 0));
-        const quat2Int = new Quaternion().setFromEuler(new Euler(eul1.x, eul1.y, 0));
-        const quat3Int = new Quaternion().setFromEuler(new Euler(eul1.x, eul1.y, eul1.z));
-        //combination 1
-        const quat1Comb1 = new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), eul1.y);
-        const quat2Comb1 = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), eul1.x).multiply(quat1Comb1);
-        const quat3Comb1 = new Quaternion().setFromAxisAngle(new Vector3().setFromMatrixColumn(new Matrix4().makeRotationFromQuaternion(quat2Comb1), 2), eul1.z).multiply(quat2Comb1);
-        //combination 2
-        const quat1Comb2 = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), eul1.z);
-        const quat2Comb2 = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), eul1.x).multiply(quat1Comb2);
-        const quat3Comb2 = new Quaternion().setFromAxisAngle(new Vector3().setFromMatrixColumn(new Matrix4().makeRotationFromQuaternion(quat1Int), 1), eul1.y).multiply(quat2Comb2);
-        return [
-            [quat1Ext, quat2Ext, quat3Ext],
-            [quat1Int, quat2Int, quat3Int],
-            [quat1Comb1, quat2Comb1, quat3Comb1],
-            [quat1Comb2, quat2Comb2, quat3Comb2]];
-    }
 
-    constructor(landmarksInfo, humerusGeometry) {
+    constructor(landmarksInfo, timeSeriesInfo, humerusGeometry) {
         this.landmarksInfo = landmarksInfo;
+        this.timeSeriesInfo = timeSeriesInfo;
         this.humerusGeometry = humerusGeometry;
         this.activeDiv = null;
         this.numFrames = 100;
         this.framePeriod = 30; // in ms - meaning that each animation takes 3 seconds
-        this.rotations = SceneManager.createRotations();
+        this.normalizeHumerusGeometry();
         this.getTimelineCtrlElements();
         this.getEulerSceneElements();
         this.getRotationStateRadios();
         this.createCamera();
         this.createRenderer();
+        this.createRotations();
         this.createEulerScenes();
         this.animationHelper = new AnimationHelper(this.eulerScenes, this.numFrames, this.framePeriod, this.playBtn, this.timeline, this.frameNumLbl, this.renderer, this.viewsContainer, true);
         this.addTrackBallControlsListeners();
@@ -48,6 +28,21 @@ export class SceneManager {
         this.addDblClickDivListener();
         this.addWindowResizeListener();
         this.addRotationStateRadiosListener();
+    }
+
+    normalizeHumerusGeometry() {
+        const hhc = this.landmarksInfo.humerus.hhc;
+        const le = this.landmarksInfo.humerus.le;
+        const me = this.landmarksInfo.humerus.me;
+        const y_axis = new THREE.Vector3().addVectors(me, le).multiplyScalar(0.5).multiplyScalar(-1).add(hhc);
+        const x_axis = new THREE.Vector3().subVectors(me, le).cross(y_axis);
+        const z_axis = new THREE.Vector3().crossVectors(x_axis, y_axis);
+        x_axis.normalize();
+        y_axis.normalize();
+        z_axis.normalize();
+        const BB_T_H = new THREE.Matrix4().makeBasis(x_axis, y_axis, z_axis).setPosition(hhc);
+        const H_T_BB = new THREE.Matrix4().getInverse(BB_T_H);
+        this.humerusGeometry.applyMatrix4(H_T_BB);
     }
 
     getTimelineCtrlElements() {
@@ -80,9 +75,21 @@ export class SceneManager {
         this.renderer.setSize(this.viewsContainer.clientWidth, this.viewsContainer.clientHeight);
     }
 
+    createRotations() {
+        const frame100Quat = this.timeSeriesInfo.torsoOrientQuat(150).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(150));
+        const frame100Mat = new Matrix4().makeRotationFromQuaternion(frame100Quat);
+        const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frame100Mat);
+        this.rotations = [
+            eulerDecomp.R3$$_R2$_R1,
+            eulerDecomp.R1_R2_R3,
+            eulerDecomp.R3$$_R1_R2,
+            eulerDecomp.R2$_R1_R3
+        ]
+    }
+
     createEulerScenes() {
         this.scenesMap = new Map();
-        this.views.forEach((view, idx) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames, this.camera, this.rotations[idx], this.humerusGeometry, this.landmarksInfo)), this);
+        this.views.forEach((view, idx) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames, this.camera, this.rotations[idx], this.humerusGeometry)), this);
         this.eulerScenes = Array.from(this.scenesMap.values());
     }
 

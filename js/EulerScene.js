@@ -20,9 +20,9 @@ export class EulerScene {
         trackBallControl.keys = [65, 83, 68];
     }
 
-    constructor(viewElement, renderer, numFrames, camera, stepQuats, arcStripWidth = 1, triadLength=15, markingStart=5) {
+    constructor(viewElement, renderer, numFrames, camera, rotations, arcStripWidth = 1, triadLength=15, markingStart=5) {
         this.camera = camera;
-        this.stepQuats = stepQuats;
+        this.rotations = rotations;
         this.viewElement = viewElement;
         this.numFrames = numFrames;
         this.renderer = renderer;
@@ -59,9 +59,16 @@ export class EulerScene {
     }
 
     createSteps() {
-        this.steps = this.stepQuats.map((quat, idx, array) => {
-            const quatStart = idx===0 ? new THREE.Quaternion() : array[idx-1];
-            const eulerStep = new EulerStep.EulerStep(quatStart, quat, this.numFrames, this.triadLength, this.triadAspectRatio, this.markingsStart, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
+        this.quaternions = [new THREE.Quaternion()];
+
+        this.rotations.forEach(rotation => {
+            const lastQuat = this.quaternions[this.quaternions.length-1];
+            const currentQuatRot = new THREE.Quaternion().setFromAxisAngle(rotation.axis, rotation.angle);
+            this.quaternions.push(currentQuatRot.multiply(lastQuat));
+        }, this);
+
+        this.steps = this.rotations.map((rotation, idx, array) => {
+            const eulerStep = new EulerStep.EulerStep(this.quaternions[idx], rotation, this.numFrames, this.triadLength, this.triadAspectRatio, this.markingsStart, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
             this.addStepToScene(eulerStep);
             return eulerStep;
         }, this);

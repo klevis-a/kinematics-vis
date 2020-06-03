@@ -8,9 +8,10 @@ export class EulerStep {
     static arrowGeometryFromArcGeometry = EulerStepStatic.arrowGeometryFromArcGeometry;
     static updateFlatArcArrow = EulerStepStatic.updateFlatArcArrow;
 
-    constructor(quatStart, quatEnd, numFrames, triadLength, triadAspectRatio, markingsStart, stepNumber, arcStripWidth, numArcRadialSegments, arcHeightSegments) {
+    constructor(quatStart, rotation, numFrames, triadLength, triadAspectRatio, markingsStart, stepNumber, arcStripWidth, numArcRadialSegments, arcHeightSegments) {
         this.quatStart = quatStart;
-        this.quatEnd = quatEnd;
+        this.rotation = rotation;
+        this.quatEnd = new THREE.Quaternion().setFromAxisAngle(rotation.axis, rotation.angle).multiply(quatStart);
         this.numFrames = numFrames;
         this.triadLength = triadLength;
         this.triadAspectRatio = triadAspectRatio;
@@ -23,13 +24,6 @@ export class EulerStep {
         this.arrowSegmentOffset = [];
         this.arcs = [];
         this.arcArrows = [];
-
-        const quat1Quat2Rot = new THREE.Quaternion().multiplyQuaternions(this.quatEnd, new THREE.Quaternion().copy(this.quatStart).conjugate());
-        const {axis: rotAxis, angle: rotAngle} = EulerGeometry.axisAngleFromQuat(quat1Quat2Rot);
-        const rotPlane = new THREE.Plane(rotAxis);
-        this.rotUnitVector = rotAxis;
-        this.rotAngle = rotAngle;
-        this.rotPlane = rotPlane;
 
         this.createTriads();
         this.createArcs();
@@ -130,11 +124,12 @@ export class EulerStep {
     }
 
     createArcs() {
+        const rotPlane = new THREE.Plane(this.rotation.axis);
         const arcsStartingDistance = this.markingsStart + this.arcStripWidth;
         for(let dim=0; dim<3; dim++) {
             const arcMaterial = new THREE.MeshBasicMaterial({color: EulerGeometry.Triad.colorFromDimAndIntensity(dim, this.triad.colorIntensity), depthTest: false});
             arcMaterial.side = THREE.DoubleSide;
-            this.arcs[dim] = EulerStep.createArc(this.startingTriad, this.endingTriad, this.rotUnitVector, this.rotAngle, this.rotPlane,
+            this.arcs[dim] = EulerStep.createArc(this.startingTriad, this.endingTriad, this.rotation.axis, this.rotation.angle, rotPlane,
                 dim, arcsStartingDistance+3*dim*this.arcStripWidth, this.arcStripWidth, arcMaterial, this.numArcRadialSegments, this.arcHeightSegments);
             this.arcs[dim].renderOrder = 0;
             this.arcs[dim].updateWorldMatrix(true);
@@ -164,6 +159,6 @@ export class EulerStep {
         const axisLength = this.triadLength * 1.25;
         const arrowMainRadius = this.triadLength*this.triadAspectRatio * 0.75;
         const arrowMinorRadius = this.arcStripWidth * 0.25;
-        this.rotAxis = new EulerGeometry.RotAxisWithArrow(rotAxisColor, axisRadius, axisLength, arrowMainRadius, arrowMinorRadius, this.rotUnitVector, this.rotAngle);
+        this.rotAxis = new EulerGeometry.RotAxisWithArrow(rotAxisColor, axisRadius, axisLength, arrowMainRadius, arrowMinorRadius, this.rotation.axis, this.rotation.angle);
     }
 }
