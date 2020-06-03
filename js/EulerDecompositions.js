@@ -33,22 +33,22 @@ export class EulerDecomposition_RY$$_RZ$_RX extends EulerDecomposition{
     extractAngles() {
         if (this.getElement(0, 1) < 1) {
             if (this.getElement(0, 1) > -1) {
-                this.angles[0] = Math.atan2(this.getElement(0, 2), this.getElement(0, 0));
+                this.angles[0] = Math.atan2(this.getElement(2, 1), this.getElement(1, 1));
                 this.angles[1] = Math.asin(-this.getElement(0, 1));
-                this.angles[2] = Math.atan2(this.getElement(2, 1), this.getElement(1, 1));
+                this.angles[2] = Math.atan2(this.getElement(0, 2), this.getElement(0, 0));
             }
             // r01=-1
             else {
-                this.angles[0] = 0;
+                this.angles[0] = Math.atan2(-this.getElement(2,0),this.getElement(2,2));
                 this.angles[1] = Math.PI/2;
-                this.angles[2] = Math.atan2(-this.getElement(2,0),this.getElement(2,2));
+                this.angles[2] = 0;
             }
         }
         // r01=+1
         else {
-            this.angles[0] = 0;
+            this.angles[0] = Math.atan2(-this.getElement(2,0),this.getElement(2,2));
             this.angles[1] = -Math.PI/2;
-            this.angles[2] = Math.atan2(-this.getElement(2,0),this.getElement(2,2));
+            this.angles[2] = 0;
         }
     }
 
