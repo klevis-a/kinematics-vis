@@ -8,13 +8,13 @@ export class EulerBoneScene extends EulerScene {
     constructor(viewElement, renderer, numFrames, camera, rotations, humerusGeometry) {
         super(viewElement, renderer, numFrames, camera, rotations, 10, 150, 50);
         this.humerusGeometry = humerusGeometry;
+        this.step0Humerus = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);
+        this.step0Triad.add(this.step0Humerus);
         this.addHumerus();
         this.attachHumeriToTriads();
     }
 
     attachHumeriToTriads() {
-        this.step0Humerus = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);
-        this.step0Triad.add(this.step0Humerus);
         this.stepHumeri = [];
         this.steps.forEach(step => {
             const humerusMesh = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);

@@ -1,9 +1,11 @@
 export class FrameSelectorController {
-    constructor(timeline, frameNumLbl, numFrames, setFrameFnc) {
+    constructor(timeline, frameNumLbl, frameGoCtrl, numFrames, setFrameFnc, updateEulerScenesFnc) {
         this.Timeline = timeline;
         this.FrameNumLbl = frameNumLbl;
+        this.FrameGoCtrl = frameGoCtrl;
         this.NumFrames = numFrames;
         this.SetFrameFnc = setFrameFnc;
+        this.UpdateEulerScenesFnc = updateEulerScenesFnc;
 
         this.Timeline.value = 1;
         this.Timeline.min = 1;
@@ -11,6 +13,7 @@ export class FrameSelectorController {
         this.Timeline.step = '1';
         this.FrameNumLbl.innerHTML = 1;
 
+        this.FrameGoCtrl.onclick = () => this.UpdateEulerScenesFnc(this.Timeline.value-1);
         this.Timeline.oninput = () => this.handleTimeLineInput();
         this.Timeline.addEventListener('keydown', (event) => {
             if (event.keyCode === 37) {

@@ -32,9 +32,9 @@ export class EulerStep {
     }
 
     dispose() {
-        this.startingTriad.dipose();
+        this.startingTriad.dispose();
         this.endingTriad.dispose();
-        this.triad.dipose();
+        this.triad.dispose();
         this.arcs.forEach(arc => {
             arc.geometry.dispose();
             arc.material.dispose();

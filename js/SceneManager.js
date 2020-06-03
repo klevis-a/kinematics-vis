@@ -1,5 +1,5 @@
 import {divGeometry} from "./SceneHelpers.js";
-import {WebGLRenderer, Euler, Matrix4, PerspectiveCamera, Quaternion, Vector3} from "./vendor/three.js/build/three.module.js";
+import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
 import {AnimationHelper} from "./AnimationHelper.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerDecomposition_RY$$_RZ$_RX} from "./EulerDecompositions.js";
@@ -24,7 +24,8 @@ export class SceneManager {
         this.createRotations();
         this.createEulerScenes();
         this.animationHelper = new AnimationHelper(this.eulerScenes, this.numFrames, this.framePeriod, this.playBtn, this.timeline, this.frameNumLbl, this.renderer, this.viewsContainer, true);
-        this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.timeSeriesInfo.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum));
+        this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
+            this.timeSeriesInfo.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum), (frameNum) => this.updateEulerScenesToFrame(frameNum));
         this.addTrackBallControlsListeners();
         this.addKeyPress1234Listener();
         this.addDblClickDivListener();
@@ -34,6 +35,26 @@ export class SceneManager {
 
     updateHumerusInScenes(frameNum) {
         this.eulerScenes.forEach(eulerScene => eulerScene.humerus.quaternion.copy(this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum))), this);
+    }
+
+    updateEulerScenesToFrame(frameNum) {
+        const frameQuat = this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum));
+        const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
+        const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frameMat);
+        this.rotations = [
+            eulerDecomp.R3$$_R2$_R1,
+            eulerDecomp.R1_R2_R3,
+            eulerDecomp.R3$$_R1_R2,
+            eulerDecomp.R2$_R1_R3
+        ];
+
+        this.eulerScenes.forEach((eulerScene,idx) => {
+            eulerScene.removeSteps();
+            eulerScene.rotations = this.rotations[idx];
+            eulerScene.createSteps();
+            eulerScene.attachHumeriToTriads();
+            eulerScene.goToStep(eulerScene.currentStep);
+        }, this);
     }
 
     normalizeHumerusGeometry() {
@@ -66,6 +87,7 @@ export class SceneManager {
     getFrameSelectorCtrlElements() {
         this.frameTimeline = document.getElementById('frameTimeline');
         this.frameFrameNum = document.getElementById('frameFrameNum');
+        this.frameGoCtrl = document.getElementById('frameGoCtrl');
     }
 
     getRotationStateRadios() {
@@ -87,9 +109,9 @@ export class SceneManager {
     }
 
     createRotations() {
-        const frame100Quat = this.timeSeriesInfo.torsoOrientQuat(150).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(150));
-        const frame100Mat = new Matrix4().makeRotationFromQuaternion(frame100Quat);
-        const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frame100Mat);
+        const frame0Quat = this.timeSeriesInfo.torsoOrientQuat(0).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(0));
+        const frame0Mat = new Matrix4().makeRotationFromQuaternion(frame0Quat);
+        const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frame0Mat);
         this.rotations = [
             eulerDecomp.R3$$_R2$_R1,
             eulerDecomp.R1_R2_R3,
