@@ -136,17 +136,18 @@ export class RotAxisWithArrow extends THREE.Object3D {
         const rotAxisMaterial = new THREE.MeshBasicMaterial({color: this.color});
         const rotAxisGeometry = new THREE.CylinderBufferGeometry(this.axisRadius, this.axisRadius, this.axisLength, this.axisRadialSegments, this.axisHeightSegments);
         rotAxisGeometry.translate(0, this.axisLength/2, 0);
-        this.rotAxis = new THREE.Mesh(rotAxisGeometry, rotAxisMaterial);
-        this.rotAxis.updateMatrixWorld(true);
-        this.rotAxis.quaternion.setFromUnitVectors(new THREE.Vector3().setFromMatrixColumn(this.rotAxis.matrixWorld, 1), rotUnitVector);
-        this.rotAxis.updateMatrixWorld(true);
+        this.axis = new THREE.Mesh(rotAxisGeometry, rotAxisMaterial);
+        this.axis.updateMatrixWorld(true);
+        this.axis.quaternion.setFromUnitVectors(new THREE.Vector3().setFromMatrixColumn(this.axis.matrixWorld, 1), rotUnitVector);
+        this.axis.updateMatrixWorld(true);
+        this.add(this.axis);
 
         const arcMaterial = new THREE.MeshPhongMaterial({color: this.color});
         arcMaterial.side = THREE.DoubleSide;
         const arcGeometry = new THREE.TubeBufferGeometry(new CustomCircle(this.arrowMainRadius), this.tubularSegments, this.arrowMinorRadius, this.arrowRadialSegments, false);
         this.arc = new THREE.Mesh(arcGeometry, arcMaterial);
         this.arc.position.set(0, this.axisLength * 0.95, 0);
-        this.rotAxis.add(this.arc);
+        this.axis.add(this.arc);
 
         const arrowGeometry = new THREE.CylinderBufferGeometry(0, this.arrowMinorRadius * 2, this.arrowMinorRadius * 2, this.arrowPointerRadialSegments, this.arrowPointerHeightSegments, false);
         arrowGeometry.translate(0, this.arrowMinorRadius, 0);
@@ -163,8 +164,8 @@ export class RotAxisWithArrow extends THREE.Object3D {
     }
 
     dispose() {
-        this.rotAxis.geometry.dispose();
-        this.rotAxis.material.dispose();
+        this.axis.geometry.dispose();
+        this.axis.material.dispose();
         this.arc.geometry.dispose();
         this.arc.material.dispose();
         this.arrow.geometry.dispose();
