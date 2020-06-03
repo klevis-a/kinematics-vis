@@ -58,3 +58,11 @@ body {
     width: 50%;
     display: flex;
 }
+
+#frameControl {
+    position: absolute;
+    left: 25%;
+    top: 0;
+    width: 50%;
+    display: flex;
+}

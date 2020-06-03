@@ -3,7 +3,7 @@ import {WebGLRenderer, Euler, Matrix4, PerspectiveCamera, Quaternion, Vector3} f
 import {AnimationHelper} from "./AnimationHelper.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerDecomposition_RY$$_RZ$_RX} from "./EulerDecompositions.js";
-import * as THREE from "./vendor/three.js/build/three.module.js";
+import {FrameSelectorController} from "./FrameSelectorController.js";
 
 export class SceneManager {
 
@@ -18,11 +18,13 @@ export class SceneManager {
         this.getTimelineCtrlElements();
         this.getEulerSceneElements();
         this.getRotationStateRadios();
+        this.getFrameSelectorCtrlElements();
         this.createCamera();
         this.createRenderer();
         this.createRotations();
         this.createEulerScenes();
         this.animationHelper = new AnimationHelper(this.eulerScenes, this.numFrames, this.framePeriod, this.playBtn, this.timeline, this.frameNumLbl, this.renderer, this.viewsContainer, true);
+        this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.timeSeriesInfo.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum));
         this.addTrackBallControlsListeners();
         this.addKeyPress1234Listener();
         this.addDblClickDivListener();
@@ -30,31 +32,40 @@ export class SceneManager {
         this.addRotationStateRadiosListener();
     }
 
+    updateHumerusInScenes(frameNum) {
+        this.eulerScenes.forEach(eulerScene => eulerScene.humerus.quaternion.copy(this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum))), this);
+    }
+
     normalizeHumerusGeometry() {
         const hhc = this.landmarksInfo.humerus.hhc;
         const le = this.landmarksInfo.humerus.le;
         const me = this.landmarksInfo.humerus.me;
-        const y_axis = new THREE.Vector3().addVectors(me, le).multiplyScalar(0.5).multiplyScalar(-1).add(hhc);
-        const x_axis = new THREE.Vector3().subVectors(me, le).cross(y_axis);
-        const z_axis = new THREE.Vector3().crossVectors(x_axis, y_axis);
+        const y_axis = new Vector3().addVectors(me, le).multiplyScalar(0.5).multiplyScalar(-1).add(hhc);
+        const x_axis = new Vector3().subVectors(me, le).cross(y_axis);
+        const z_axis = new Vector3().crossVectors(x_axis, y_axis);
         x_axis.normalize();
         y_axis.normalize();
         z_axis.normalize();
-        const BB_T_H = new THREE.Matrix4().makeBasis(x_axis, y_axis, z_axis).setPosition(hhc);
-        const H_T_BB = new THREE.Matrix4().getInverse(BB_T_H);
+        const BB_T_H = new Matrix4().makeBasis(x_axis, y_axis, z_axis).setPosition(hhc);
+        const H_T_BB = new Matrix4().getInverse(BB_T_H);
         this.humerusGeometry.applyMatrix4(H_T_BB);
     }
 
     getTimelineCtrlElements() {
-            this.playBtn = document.getElementById('playPauseCtrl');
-            this.timeline = document.getElementById('timeline');
-            this.frameNumLbl = document.getElementById('frameNum');
+        this.playBtn = document.getElementById('playPauseCtrl');
+        this.timeline = document.getElementById('timeline');
+        this.frameNumLbl = document.getElementById('frameNum');
     }
 
     getEulerSceneElements() {
-            this.canvas = document.getElementById('canvas');
-            this.viewsContainer = document.getElementById('views');
-            this.views = [document.getElementById('view1'), document.getElementById('view2'), document.getElementById('view3'), document.getElementById('view4')];
+        this.canvas = document.getElementById('canvas');
+        this.viewsContainer = document.getElementById('views');
+        this.views = [document.getElementById('view1'), document.getElementById('view2'), document.getElementById('view3'), document.getElementById('view4')];
+    }
+
+    getFrameSelectorCtrlElements() {
+        this.frameTimeline = document.getElementById('frameTimeline');
+        this.frameFrameNum = document.getElementById('frameFrameNum');
     }
 
     getRotationStateRadios() {

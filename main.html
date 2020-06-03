@@ -40,8 +40,16 @@
             <div id="frameNum"></div>
         </div>
     </div>
+    <div id="frameControl">
+        <div id="frameTimelineCtrl">
+            <div id="frameGoCtrl" class="go"></div>
+            <div id="frameSliderDiv"><input type="range" min="0" max="99" value="0" step="any" class="slider" id="frameTimeline"></div>
+            <div id="frameFrameNum"></div>
+        </div>
+    </div>
 </div>
 <script src="js/vendor/palette.js"></script>
+<script src="js/vendor/require.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>
