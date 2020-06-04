@@ -17,7 +17,7 @@ export class FrameSelectorController {
         this.Timeline.oninput = () => this.handleTimeLineInput();
         this.Timeline.addEventListener('keydown', (event) => {
             if (event.keyCode === 37) {
-                const currentVal = parseFloat(this.Timeline.value);
+                const currentVal = parseInt(this.Timeline.value);
                 if (currentVal<=this.Timeline.min) {
                     this.Timeline.value = this.Timeline.min;
                 }
@@ -26,7 +26,7 @@ export class FrameSelectorController {
                 }
             }
             if (event.keyCode === 39) {
-                const currentVal = parseFloat(this.Timeline.value);
+                const currentVal = parseInt(this.Timeline.value);
                 if (currentVal>=this.Timeline.max) {
                     this.Timeline.value = this.Timeline.max;
                 }
