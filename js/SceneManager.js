@@ -2,7 +2,7 @@ import {divGeometry} from "./SceneHelpers.js";
 import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
 import {AnimationHelper} from "./AnimationHelper.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
-import {EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition} from "./EulerDecompositions.js";
+import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition} from "./EulerDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 
@@ -15,6 +15,7 @@ export class SceneManager {
         this.activeDiv = null;
         this.numFrames = 100;
         this.framePeriod = 30; // in ms - meaning that each animation takes 3 seconds
+        this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
         this.normalizeHumerusGeometry();
         this.getTimelineCtrlElements();
         this.getEulerSceneElements();
@@ -105,7 +106,7 @@ export class SceneManager {
     createRotations(frameNum) {
         const frameQuat = this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum));
         const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
-        const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frameMat);
+        const eulerDecomp = new this.eulerDecompClass(frameMat);
         const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
         this.rotations = [
             eulerDecomp.R3$$_R2$_R1,
@@ -206,7 +207,8 @@ export class SceneManager {
 
     createOptionsGUI() {
         const guiOptions = {
-            showAllHumeri: false
+            showAllHumeri: false,
+            decompMethod: "yx'y''"
         };
         this.optionsGUI = new GUI({resizable : false, name: 'debugGUI', closeOnTop: true});
         this.optionsGUI.add(guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
@@ -214,6 +216,18 @@ export class SceneManager {
                 eulerScene.priorStepHumeriVisible = value;
                 eulerScene.updateHumerisBasedOnStep();
             }, this);
+        });
+        this.optionsGUI.add(guiOptions, 'decompMethod', ["yx'y''", "xz'y''"]).name('Decomposition').onChange(value => {
+            switch (value) {
+                case "yx'y''":
+                    this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
+                    this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
+                    break;
+                case "xz'y''":
+                    this.eulerDecompClass = EulerDecomposition_RY$$_RZ$_RX;
+                    this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
+                    break;
+            };
         });
         this.optionsGUI.close();
         document.getElementById('datGUI').appendChild(this.optionsGUI.domElement);
