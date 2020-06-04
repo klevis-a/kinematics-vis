@@ -10,8 +10,10 @@ export class EulerBoneScene extends EulerScene {
         this.humerusGeometry = humerusGeometry;
         this.step0Humerus = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);
         this.step0Triad.add(this.step0Humerus);
+        this.priorStepHumeriVisible = false;
         this.addHumerus();
         this.attachHumeriToTriads();
+        this.updateHumerisBasedOnStep();
     }
 
     attachHumeriToTriads() {
@@ -33,8 +35,30 @@ export class EulerBoneScene extends EulerScene {
     }
 
     addHumerus() {
-        this.humerus = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);
+        this.humerus = new THREE.Mesh(this.humerusGeometry, new THREE.MeshPhongMaterial({color: EulerBoneScene.BONE_COLOR, opacity: 0.5, transparent: true}));
         this.humerus.quaternion.copy(this.quaternions[this.quaternions.length-1]);
         this.scene.add(this.humerus);
+    }
+
+    goToStep(stepNum) {
+        super.goToStep(stepNum);
+        if (this.stepHumeri != null) {
+            this.updateHumerisBasedOnStep();
+        }
+    }
+
+    updateHumerisBasedOnStep() {
+        this.stepHumeri.forEach((stepHumerus, idx) => {
+            if (this.priorStepHumeriVisible) {
+                stepHumerus.visible = true;
+            }
+            else {
+                if ((idx + 1) == this.currentStep) {
+                    stepHumerus.visible = true;
+                } else {
+                    stepHumerus.visible = false;
+                }
+            }
+        });
     }
 }

@@ -4,6 +4,7 @@ import {AnimationHelper} from "./AnimationHelper.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition} from "./EulerDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
+import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 
 export class SceneManager {
 
@@ -31,6 +32,7 @@ export class SceneManager {
         this.addDblClickDivListener();
         this.addWindowResizeListener();
         this.addRotationStateRadiosListener();
+        this.createOptionsGUI();
     }
 
     updateHumerusInScenes(frameNum) {
@@ -209,5 +211,20 @@ export class SceneManager {
             animationHelper.goToStep(parseInt(this.value));
         };
         this.rotationStateRadios.forEach(radioBtn => radioBtn.addEventListener('change', changeHandler));
+    }
+
+    createOptionsGUI() {
+        const guiOptions = {
+            showAllHumeri: false
+        };
+        this.optionsGUI = new GUI({resizable : false, name: 'debugGUI', closeOnTop: true});
+        this.optionsGUI.add(guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
+            this.eulerScenes.forEach(eulerScene => {
+                eulerScene.priorStepHumeriVisible = value;
+                eulerScene.updateHumerisBasedOnStep();
+            }, this);
+        });
+        this.optionsGUI.close();
+        document.getElementById('datGUI').appendChild(this.optionsGUI.domElement);
     }
 }

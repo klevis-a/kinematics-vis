@@ -66,3 +66,9 @@ body {
     width: 50%;
     display: flex;
 }
+
+#datGUI {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
