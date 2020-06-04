@@ -29,6 +29,7 @@ body {
     border: 1px solid #000000;
     flex-shrink: 1;
     flex-grow: 1;
+    position: relative;
 }
 
 .full {
@@ -71,4 +72,22 @@ body {
     position: absolute;
     top: 0;
     right: 0;
+}
+
+.viewLabelBottomRight {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 5px;
+    background-color: black;
+    color: white;
+}
+
+.viewLabelBottomLeft {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 5px;
+    background-color: black;
+    color: white;
 }

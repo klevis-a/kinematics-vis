@@ -174,15 +174,21 @@ export class SceneManager {
                 sceneManager.views.forEach(view => {
                     if (view.id === this.id) {
                         view.className = 'full';
+                        view.firstElementChild.style.display = 'block';
                     }
                     else {
                         view.className = 'zero';
+                        view.firstElementChild.style.display = 'none';
                     }
                 });
                 sceneManager.animationHelper.setActiveScene(sceneManager.scenesMap.get(this.id));
             } else {
                 sceneManager.activeDiv = null;
-                sceneManager.views.forEach(view => view.className='quarter');
+                sceneManager.views.forEach(view => {
+                    view.className='quarter';
+                    view.firstElementChild.style.display = 'block';
+
+                });
                 sceneManager.animationHelper.setActiveScene(null);
             }
 
