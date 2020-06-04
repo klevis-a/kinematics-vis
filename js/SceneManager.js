@@ -45,7 +45,7 @@ export class SceneManager {
         this.rotations = [
             eulerDecomp.R3$$_R2$_R1,
             eulerDecomp.R1_R2_R3,
-            eulerDecomp.R3$$_R1_R2,
+            eulerDecomp.R3$$_Rcombo,
             axialDecomp.rotationSequence
         ];
 
@@ -117,7 +117,7 @@ export class SceneManager {
         this.rotations = [
             eulerDecomp.R3$$_R2$_R1,
             eulerDecomp.R1_R2_R3,
-            eulerDecomp.R3$$_R1_R2,
+            eulerDecomp.R3$$_Rcombo,
             axialDecomp.rotationSequence
         ]
     }
