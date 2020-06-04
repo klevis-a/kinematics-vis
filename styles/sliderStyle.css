@@ -86,6 +86,13 @@
     flex-shrink: 0;
     margin-left: 0.5em;
     margin-right: 0.5em;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.play:hover {
+    opacity: 1;
 }
 
 .go {
@@ -99,6 +106,13 @@
     flex-shrink: 0;
     margin-left: 0.25em;
     margin-right: 0.25em;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.go:hover {
+    opacity: 1;
 }
 
 .pause {
@@ -110,6 +124,13 @@
     flex-shrink: 0;
     margin-left: 0.5em;
     margin-right: 0.5em;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.pause:hover {
+    opacity: 1;
 }
 
 #frameNum {
