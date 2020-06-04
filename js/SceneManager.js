@@ -22,7 +22,7 @@ export class SceneManager {
         this.getFrameSelectorCtrlElements();
         this.createCamera();
         this.createRenderer();
-        this.createRotations();
+        this.createRotations(0);
         this.createEulerScenes();
         this.animationHelper = new AnimationHelper(this.eulerScenes, this.numFrames, this.framePeriod, this.playBtn, this.timeline, this.frameNumLbl, this.renderer, this.viewsContainer, true);
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
@@ -40,16 +40,7 @@ export class SceneManager {
     }
 
     updateEulerScenesToFrame(frameNum) {
-        const frameQuat = this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum));
-        const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
-        const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frameMat);
-        const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
-        this.rotations = [
-            eulerDecomp.R3$$_R2$_R1,
-            eulerDecomp.R1_R2_R3,
-            eulerDecomp.R3$$_Rcombo,
-            axialDecomp.rotationSequence
-        ];
+        this.createRotations(frameNum);
 
         this.eulerScenes.forEach((eulerScene,idx) => {
             eulerScene.removeSteps();
@@ -111,11 +102,11 @@ export class SceneManager {
         this.renderer.setSize(this.viewsContainer.clientWidth, this.viewsContainer.clientHeight);
     }
 
-    createRotations() {
-        const frame0Quat = this.timeSeriesInfo.torsoOrientQuat(0).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(0));
-        const frame0Mat = new Matrix4().makeRotationFromQuaternion(frame0Quat);
-        const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frame0Mat);
-        const axialDecomp = new AxialDecomposition(frame0Quat, new Vector3().setFromMatrixColumn(frame0Mat,1));
+    createRotations(frameNum) {
+        const frameQuat = this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum));
+        const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
+        const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frameMat);
+        const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
         this.rotations = [
             eulerDecomp.R3$$_R2$_R1,
             eulerDecomp.R1_R2_R3,
