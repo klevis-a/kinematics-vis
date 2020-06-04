@@ -1,4 +1,5 @@
-import {Matrix4, Vector3} from "./vendor/three.js/build/three.module.js";
+import {Matrix4, Vector3, Quaternion} from "./vendor/three.js/build/three.module.js";
+import {axisAngleFromQuat} from "./EulerGeometry.js";
 
 class EulerDecomposition {
     constructor(mat4) {
@@ -7,16 +8,6 @@ class EulerDecomposition {
 
     getElement(row,column) {
         return this.mat4.elements[4*column+row];
-    }
-
-    createAxisAngleMap() {
-        this.axisAngleMap = new Map();
-        this.axisAngleMap.set(this.axis_1, this.angles[0]);
-        this.axisAngleMap.set(this.axis_2, this.angles[1]);
-        this.axisAngleMap.set(this.axis_2$, this.angles[1]);
-        this.axisAngleMap.set(this.axis_3, this.angles[2]);
-        this.axisAngleMap.set(this.axis_3$, this.angles[2]);
-        this.axisAngleMap.set(this.axis_3$$, this.angles[2]);
     }
 }
 
@@ -65,12 +56,67 @@ export class EulerDecomposition_RY$$_RZ$_RX extends EulerDecomposition{
         this.axis_3$$ = new Vector3().setFromMatrixColumn(afterRot2,1);
     }
 
+    createAxisAngleMap() {
+        this.axisAngleMap = new Map();
+        this.axisAngleMap.set(this.axis_1, this.angles[0]);
+        this.axisAngleMap.set(this.axis_2, this.angles[1]);
+        this.axisAngleMap.set(this.axis_2$, this.angles[1]);
+        this.axisAngleMap.set(this.axis_3, this.angles[2]);
+        this.axisAngleMap.set(this.axis_3$, this.angles[2]);
+        this.axisAngleMap.set(this.axis_3$$, this.angles[2]);
+    }
+
     createRotations() {
         this.R3$$_R2$_R1 = [this.axis_1, this.axis_2$, this.axis_3$$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
         this.R3$$_R1_R2 = [this.axis_2, this.axis_1, this.axis_3$$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
         this.R2$_R3$_R1 = [this.axis_1, this.axis_3$, this.axis_2$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
         this.R2$_R1_R3 = [this.axis_3, this.axis_1, this.axis_2$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
         this.R1_R2_R3 = [this.axis_3, this.axis_2, this.axis_1].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
+    }
+}
+
+export class AxialDecomposition {
+    constructor(quat, axialAxis) {
+        this.quat = quat;
+        this.axialAxis = axialAxis;
+        this.angles = [];
+        this.extractAxialQuat();
+        //this.extractNonAxialAngles();
+        const {axis, angle} = axisAngleFromQuat(this.nonAxialQuat);
+        this.rotationSequence = [
+            new AxisAngle(axis, angle),
+            new AxisAngle(new Vector3().copy(axialAxis), 2 * Math.acos(this.axialQuat.w)),
+            new AxisAngle(new Vector3(0, 0, 1), 0),
+        ]
+    }
+
+    extractAxialQuat() {
+        const r = new Vector3(this.quat.x, this.quat.y, this.quat.z);
+        const p = new Vector3().copy(this.axialAxis).multiplyScalar(r.dot(this.axialAxis));
+        this.axialQuat = new Quaternion(p.x, p.y, p.z, this.quat.w).normalize();
+        this.nonAxialQuat = new Quaternion().copy(this.axialQuat).conjugate().multiply(this.quat).normalize();
+    }
+
+    extractNonAxialAngles() {
+        const test = new Matrix4().makeRotationFromQuaternion(this.nonAxialQuat);
+        const test2 = new Matrix4().makeRotationFromQuaternion(this.quat);
+        const eulerDecomp = new EulerDecomposition(new Matrix4().makeRotationFromQuaternion(this.nonAxialQuat));
+        if (eulerDecomp.getElement(0, 2) < 1) {
+            if (eulerDecomp.getElement(0, 2) > -1) {
+                this.angles[0] = Math.atan2(-eulerDecomp.getElement(0, 1), eulerDecomp.getElement(0, 0));
+                this.angles[1] = Math.atan2(-eulerDecomp.getElement(1, 2), eulerDecomp.getElement(2, 2));
+            }
+            // r02=-1
+            else {
+                this.angles[0] = 0;
+                this.angles[1] = Math.atan2(-eulerDecomp.getElement(1,0),eulerDecomp.getElement(1,1));
+            }
+        }
+        // r02=+1
+        else {
+            this.angles[0] = 0;
+            this.angles[1] = Math.atan2(-eulerDecomp.getElement(1,0),eulerDecomp.getElement(1,1));
+        }
     }
 }
 

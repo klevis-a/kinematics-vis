@@ -2,7 +2,7 @@ import {divGeometry} from "./SceneHelpers.js";
 import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
 import {AnimationHelper} from "./AnimationHelper.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
-import {EulerDecomposition_RY$$_RZ$_RX} from "./EulerDecompositions.js";
+import {EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition} from "./EulerDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 
 export class SceneManager {
@@ -41,11 +41,12 @@ export class SceneManager {
         const frameQuat = this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum));
         const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
         const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frameMat);
+        const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
         this.rotations = [
             eulerDecomp.R3$$_R2$_R1,
             eulerDecomp.R1_R2_R3,
             eulerDecomp.R3$$_R1_R2,
-            eulerDecomp.R2$_R1_R3
+            axialDecomp.rotationSequence
         ];
 
         this.eulerScenes.forEach((eulerScene,idx) => {
@@ -112,11 +113,12 @@ export class SceneManager {
         const frame0Quat = this.timeSeriesInfo.torsoOrientQuat(0).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(0));
         const frame0Mat = new Matrix4().makeRotationFromQuaternion(frame0Quat);
         const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frame0Mat);
+        const axialDecomp = new AxialDecomposition(frame0Quat, new Vector3().setFromMatrixColumn(frame0Mat,1));
         this.rotations = [
             eulerDecomp.R3$$_R2$_R1,
             eulerDecomp.R1_R2_R3,
             eulerDecomp.R3$$_R1_R2,
-            eulerDecomp.R2$_R1_R3
+            axialDecomp.rotationSequence
         ]
     }
 

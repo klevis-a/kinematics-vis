@@ -11,7 +11,7 @@ function loadPapaParse() {
 
 const csvLoaderInit = loadPapaParse().then(papa => new CSVLoader(papa));
 const landmarkInit = csvLoaderInit.then(csvLoader => csvLoader.loadCsv('./csv/N005_CTdata_Input_for_mtwtesla.csv'));
-const timeSeriesCsvInit = csvLoaderInit.then((csvLoader) => csvLoader.loadCsv('./csv/N005_CA_t01.csv'));
+const timeSeriesCsvInit = csvLoaderInit.then((csvLoader) => csvLoader.loadCsv('./csv/N005_FE_t01.csv'));
 const humerusLoader = promiseLoadSTL('./models/humerus.stl');
 
 Promise.all([landmarkInit, timeSeriesCsvInit, humerusLoader]).then(([landmarkResults, timeSeriesResults, humerusGeometry]) => {
