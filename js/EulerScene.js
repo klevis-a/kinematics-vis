@@ -67,7 +67,7 @@ export class EulerScene {
             this.quaternions.push(currentQuatRot.multiply(lastQuat));
         }, this);
 
-        this.steps = this.rotations.map((rotation, idx, array) => {
+        this.steps = this.rotations.map((rotation, idx) => {
             const eulerStep = new EulerStep.EulerStep(this.quaternions[idx], rotation, this.numFrames, this.triadLength, this.triadAspectRatio, this.markingsStart, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
             this.addStepToScene(eulerStep);
             return eulerStep;

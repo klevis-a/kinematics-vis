@@ -53,11 +53,7 @@ export class EulerBoneScene extends EulerScene {
                 stepHumerus.visible = true;
             }
             else {
-                if ((idx + 1) == this.currentStep) {
-                    stepHumerus.visible = true;
-                } else {
-                    stepHumerus.visible = false;
-                }
+                stepHumerus.visible = (idx + 1) === this.currentStep;
             }
         });
     }
