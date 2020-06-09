@@ -17,6 +17,7 @@ export class SceneManager {
         this.framePeriod = 30; // in ms - meaning that each animation takes 3 seconds
         this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
         this.normalizeHumerusGeometry();
+        this.humerusLength = new Vector3().subVectors(this.landmarksInfo.humerus.hhc, new Vector3().addVectors(this.landmarksInfo.humerus.me, this.landmarksInfo.humerus.le).multiplyScalar(0.5)).length();
         this.getTimelineCtrlElements();
         this.getEulerSceneElements();
         this.getRotationStateRadios();
@@ -48,6 +49,7 @@ export class SceneManager {
             eulerScene.rotations = this.rotations[idx];
             eulerScene.createSteps();
             eulerScene.attachHumeriToTriads();
+            eulerScene.attachAxialPlanesToHumeri();
             eulerScene.goToStep(eulerScene.currentStep);
             this.animationHelper.TimelineController.updateTimeLine(0);
         }, this);
@@ -119,7 +121,7 @@ export class SceneManager {
 
     createEulerScenes() {
         this.scenesMap = new Map();
-        this.views.forEach((view, idx) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames, this.camera, this.rotations[idx], this.humerusGeometry)), this);
+        this.views.forEach((view, idx) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames, this.camera, this.rotations[idx], this.humerusGeometry, this.humerusLength)), this);
         this.eulerScenes = Array.from(this.scenesMap.values());
     }
 
