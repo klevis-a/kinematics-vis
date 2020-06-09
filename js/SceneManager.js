@@ -49,6 +49,7 @@ export class SceneManager {
             eulerScene.createSteps();
             eulerScene.attachHumeriToTriads();
             eulerScene.goToStep(eulerScene.currentStep);
+            this.animationHelper.TimelineController.updateTimeLine(0);
         }, this);
     }
 
