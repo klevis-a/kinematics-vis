@@ -82,9 +82,6 @@ export class EulerScene {
 
     goToStep(stepNum) {
         this.currentStep = stepNum;
-        for (let i=stepNum; i<this.steps.length; i++) {
-            this.steps[i].deactivate();
-        }
 
         this.steps.forEach((step, idx) => {
            if (idx <= stepNum-2) {
