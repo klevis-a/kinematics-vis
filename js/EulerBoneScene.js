@@ -67,9 +67,6 @@ export class EulerBoneScene extends EulerScene {
     }
 
     attachAxialPlanesToHumeri() {
-        const xLineMaterial_wire = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false, wireframe: true});
-        const zLineMaterial_wire = new THREE.MeshBasicMaterial({color: 0x0000ff, side: THREE.DoubleSide, depthTest: false, wireframe: true});
-
         this.stepHumeri.forEach(humerus => {
             //this is the axial plane that simply goes along with the the humerus
             const axialPlane = new THREE.Mesh(this.PLANE_GEOMETRY, EulerBoneScene.AXIAL_PLANE_MATERIAL);
