@@ -95,7 +95,7 @@ export class SceneManager {
     createCamera() {
         const {aspectRatio} = divGeometry(this.views[0]);
         const fov = 75;
-        this.camera = new PerspectiveCamera(fov, aspectRatio, 0.1, 2000);
+        this.camera = new PerspectiveCamera(fov, aspectRatio, 1, 2000);
         this.camera.position.set(-500, 0, 0);
         this.camera.updateProjectionMatrix();
     }
