@@ -16,7 +16,7 @@ export class FatArrow extends THREE.Object3D {
         this.radialSegments = 10;
         this.heightSegments = 1;
 
-        const arrowMaterial = new THREE.MeshPhongMaterial({color: color, opacity: 0.9, transparent: true});
+        const arrowMaterial = new THREE.MeshPhongMaterial({color: color, opacity: 0.9, transparent: true, polygonOffset: true, polygonOffsetFactor: -1.0, polygonOffsetUnits: -(markings+1)*2});
         this.line = new THREE.Mesh(this.createMarkingsGeometry(), arrowMaterial);
         this.add(this.line);
 
