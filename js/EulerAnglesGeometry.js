@@ -53,7 +53,7 @@ export class Euler_yxy_angle_geometry {
 
         const innerRadius = y_neg_xz_z.length()/2;
         const outerRadius = innerRadius + humerusLength/10;
-        const poe_angle_geometry = new THREE.RingBufferGeometry(innerRadius, outerRadius, 20, 1, 0, Math.atan(y_neg_xz_x.length()/y_neg_xz_z.length()));
+        const poe_angle_geometry = new THREE.RingBufferGeometry(innerRadius, outerRadius, 20, 1, 0, Math.atan2(y_neg.x,y_neg.z));
         poe_angle_geometry.rotateY(-Math.PI/2);
         poe_angle_geometry.rotateZ(-Math.PI/2);
         return [poe_lines_geometry, poe_angle_geometry];
