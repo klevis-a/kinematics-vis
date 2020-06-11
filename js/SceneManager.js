@@ -6,6 +6,7 @@ import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDec
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import "./EulerSceneDecorators.js";
+import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry} from "./EulerAnglesGeometry.js";
 
 export class SceneManager {
 
@@ -18,6 +19,7 @@ export class SceneManager {
         this.framePeriod = 30; // in ms - meaning that each animation takes 3 seconds
         this.eulerAnglesLayer = 1;
         this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
+        this.eulerAnglesFnc = Euler_yxy_angle_geometry.createAngleObjects;
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.humerus.hhc, new Vector3().addVectors(this.landmarksInfo.humerus.me, this.landmarksInfo.humerus.le).multiplyScalar(0.5)).length();
         this.getTimelineCtrlElements();
@@ -54,7 +56,8 @@ export class SceneManager {
             eulerScene.attachHumeriToTriads();
             eulerScene.attachAxialPlanesToHumeri();
             eulerScene.goToStep(eulerScene.currentStep);
-            eulerScene.update_yxy_euler_angles();
+            eulerScene.eulerAnglesFnc = this.eulerAnglesFnc;
+            eulerScene.update_euler_angles();
             this.animationHelper.TimelineController.updateTimeLine(0);
         }, this);
     }
@@ -130,7 +133,11 @@ export class SceneManager {
     }
 
     addAnglesToEulerScenes() {
-        this.eulerScenes.forEach(scene => scene.add_yxy_euler_angles(this.eulerAnglesLayer));
+        this.eulerScenes.forEach(scene => {
+            scene.eulerAnglesFnc = this.eulerAnglesFnc;
+            scene.eulerAnglesLayer = this.eulerAnglesLayer;
+            scene.prepare_scene_for_euler_angles(this.eulerAnglesLayer)
+        });
     }
 
     addTrackBallControlsListeners() {
@@ -239,10 +246,12 @@ export class SceneManager {
             switch (value) {
                 case "yx'y''":
                     this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
+                    this.eulerAnglesFnc = Euler_yxy_angle_geometry.createAngleObjects;
                     this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
                     break;
                 case "xz'y''":
                     this.eulerDecompClass = EulerDecomposition_RY$$_RZ$_RX;
+                    this.eulerAnglesFnc = Euler_xzy_angle_geometry.createAngleObjects;
                     this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
                     break;
             };
