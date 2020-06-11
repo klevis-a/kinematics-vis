@@ -5,7 +5,7 @@ import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition} from "./EulerDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
-import {addEulerAngles} from "./EulerSceneDecorators.js";
+import "./EulerSceneDecorators.js";
 
 export class SceneManager {
 
@@ -54,7 +54,7 @@ export class SceneManager {
             eulerScene.attachHumeriToTriads();
             eulerScene.attachAxialPlanesToHumeri();
             eulerScene.goToStep(eulerScene.currentStep);
-            eulerScene.finalTriad_angles.quaternion.copy(eulerScene.quaternions[eulerScene.quaternions.length-1]);
+            eulerScene.update_yxy_euler_angles();
             this.animationHelper.TimelineController.updateTimeLine(0);
         }, this);
     }
@@ -130,7 +130,7 @@ export class SceneManager {
     }
 
     addAnglesToEulerScenes() {
-        this.eulerScenes.forEach(scene => addEulerAngles(scene, this.eulerAnglesLayer));
+        this.eulerScenes.forEach(scene => scene.add_yxy_euler_angles(this.eulerAnglesLayer));
     }
 
     addTrackBallControlsListeners() {

@@ -123,21 +123,21 @@ export class EulerScene {
         this.scene.add(this.step0Triad);
 
         const xAxis_mat = new THREE.LineBasicMaterial({color: 0xff0000});
-        const xAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-this.triadLength*1.25, 0, 0), new THREE.Vector3(this.triadLength*1.25, 0, 0)]);
+        const xAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-this.triadLength*2, 0, 0), new THREE.Vector3(this.triadLength*2, 0, 0)]);
         this.xAxis = new THREE.Line(xAxis_geo, xAxis_mat);
         this.scene.add(this.xAxis);
 
         const yAxis_mat = new THREE.LineBasicMaterial({color: 0x00ff00});
-        const yAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -this.triadLength*1.25, 0), new THREE.Vector3(0, this.triadLength*1.25, 0)]);
+        const yAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -this.triadLength*2, 0), new THREE.Vector3(0, this.triadLength*2, 0)]);
         this.yAxis = new THREE.Line(yAxis_geo, yAxis_mat);
         this.scene.add(this.yAxis);
 
         const zAxis_mat = new THREE.LineBasicMaterial({color: 0x0000ff});
-        const zAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, -this.triadLength*1.25), new THREE.Vector3(0, 0, this.triadLength*1.25)]);
+        const zAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, -this.triadLength*2), new THREE.Vector3(0, 0, this.triadLength*2)]);
         this.zAxis = new THREE.Line(zAxis_geo, zAxis_mat);
         this.scene.add(this.zAxis);
 
-        const planeGeometry = new THREE.PlaneBufferGeometry(this.triadLength*1.25*2, this.triadLength*1.25*2);
+        const planeGeometry = new THREE.PlaneBufferGeometry(this.triadLength*2*2, this.triadLength*2*2);
         const planeEdgesGeometry = new THREE.EdgesGeometry(planeGeometry);
         this.xyPlane = new THREE.LineSegments(planeEdgesGeometry, zAxis_mat);
         this.scene.add(this.xyPlane);
