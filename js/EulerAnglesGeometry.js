@@ -136,6 +136,7 @@ export class Euler_xzy_angle_geometry {
     static poe_geometry(y_axis, humerusLength) {
         const poe_lines_points = [];
         const y_neg = new THREE.Vector3().copy(y_axis).multiplyScalar(-humerusLength);
+        const y_neg_yz = new THREE.Vector3().set(0, y_neg.y, y_neg.z);
         const y_neg_x = new THREE.Vector3(y_neg.x, 0, 0);
         poe_lines_points.push(y_neg);
         poe_lines_points.push(new THREE.Vector3());
@@ -143,7 +144,7 @@ export class Euler_xzy_angle_geometry {
         poe_lines_points.push(y_neg);
         const poe_lines_geometry = new THREE.BufferGeometry().setFromPoints(poe_lines_points);
 
-        const innerRadius = humerusLength * 0.8;
+        const innerRadius = y_neg_yz.length() * 0.7;
         const outerRadius = innerRadius + humerusLength/10;
         const poe_angle_geometry = new THREE.RingBufferGeometry(innerRadius, outerRadius, 20, 1, 0, Math.asin(-y_axis.x));
         return [poe_lines_geometry, poe_angle_geometry];
