@@ -5,6 +5,7 @@ import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition} from "./EulerDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
+import {addEulerAngles} from "./EulerSceneDecorators.js";
 
 export class SceneManager {
 
@@ -15,6 +16,7 @@ export class SceneManager {
         this.activeDiv = null;
         this.numFrames = 100;
         this.framePeriod = 30; // in ms - meaning that each animation takes 3 seconds
+        this.eulerAnglesLayer = 1;
         this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.humerus.hhc, new Vector3().addVectors(this.landmarksInfo.humerus.me, this.landmarksInfo.humerus.le).multiplyScalar(0.5)).length();
@@ -26,6 +28,7 @@ export class SceneManager {
         this.createRenderer();
         this.createRotations(0);
         this.createEulerScenes();
+        this.addAnglesToEulerScenes();
         this.animationHelper = new AnimationHelper(this.eulerScenes, this.numFrames, this.framePeriod, this.playBtn, this.timeline, this.frameNumLbl, this.renderer, this.viewsContainer, true);
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
             this.timeSeriesInfo.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum), (frameNum) => this.updateEulerScenesToFrame(frameNum));
@@ -51,6 +54,7 @@ export class SceneManager {
             eulerScene.attachHumeriToTriads();
             eulerScene.attachAxialPlanesToHumeri();
             eulerScene.goToStep(eulerScene.currentStep);
+            eulerScene.finalTriad_angles.quaternion.copy(eulerScene.quaternions[eulerScene.quaternions.length-1]);
             this.animationHelper.TimelineController.updateTimeLine(0);
         }, this);
     }
@@ -123,6 +127,10 @@ export class SceneManager {
         this.scenesMap = new Map();
         this.views.forEach((view, idx) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames, this.camera, this.rotations[idx], this.humerusGeometry, this.humerusLength)), this);
         this.eulerScenes = Array.from(this.scenesMap.values());
+    }
+
+    addAnglesToEulerScenes() {
+        this.eulerScenes.forEach(scene => addEulerAngles(scene, this.eulerAnglesLayer));
     }
 
     addTrackBallControlsListeners() {
@@ -217,7 +225,8 @@ export class SceneManager {
     createOptionsGUI() {
         const guiOptions = {
             showAllHumeri: false,
-            decompMethod: "yx'y''"
+            decompMethod: "yx'y''",
+            showAngles: false
         };
         this.optionsGUI = new GUI({resizable : false, name: 'debugGUI', closeOnTop: true});
         this.optionsGUI.add(guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
@@ -237,6 +246,14 @@ export class SceneManager {
                     this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
                     break;
             };
+        });
+        this.optionsGUI.add(guiOptions, 'showAngles').name('Visualize Angles').onChange(value => {
+            if (value) {
+                this.camera.layers.set(this.eulerAnglesLayer);
+            }
+            else {
+                this.camera.layers.set(0);
+            }
         });
         this.optionsGUI.close();
         document.getElementById('datGUI').appendChild(this.optionsGUI.domElement);
