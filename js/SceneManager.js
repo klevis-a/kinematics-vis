@@ -7,6 +7,7 @@ import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import "./EulerSceneDecorators.js";
 import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry} from "./EulerAnglesGeometry.js";
+import {svdDecomp} from "./EulerDecompositions.js";
 
 export class SceneManager {
 
@@ -20,6 +21,7 @@ export class SceneManager {
         this.eulerAnglesLayer = 1;
         this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
         this.eulerAnglesFnc = Euler_yxy_angle_geometry.createAngleObjects;
+        this.svdDecompClass = svdDecomp(this.timeSeriesInfo);
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.humerus.hhc, new Vector3().addVectors(this.landmarksInfo.humerus.me, this.landmarksInfo.humerus.le).multiplyScalar(0.5)).length();
         this.getTimelineCtrlElements();
@@ -118,9 +120,11 @@ export class SceneManager {
         const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
         const eulerDecomp = new this.eulerDecompClass(frameMat);
         const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
+        const svdDecomp = new this.svdDecompClass(frameQuat);
         this.rotations = [
             eulerDecomp.R3$$_R2$_R1,
-            eulerDecomp.R1_R2_R3,
+            svdDecomp.rotationSequence,
+            //eulerDecomp.R1_R2_R3,
             eulerDecomp.R3$$_Rcombo,
             axialDecomp.rotationSequence
         ]

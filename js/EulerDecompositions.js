@@ -1,5 +1,6 @@
-import {Matrix4, Vector3, Quaternion} from "./vendor/three.js/build/three.module.js";
+import {Matrix4, Quaternion, Vector3} from "./vendor/three.js/build/three.module.js";
 import {axisAngleFromQuat} from "./EulerGeometry.js";
+import SVD from './vendor/svd.js'
 
 class EulerDecomposition {
     constructor(mat4) {
@@ -210,6 +211,63 @@ export class AxialDecomposition {
         this.zAxisQuat = new Quaternion(p.x, p.y, p.z, this.nonAxialQuat.w).normalize();
         this.xAxisQuat = new Quaternion().multiplyQuaternions(this.nonAxialQuat, new Quaternion().copy(this.zAxisQuat).conjugate());
     }
+}
+
+export function svdDecomp(timeSeriesInfo) {
+
+    const y_axes = [];
+
+    for (let i=0; i<timeSeriesInfo.NumFrames; i++) {
+        const humQuat = timeSeriesInfo.torsoOrientQuat(i).conjugate().multiply(timeSeriesInfo.humOrientQuat(i));
+        const humMat = new Matrix4().makeRotationFromQuaternion(humQuat);
+        const y_axis = new Vector3().setFromMatrixColumn(humMat, 1);
+        y_axes.push([y_axis.x, y_axis.y, y_axis.z]);
+    }
+
+    const {u, v, q} = SVD(y_axes, true, true);
+    const minDim = q.indexOf(Math.min(...q));
+    const majorRotAxis = new Vector3(v[0][minDim], v[1][minDim], v[2][minDim]);
+
+    const svdDecompClass = class SvdDecompClass{
+        constructor(quat) {
+            this.quat = quat;
+            this.mat = new Matrix4().makeRotationFromQuaternion(this.quat);
+            this.humeralAxis = new Vector3().setFromMatrixColumn(this.mat, 1);
+            this.extractAxialQuat();
+            this.extractMajorMinorAxis();
+
+            const {axis: majorAxis, angle: majorAngle} = axisAngleFromQuat(this.majorAxisQuat);
+            const {axis: minorAxis, angle: minorAngle} = axisAngleFromQuat(this.minorAxisQuat);
+            let {axis: axialAxisComp, angle: axialAngle} = axisAngleFromQuat(this.axialQuat);
+            if (axialAxisComp.dot(this.humeralAxis) < 0) {
+                axialAngle = - axialAngle;
+            }
+            this.rotationSequence = [
+                new AxisAngle(minorAxis, minorAngle),
+                new AxisAngle(majorAxis, majorAngle),
+                new AxisAngle(new Vector3().copy(this.humeralAxis), axialAngle)
+            ];
+        }
+
+        extractAxialQuat() {
+            this.axialQuat = quatProject(this.quat, this.humeralAxis);
+            this.nonAxialQuat = new Quaternion().copy(this.axialQuat).conjugate().multiply(this.quat).normalize();
+        }
+
+        extractMajorMinorAxis() {
+            this.majorAxisQuat = quatProject(this.nonAxialQuat, majorRotAxis);
+            this.minorAxisQuat = new Quaternion().copy(this.majorAxisQuat).conjugate().multiply(this.nonAxialQuat).normalize();
+            //this.minorAxisQuat = new Quaternion().copy(this.nonAxialQuat).multiply(new Quaternion().copy(this.majorAxisQuat).conjugate());
+        }
+    };
+
+    return svdDecompClass;
+}
+
+export function quatProject(quat, axis) {
+    const r = new Vector3(quat.x, quat.y, quat.z);
+    const p = new Vector3().copy(axis).multiplyScalar(r.dot(axis));
+    return new Quaternion(p.x, p.y, p.z, quat.w).normalize();
 }
 
 export class AxisAngle {
