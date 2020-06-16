@@ -1,5 +1,6 @@
 import {EulerScene} from "./EulerScene.js";
 import * as THREE from './vendor/three.js/build/three.module.js';
+import {Globe} from "./EulerGeometry.js";
 
 export class EulerBoneScene extends EulerScene {
     static BONE_COLOR = 0xe3dac9;
@@ -26,6 +27,7 @@ export class EulerBoneScene extends EulerScene {
         this.attachHumeriToTriads();
         this.attachAxialPlanesToHumeri();
         this.updateHumerisBasedOnStep();
+        this.scene.add(new Globe(this.humerusLength*1.25, 9, 18, 0xff0000));
     }
 
     attachHumeriToTriads() {

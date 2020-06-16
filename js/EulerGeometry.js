@@ -173,6 +173,46 @@ export class RotAxisWithArrow extends THREE.Object3D {
     }
 }
 
+export class Globe extends THREE.Object3D {
+    constructor(radius, numLongitudes, numLatitudes, color) {
+        super();
+        this.radius = radius;
+        this.color = color;
+        this.circleMaterial = new THREE.LineBasicMaterial({color: this.color});
+        this.numLongitudes = numLongitudes;
+        this.numLatitudes = numLatitudes;
+
+        this.longitudes = [];
+
+        const longitudeGeometry = new THREE.CircleBufferGeometry(this.radius, 36);
+        const longitudeEdges = new THREE.EdgesGeometry(longitudeGeometry);
+        const longitudeDelta = Math.PI/this.numLongitudes;
+        for(let i=0; i<this.numLongitudes; i++) {
+            const currentLong = new THREE.LineSegments(longitudeEdges, this.circleMaterial);
+            currentLong.rotateY(i*longitudeDelta);
+            this.longitudes.push(currentLong);
+            this.add(currentLong);
+        }
+
+        this.latitudes = [];
+        const latitudeDelta = Math.PI/2/this.numLatitudes;
+        for(let i=0; i<this.numLatitudes; i++) {
+            const latitudeGeometry = new THREE.CircleBufferGeometry(this.radius*Math.cos(latitudeDelta*i), 36);
+            latitudeGeometry.rotateX(-Math.PI/2);
+            const latitudeEdges = new THREE.EdgesGeometry(latitudeGeometry);
+            const currentLatitude = new THREE.LineSegments(latitudeEdges, this.circleMaterial);
+            this.add(currentLatitude);
+            currentLatitude.position.set(0, this.radius*Math.sin(latitudeDelta*i), 0);
+
+            if (i !== 0) {
+                const currentLatitudeNeg = new THREE.LineSegments(latitudeEdges, this.circleMaterial);
+                this.add(currentLatitudeNeg);
+                currentLatitudeNeg.position.set(0, -this.radius*Math.sin(latitudeDelta*i), 0);
+            }
+        }
+    }
+}
+
 export function axisAngleFromQuat(quat) {
     quat.normalize();
     let angle = 2 * Math.acos(quat.w);
