@@ -60,6 +60,7 @@ export class SceneManager {
             eulerScene.goToStep(eulerScene.currentStep);
             eulerScene.eulerAnglesFnc = this.eulerAnglesFnc;
             eulerScene.update_euler_angles();
+            eulerScene.addFinalLatitudeLongitude();
             this.animationHelper.TimelineController.updateTimeLine(0);
         }, this);
     }

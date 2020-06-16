@@ -30,6 +30,7 @@ export class EulerBoneScene extends EulerScene {
         this.attachAxialPlanesToHumeri();
         this.updateHumerisBasedOnStep();
         this.addSphere();
+        this.addFinalLatitudeLongitude();
     }
 
     attachHumeriToTriads() {
