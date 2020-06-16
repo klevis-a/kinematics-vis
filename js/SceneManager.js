@@ -251,11 +251,13 @@ export class SceneManager {
                 case "yx'y''":
                     this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
                     this.eulerAnglesFnc = Euler_yxy_angle_geometry.createAngleObjects;
+                    this.eulerScenes.forEach(eulerScene => eulerScene.changeSphere(new Vector3(0, 1, 0)));
                     this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
                     break;
                 case "xz'y''":
                     this.eulerDecompClass = EulerDecomposition_RY$$_RZ$_RX;
                     this.eulerAnglesFnc = Euler_xzy_angle_geometry.createAngleObjects;
+                    this.eulerScenes.forEach(eulerScene => eulerScene.changeSphere(new Vector3(1, 0, 0)));
                     this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
                     break;
             };

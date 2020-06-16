@@ -50,3 +50,25 @@ EulerScene.prototype.add_euler_angles = function() {
     this.scene.add(this.poe_angles);
     this.scene.add(this.ea_angles);
 };
+
+EulerScene.prototype.addSphere = function() {
+    const sphereGeometry = new THREE.SphereBufferGeometry(this.humerusLength, this.numLongitudeSegments, this.numLatitudeSegments, 0, Math.PI, 0, Math.PI);
+    const sphereGeometryEdges = new THREE.EdgesGeometry(sphereGeometry);
+    const edgesMaterial = new THREE.LineBasicMaterial({color: 0x000000});
+    this.sphere = new THREE.LineSegments(sphereGeometryEdges, edgesMaterial);
+    this.scene.add(this.sphere);
+
+    const longitudeDeltaAngle = Math.PI/this.numLongitudeSegments;
+    for (let i=1; i<this.numLongitudeSegments; i++) {
+        const points = [];
+        points.push(new THREE.Vector3());
+        points.push(new THREE.Vector3(Math.cos(i*longitudeDeltaAngle)*this.humerusLength, 0, Math.sin(i*longitudeDeltaAngle)*this.humerusLength));
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(lineGeometry, edgesMaterial);
+        this.sphere.add(line);
+    }
+};
+
+EulerScene.prototype.changeSphere = function(northPole) {
+    this.sphere.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), northPole));
+};

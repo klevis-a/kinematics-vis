@@ -1,5 +1,6 @@
 import {EulerScene} from "./EulerScene.js";
 import * as THREE from './vendor/three.js/build/three.module.js';
+import "./EulerSceneDecorators.js";
 
 export class EulerBoneScene extends EulerScene {
     static BONE_COLOR = 0xe3dac9;
@@ -29,24 +30,6 @@ export class EulerBoneScene extends EulerScene {
         this.attachAxialPlanesToHumeri();
         this.updateHumerisBasedOnStep();
         this.addSphere();
-    }
-
-    addSphere() {
-        const sphereGeometry = new THREE.SphereBufferGeometry(this.humerusLength, this.numLongitudeSegments, this.numLatitudeSegments, 0, Math.PI, 0, Math.PI);
-        const sphereGeometryEdges = new THREE.EdgesGeometry(sphereGeometry);
-        const edgesMaterial = new THREE.LineBasicMaterial({color: 0x000000});
-        this.sphere = new THREE.LineSegments(sphereGeometryEdges, edgesMaterial);
-        this.scene.add(this.sphere);
-
-        const longitudeDeltaAngle = Math.PI/this.numLongitudeSegments;
-        for (let i=1; i<this.numLongitudeSegments; i++) {
-            const points = [];
-            points.push(new THREE.Vector3());
-            points.push(new THREE.Vector3(Math.cos(i*longitudeDeltaAngle)*this.humerusLength, 0, Math.sin(i*longitudeDeltaAngle)*this.humerusLength));
-            const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-            const line = new THREE.Line(lineGeometry, edgesMaterial);
-            this.sphere.add(line);
-        }
     }
 
     attachHumeriToTriads() {
