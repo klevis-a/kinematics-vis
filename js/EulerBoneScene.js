@@ -1,6 +1,5 @@
 import {EulerScene} from "./EulerScene.js";
 import * as THREE from './vendor/three.js/build/three.module.js';
-import {Globe} from "./EulerGeometry.js";
 
 export class EulerBoneScene extends EulerScene {
     static BONE_COLOR = 0xe3dac9;
@@ -13,6 +12,8 @@ export class EulerBoneScene extends EulerScene {
 
     constructor(viewElement, renderer, numFrames, camera, rotations, humerusGeometry, humerusLength) {
         super(viewElement, renderer, numFrames, camera, rotations, 10, 150, 50);
+        this.numLatitudeSegments = 20;
+        this.numLongitudeSegments = 10;
         this.humerusGeometry = humerusGeometry;
         this.humerusLength = humerusLength;
         this.step0Humerus = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);
@@ -27,7 +28,25 @@ export class EulerBoneScene extends EulerScene {
         this.attachHumeriToTriads();
         this.attachAxialPlanesToHumeri();
         this.updateHumerisBasedOnStep();
-        this.scene.add(new Globe(this.humerusLength*1.25, 9, 18, 0xff0000));
+        this.addSphere();
+    }
+
+    addSphere() {
+        const sphereGeometry = new THREE.SphereBufferGeometry(this.humerusLength, this.numLongitudeSegments, this.numLatitudeSegments, 0, Math.PI, 0, Math.PI);
+        const sphereGeometryEdges = new THREE.EdgesGeometry(sphereGeometry);
+        const edgesMaterial = new THREE.LineBasicMaterial({color: 0x000000});
+        this.sphere = new THREE.LineSegments(sphereGeometryEdges, edgesMaterial);
+        this.scene.add(this.sphere);
+
+        const longitudeDeltaAngle = Math.PI/this.numLongitudeSegments;
+        for (let i=1; i<this.numLongitudeSegments; i++) {
+            const points = [];
+            points.push(new THREE.Vector3());
+            points.push(new THREE.Vector3(Math.cos(i*longitudeDeltaAngle)*this.humerusLength, 0, Math.sin(i*longitudeDeltaAngle)*this.humerusLength));
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const line = new THREE.Line(lineGeometry, edgesMaterial);
+            this.sphere.add(line);
+        }
     }
 
     attachHumeriToTriads() {
@@ -74,7 +93,7 @@ export class EulerBoneScene extends EulerScene {
             const axialPlane = new THREE.Mesh(this.PLANE_GEOMETRY, EulerBoneScene.AXIAL_PLANE_MATERIAL);
             axialPlane.renderOrder = 0;
             axialPlane.position.set(0, 0, 0);
-            axialPlane.translateY(-this.humerusLength*1.25);
+            axialPlane.translateY(-this.humerusLength);
             humerus.add(axialPlane);
 
             const xLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.XLINE_MATERIAL);
@@ -106,7 +125,7 @@ export class EulerBoneScene extends EulerScene {
         this.steps[this.currentStep-1].triad.updateMatrixWorld();
         const currentHumeralAxis = this.steps[this.currentStep-1].triad.arrowAxis(1);
         this.axialGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), currentHumeralAxis);
-        this.axialGroup.position.copy(new THREE.Vector3().copy(currentHumeralAxis).multiplyScalar(-this.humerusLength*1.25));
+        this.axialGroup.position.copy(new THREE.Vector3().copy(currentHumeralAxis).multiplyScalar(-this.humerusLength));
     }
 
     updateHumerisBasedOnStep() {

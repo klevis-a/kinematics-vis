@@ -2,7 +2,6 @@ import * as THREE from "./vendor/three.js/build/three.module.js";
 import * as EulerGeometry from "./EulerGeometry.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerScene} from "./EulerScene.js";
-import {Euler_yxy_angle_geometry} from "./EulerAnglesGeometry.js";
 
 EulerScene.prototype.update_euler_angles = function() {
     this.finalTriad_angles.quaternion.copy(this.quaternions[this.quaternions.length-1]);
@@ -16,8 +15,12 @@ EulerScene.prototype.update_euler_angles = function() {
 };
 
 EulerScene.prototype.prepare_scene_for_euler_angles = function() {
+    const recursiveSet = child => child.layers.set(this.eulerAnglesLayer);
+    const recursiveEnable = child => child.layers.enable(this.eulerAnglesLayer);
+
     const sceneObjects = [this.humerus, this.spotlight, this.xyPlane, this.xzPlane, this.yzPlane, this.xAxis, this.yAxis, this.zAxis];
     sceneObjects.forEach(sceneObject => sceneObject.layers.enable(this.eulerAnglesLayer));
+    this.sphere.traverse(recursiveEnable);
 
     this.initTriad_angles = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
     this.scene.add(this.initTriad_angles);
@@ -31,9 +34,8 @@ EulerScene.prototype.prepare_scene_for_euler_angles = function() {
     this.finalTriad_angles.add(this.finalHumerus_angles);
     this.finalTriad_angles.layers.set(this.eulerAnglesLayer);
 
-    const complexObjects = [this.initTriad_angles, this.finalTriad_angles];
-    const recursiveSet = child => child.layers.set(this.eulerAnglesLayer);
-    complexObjects.forEach(complexObject => complexObject.traverse(recursiveSet));
+    const angleObjects = [this.initTriad_angles, this.finalTriad_angles];
+    angleObjects.forEach(complexObject => complexObject.traverse(recursiveSet));
 
     this.finalTriad_angles.quaternion.copy(this.quaternions[this.quaternions.length-1]);
     this.finalTriad_angles.updateMatrixWorld();
