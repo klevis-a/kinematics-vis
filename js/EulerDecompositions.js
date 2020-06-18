@@ -151,6 +151,18 @@ export class EulerDecomposition_RY$$_RX$_RY extends EulerDecomposition{
     }
 }
 
+export class OneStep {
+    constructor(quat) {
+        this.quat = quat;
+        const {axis: axis, angle: angle} = axisAngleFromQuat(this.quat);
+        this.rotationSequence = [
+            new AxisAngle(axis, angle),
+            new AxisAngle(new Vector3(0, 0, 1), 0),
+            new AxisAngle(new Vector3(0, 0, 1), 0)
+        ];
+    }
+}
+
 export class AxialDecomposition {
     constructor(quat, axialAxis) {
         this.quat = quat;

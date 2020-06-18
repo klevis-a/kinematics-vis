@@ -2,7 +2,7 @@ import {divGeometry} from "./SceneHelpers.js";
 import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
 import {AnimationHelper} from "./AnimationHelper.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
-import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition} from "./EulerDecompositions.js";
+import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition, OneStep} from "./EulerDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import "./EulerSceneDecorators.js";
@@ -122,11 +122,13 @@ export class SceneManager {
         const eulerDecomp = new this.eulerDecompClass(frameMat);
         const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
         const svdDecomp = new this.svdDecompClass(frameQuat);
+        const oneStepDecomp = new OneStep(frameQuat);
         this.rotations = [
             eulerDecomp.R3$$_R2$_R1,
             svdDecomp.rotationSequence,
             //eulerDecomp.R1_R2_R3,
-            eulerDecomp.R3$$_Rcombo,
+            //eulerDecomp.R3$$_Rcombo,
+            oneStepDecomp.rotationSequence,
             axialDecomp.rotationSequence
         ]
     }
