@@ -75,28 +75,28 @@ export class EulerBoneScene extends EulerScene {
         this.stepHumeri.forEach(humerus => {
             //this is the axial plane that simply goes along with the the humerus
             const axialPlane = new THREE.Mesh(this.PLANE_GEOMETRY, EulerBoneScene.AXIAL_PLANE_MATERIAL);
-            axialPlane.renderOrder = 0;
+            axialPlane.renderOrder = 2;
             axialPlane.position.set(0, 0, 0);
             axialPlane.translateY(-this.humerusLength);
             humerus.add(axialPlane);
 
             const xLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.XLINE_MATERIAL);
-            xLine.renderOrder = 1;
+            xLine.renderOrder = 3;
             xLine.rotateY(Math.PI/2);
 
             const zLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.ZLINE_MATERIAL);
-            zLine.renderOrder = 1;
+            zLine.renderOrder = 3;
             axialPlane.add(xLine);
             axialPlane.add(zLine);
         });
 
         //this is the axial group that only moves with the humeral axis (i.e. no axial rotation)
         const xLine_noAxial = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.XLINE_MATERIAL_WIRE);
-        xLine_noAxial.renderOrder = 1;
+        xLine_noAxial.renderOrder = 3;
         xLine_noAxial.rotateY(Math.PI/2);
 
         const zLine_noAxial = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.ZLINE_MATERIAL_WIRE);
-        zLine_noAxial.renderOrder = 1;
+        zLine_noAxial.renderOrder = 3;
 
         this.axialGroup = new THREE.Group();
         this.axialGroup.add(xLine_noAxial);
