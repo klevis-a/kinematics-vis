@@ -20,7 +20,6 @@ export class SceneManager {
         this.framePeriod = 30; // in ms - meaning that each animation takes 3 seconds
         this.eulerAnglesLayer = 1;
         this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
-        this.eulerAnglesFnc = Euler_yxy_angle_geometry.createAngleObjects;
         this.svdDecompClass = svdDecomp(this.timeSeriesInfo);
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.humerus.hhc, new Vector3().addVectors(this.landmarksInfo.humerus.me, this.landmarksInfo.humerus.le).multiplyScalar(0.5)).length();
@@ -58,7 +57,6 @@ export class SceneManager {
             eulerScene.attachHumeriToTriads();
             eulerScene.attachAxialPlanesToHumeri();
             eulerScene.goToStep(eulerScene.currentStep);
-            eulerScene.eulerAnglesFnc = this.eulerAnglesFnc;
             eulerScene.update_euler_angles();
             eulerScene.addFinalLatitudeLongitude();
             this.animationHelper.TimelineController.updateTimeLine(0);
@@ -135,13 +133,14 @@ export class SceneManager {
 
     createEulerScenes() {
         this.scenesMap = new Map();
+        this.eulerAnglesFnc = [Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects];
         this.views.forEach((view, idx) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames, this.camera, this.rotations[idx], this.humerusGeometry, this.humerusLength)), this);
         this.eulerScenes = Array.from(this.scenesMap.values());
+        this.eulerScenes.forEach((eulerScene,idx) => eulerScene.eulerAnglesFnc = this.eulerAnglesFnc[idx]);
     }
 
     addAnglesToEulerScenes() {
         this.eulerScenes.forEach(scene => {
-            scene.eulerAnglesFnc = this.eulerAnglesFnc;
             scene.eulerAnglesLayer = this.eulerAnglesLayer;
             scene.prepare_scene_for_euler_angles(this.eulerAnglesLayer)
         });
@@ -253,14 +252,14 @@ export class SceneManager {
             switch (value) {
                 case "yx'y''":
                     this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
-                    this.eulerAnglesFnc = Euler_yxy_angle_geometry.createAngleObjects;
-                    this.eulerScenes.forEach(eulerScene => eulerScene.changeSphere(new Vector3(0, 1, 0)));
+                    this.eulerScenes[0].eulerAnglesFnc = Euler_yxy_angle_geometry.createAngleObjects;
+                    this.eulerScenes[0].changeSphere(new Vector3(0, 1, 0));
                     this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
                     break;
                 case "xz'y''":
                     this.eulerDecompClass = EulerDecomposition_RY$$_RZ$_RX;
-                    this.eulerAnglesFnc = Euler_xzy_angle_geometry.createAngleObjects;
-                    this.eulerScenes.forEach(eulerScene => eulerScene.changeSphere(new Vector3(1, 0, 0)));
+                    this.eulerScenes[0].eulerAnglesFnc = Euler_xzy_angle_geometry.createAngleObjects;
+                    this.eulerScenes[0].changeSphere(new Vector3(1, 0, 0));
                     this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
                     break;
             };
