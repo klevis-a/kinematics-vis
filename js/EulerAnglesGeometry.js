@@ -156,3 +156,60 @@ export class Euler_xzy_angle_geometry {
         return [poe_lines_geometry, poe_angle_geometry];
     }
 }
+
+export class AnglesVisualizationSVD {
+    static PLANE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xf47460, side: THREE.DoubleSide, transparent: true, opacity: 0.3});
+    static POE_ANGLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+    static ADJ_ANGLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+    static EA_ANGLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1.0, polygonOffsetUnits: -2 });
+
+    static createAngleObjects(eulerScene) {
+        const triad = eulerScene.finalTriad_angles;
+        const humerusLength = eulerScene.humerusLength;
+        const layerId = eulerScene.eulerAnglesLayer;
+        const y_axis = triad.arrowAxis(1);
+
+        //create plane
+        const rotAxis = eulerScene.rotations[0].axis;
+        const planeGeometry = new THREE.PlaneBufferGeometry(humerusLength*2, humerusLength*2, 1, 1);
+        const poe = new THREE.Mesh(planeGeometry, AnglesVisualizationSVD.PLANE_MATERIAL);
+        poe.layers.enable(layerId);
+        poe.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), rotAxis));
+
+        //create arrow
+        const rotAxisPerp = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), rotAxis).normalize();
+        const y_neg = new THREE.Vector3().copy(y_axis).multiplyScalar(-humerusLength);
+        const y_neg_xz = new THREE.Vector3().set(y_neg.x, 0, y_neg.z);
+        if (rotAxisPerp.dot(y_neg) < 0) {
+            rotAxisPerp.multiplyScalar(-1);
+        }
+        const rotAngle_poe = rotAxisPerp.x;
+        const innerRadius = y_neg_xz.length() * 0.7;
+        const outerRadius = innerRadius + humerusLength/10;
+        const poe_angle_geometry = new THREE.RingBufferGeometry(innerRadius, outerRadius, 20, 1, 0, rotAngle_poe);
+        poe_angle_geometry.rotateY(-Math.PI/2);
+        poe_angle_geometry.rotateZ(-Math.PI/2);
+        const poe_angle = new THREE.Mesh(poe_angle_geometry, AnglesVisualizationSVD.POE_ANGLE_MATERIAL);
+        poe_angle.layers.set(layerId);
+
+        const poeGroup = new THREE.Group();
+        poeGroup.add(poe);
+        poeGroup.add(poe_angle);
+
+        //create ea arrow
+        const rotAngle_ea = Math.abs(eulerScene.rotations[0].angle);
+        const ea_angle_geometry = new THREE.RingBufferGeometry(innerRadius, outerRadius, 20, 1, 0, rotAngle_ea);
+        const ea_angle = new THREE.Mesh(ea_angle_geometry, AnglesVisualizationSVD.EA_ANGLE_MATERIAL);
+        ea_angle.layers.set(layerId);
+
+        const ea_angle_x = new THREE.Vector3(0, -1, 0);
+        const ea_angle_y = new THREE.Vector3().crossVectors(rotAxis, ea_angle_x).normalize();
+        ea_angle.setRotationFromMatrix(new THREE.Matrix4().makeBasis(ea_angle_x, ea_angle_y, rotAxis));
+
+        const eaGroup = new THREE.Group();
+        eaGroup.add(ea_angle);
+
+        return [poeGroup, eaGroup];
+
+    }
+}

@@ -6,7 +6,7 @@ import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDec
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import "./EulerSceneDecorators.js";
-import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry} from "./EulerAnglesGeometry.js";
+import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry, AnglesVisualizationSVD} from "./EulerAnglesGeometry.js";
 import {svdDecomp} from "./EulerDecompositions.js";
 
 export class SceneManager {
@@ -133,7 +133,7 @@ export class SceneManager {
 
     createEulerScenes() {
         this.scenesMap = new Map();
-        this.eulerAnglesFnc = [Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects];
+        this.eulerAnglesFnc = [Euler_yxy_angle_geometry.createAngleObjects, AnglesVisualizationSVD.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects];
         this.views.forEach((view, idx) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames, this.camera, this.rotations[idx], this.humerusGeometry, this.humerusLength)), this);
         this.eulerScenes = Array.from(this.scenesMap.values());
         this.eulerScenes.forEach((eulerScene,idx) => eulerScene.eulerAnglesFnc = this.eulerAnglesFnc[idx]);
