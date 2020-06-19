@@ -255,8 +255,8 @@ export function svdDecomp(timeSeriesInfo) {
                 axialAngle = - axialAngle;
             }
             this.rotationSequence = [
-                new AxisAngle(minorAxis, minorAngle),
                 new AxisAngle(majorAxis, majorAngle),
+                new AxisAngle(minorAxis, minorAngle),
                 new AxisAngle(new Vector3().copy(this.humeralAxis), axialAngle)
             ];
         }
@@ -268,8 +268,8 @@ export function svdDecomp(timeSeriesInfo) {
 
         extractMajorMinorAxis() {
             this.majorAxisQuat = quatProject(this.nonAxialQuat, majorRotAxis);
-            this.minorAxisQuat = new Quaternion().copy(this.majorAxisQuat).conjugate().multiply(this.nonAxialQuat).normalize();
-            //this.minorAxisQuat = new Quaternion().copy(this.nonAxialQuat).multiply(new Quaternion().copy(this.majorAxisQuat).conjugate());
+            //this.minorAxisQuat = new Quaternion().copy(this.majorAxisQuat).conjugate().multiply(this.nonAxialQuat).normalize();
+            this.minorAxisQuat = new Quaternion().copy(this.nonAxialQuat).multiply(new Quaternion().copy(this.majorAxisQuat).conjugate());
         }
     };
 
