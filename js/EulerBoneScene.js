@@ -84,11 +84,11 @@ export class EulerBoneScene extends EulerScene {
             const xLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.XLINE_MATERIAL);
             xLine.renderOrder = 3;
             xLine.rotateY(Math.PI/2);
-
-            const zLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.ZLINE_MATERIAL);
-            zLine.renderOrder = 3;
             axialPlane.add(xLine);
-            axialPlane.add(zLine);
+
+            //const zLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.ZLINE_MATERIAL);
+            //zLine.renderOrder = 3;
+            //axialPlane.add(zLine);
         });
 
         //this is the axial group that only moves with the humeral axis (i.e. no axial rotation)
@@ -96,12 +96,12 @@ export class EulerBoneScene extends EulerScene {
         xLine_noAxial.renderOrder = 3;
         xLine_noAxial.rotateY(Math.PI/2);
 
-        const zLine_noAxial = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.ZLINE_MATERIAL_WIRE);
-        zLine_noAxial.renderOrder = 3;
+        //const zLine_noAxial = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.ZLINE_MATERIAL_WIRE);
+        //zLine_noAxial.renderOrder = 3;
 
         this.axialGroup = new THREE.Group();
         this.axialGroup.add(xLine_noAxial);
-        this.axialGroup.add(zLine_noAxial);
+        //this.axialGroup.add(zLine_noAxial);
         this.scene.add(this.axialGroup);
         this.updateNoAxialRotationGroup();
     }

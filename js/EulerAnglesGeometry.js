@@ -210,6 +210,5 @@ export class AnglesVisualizationSVD {
         eaGroup.add(ea_angle);
 
         return [poeGroup, eaGroup];
-
     }
 }
