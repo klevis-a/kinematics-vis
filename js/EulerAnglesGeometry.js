@@ -9,7 +9,10 @@ export class Euler_yxy_angle_geometry {
     static EA_LINES_MATERIAL = new THREE.LineBasicMaterial({ color: 0x00ff00 });
     static EA_ANGLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
 
-    static createAngleObjects(triad, humerusLength, layerId) {
+    static createAngleObjects(eulerScene) {
+        const triad = eulerScene.finalTriad_angles;
+        const humerusLength = eulerScene.humerusLength;
+        const layerId = eulerScene.eulerAnglesLayer;
         const y_axis = triad.arrowAxis(1);
         const [poe_lines_geometry, poe_angle_geometry] = Euler_yxy_angle_geometry.poe_geometry(y_axis, humerusLength);
         const poe_lines = new THREE.Line(poe_lines_geometry, Euler_yxy_angle_geometry.POE_LINES_MATERIAL);
@@ -81,7 +84,10 @@ export class Euler_xzy_angle_geometry {
     static POE_LINES_MATERIAL = new THREE.LineBasicMaterial({ color: 0x00ff00 });
     static POE_ANGLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
 
-    static createAngleObjects(triad, humerusLength, layerId) {
+    static createAngleObjects(eulerScene) {
+        const triad = eulerScene.finalTriad_angles;
+        const humerusLength = eulerScene.humerusLength;
+        const layerId = eulerScene.eulerAnglesLayer;
         const y_axis = triad.arrowAxis(1);
         const [ea_lines_geometry, ea_angle_geometry] = Euler_xzy_angle_geometry.ea_geometry(y_axis, humerusLength);
         const ea_lines = new THREE.Line(ea_lines_geometry, Euler_xzy_angle_geometry.EA_LINES_MATERIAL);
