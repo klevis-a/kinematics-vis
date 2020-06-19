@@ -233,12 +233,25 @@ export function svdDecomp(timeSeriesInfo) {
         const humQuat = timeSeriesInfo.torsoOrientQuat(i).conjugate().multiply(timeSeriesInfo.humOrientQuat(i));
         const humMat = new Matrix4().makeRotationFromQuaternion(humQuat);
         const y_axis = new Vector3().setFromMatrixColumn(humMat, 1);
-        y_axes.push([y_axis.x, y_axis.y, y_axis.z]);
+        y_axes.push([y_axis.x, y_axis.z]);
     }
+
+    //subtract the mean
+    const computeMean = (accumulator, currentValue) => {
+        accumulator[0] = accumulator[0] + currentValue[0];
+        accumulator[1] = accumulator[1] +currentValue[1];
+        return accumulator
+    };
+    const mean = y_axes.reduce(computeMean, [0, 0]);
+    y_axes.forEach(y_axis => {
+        y_axis[0]=y_axis[0]-mean[0];
+        y_axis[1]=y_axis[1]-mean[1];
+    });
+
 
     const {u, v, q} = SVD(y_axes, true, true);
     const minDim = q.indexOf(Math.min(...q));
-    const majorRotAxis = new Vector3(v[0][minDim], v[1][minDim], v[2][minDim]);
+    const majorRotAxis = new Vector3(v[0][minDim], 0, v[1][minDim]);
 
     const svdDecompClass = class SvdDecompClass{
         constructor(quat) {
