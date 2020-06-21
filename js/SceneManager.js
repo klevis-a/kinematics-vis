@@ -8,6 +8,7 @@ import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import "./EulerSceneDecorators.js";
 import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry, AnglesVisualizationSVD} from "./EulerAnglesGeometry.js";
 import {svdDecomp} from "./EulerDecompositions.js";
+import {attachAxialPlanesToHumeri_axial, updateNoAxialRotationGroup_axial} from "./EulerScene_Axial.js"
 
 export class SceneManager {
 
@@ -136,7 +137,12 @@ export class SceneManager {
         this.eulerAnglesFnc = [Euler_yxy_angle_geometry.createAngleObjects, AnglesVisualizationSVD.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects];
         this.views.forEach((view, idx) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames, this.camera, this.rotations[idx], this.humerusGeometry, this.humerusLength)), this);
         this.eulerScenes = Array.from(this.scenesMap.values());
-        this.eulerScenes.forEach((eulerScene,idx) => eulerScene.eulerAnglesFnc = this.eulerAnglesFnc[idx]);
+        this.eulerScenes.forEach((eulerScene,idx) => {
+            eulerScene.eulerAnglesFnc = this.eulerAnglesFnc[idx]
+            eulerScene.attachAxialPlanesToHumeri = attachAxialPlanesToHumeri_axial;
+            eulerScene.updateNoAxialRotationGroup = updateNoAxialRotationGroup_axial;
+            eulerScene.attachAxialPlanesToHumeri();
+        });
     }
 
     addAnglesToEulerScenes() {

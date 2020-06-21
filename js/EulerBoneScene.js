@@ -27,7 +27,6 @@ export class EulerBoneScene extends EulerScene {
         this.THIN_LINE_GEOMETRY.translate(0, 0, this.triadLength/2);
         this.addHumerus();
         this.attachHumeriToTriads();
-        this.attachAxialPlanesToHumeri();
         this.updateHumerisBasedOnStep();
         this.addSphere();
         this.addFinalLatitudeLongitude();
@@ -73,44 +72,9 @@ export class EulerBoneScene extends EulerScene {
     }
 
     attachAxialPlanesToHumeri() {
-        this.stepHumeri.forEach(humerus => {
-            //this is the axial plane that simply goes along with the the humerus
-            const axialPlane = new THREE.Mesh(this.PLANE_GEOMETRY, EulerBoneScene.AXIAL_PLANE_MATERIAL);
-            axialPlane.renderOrder = 2;
-            axialPlane.position.set(0, 0, 0);
-            axialPlane.translateY(-this.humerusLength);
-            humerus.add(axialPlane);
-
-            const xLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.XLINE_MATERIAL);
-            xLine.renderOrder = 3;
-            xLine.rotateY(Math.PI/2);
-            axialPlane.add(xLine);
-
-            //const zLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.ZLINE_MATERIAL);
-            //zLine.renderOrder = 3;
-            //axialPlane.add(zLine);
-        });
-
-        //this is the axial group that only moves with the humeral axis (i.e. no axial rotation)
-        const xLine_noAxial = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.XLINE_MATERIAL_WIRE);
-        xLine_noAxial.renderOrder = 3;
-        xLine_noAxial.rotateY(Math.PI/2);
-
-        //const zLine_noAxial = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.ZLINE_MATERIAL_WIRE);
-        //zLine_noAxial.renderOrder = 3;
-
-        this.axialGroup = new THREE.Group();
-        this.axialGroup.add(xLine_noAxial);
-        //this.axialGroup.add(zLine_noAxial);
-        this.scene.add(this.axialGroup);
-        this.updateNoAxialRotationGroup();
     }
 
     updateNoAxialRotationGroup() {
-        this.steps[this.currentStep-1].triad.updateMatrixWorld();
-        const currentHumeralAxis = this.steps[this.currentStep-1].triad.arrowAxis(1);
-        this.axialGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), currentHumeralAxis);
-        this.axialGroup.position.copy(new THREE.Vector3().copy(currentHumeralAxis).multiplyScalar(-this.humerusLength));
     }
 
     updateHumerisBasedOnStep() {
