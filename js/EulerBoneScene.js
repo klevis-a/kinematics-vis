@@ -7,9 +7,7 @@ export class EulerBoneScene extends EulerScene {
     static BONE_MATERIAL = new THREE.MeshPhongMaterial({color: EulerBoneScene.BONE_COLOR, opacity: 0.9, transparent: true});
     static AXIAL_PLANE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide, depthTest: false});
     static XLINE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false});
-    static ZLINE_MATERIAL = new THREE.MeshBasicMaterial({color: 0x0000ff, side: THREE.DoubleSide, depthTest: false});
     static XLINE_MATERIAL_WIRE = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false, wireframe: true});
-    static ZLINE_MATERIAL_WIRE = new THREE.MeshBasicMaterial({color: 0x0000ff, side: THREE.DoubleSide, depthTest: false, wireframe: true});
 
     constructor(viewElement, renderer, numFrames, camera, rotations, humerusGeometry, humerusLength) {
         super(viewElement, renderer, numFrames, camera, rotations, 10, 150, 50);

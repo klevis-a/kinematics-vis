@@ -110,7 +110,7 @@ export class Euler_xzy_angle_geometry {
         poe_object.add(poe_angle);
 
         const y_axis_neg = new THREE.Vector3().copy(y_axis).multiplyScalar(-1);
-        const y_axis_neg_x = new THREE.Vector3(y_axis_neg.x, 0, 0)
+        const y_axis_neg_x = new THREE.Vector3(y_axis_neg.x, 0, 0);
         const poe_angle_x = new THREE.Vector3().subVectors(y_axis_neg, y_axis_neg_x).normalize();
         const poe_angle_z = new THREE.Vector3().crossVectors(poe_angle_x, y_axis_neg).normalize();
         const poe_angle_y = new THREE.Vector3().crossVectors(poe_angle_z, poe_angle_x).normalize();
@@ -160,7 +160,6 @@ export class Euler_xzy_angle_geometry {
 export class AnglesVisualizationSVD {
     static PLANE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xf47460, side: THREE.DoubleSide, transparent: true, opacity: 0.3});
     static POE_ANGLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-    static ADJ_ANGLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
     static EA_ANGLE_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1.0, polygonOffsetUnits: -2 });
 
     static createAngleObjects(eulerScene) {
