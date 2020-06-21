@@ -8,7 +8,7 @@ import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import "./EulerSceneDecorators.js";
 import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry, AnglesVisualizationSVD} from "./EulerAnglesGeometry.js";
 import {svdDecomp} from "./EulerDecompositions.js";
-import {attachAxialPlanesToHumeri_axial, updateNoAxialRotationGroup_axial} from "./EulerScene_Axial.js"
+import {initAxialRotation, updateAxialRotationFrame_euler, updateAxialRotationFrame_axial, updateAxialRotationFrame_oneStep, updateAxialRotationStep_axial, updateAxialRotationStep_svd, updateAxialRotationStep_euler, updateAxialRotationStep_oneStep} from "./EulerScene_Axial.js"
 
 export class SceneManager {
 
@@ -56,7 +56,7 @@ export class SceneManager {
             eulerScene.rotations = this.rotations[idx];
             eulerScene.createSteps();
             eulerScene.attachHumeriToTriads();
-            eulerScene.attachAxialPlanesToHumeri();
+            eulerScene.initAxialRotation();
             eulerScene.goToStep(eulerScene.currentStep);
             eulerScene.update_euler_angles();
             eulerScene.addFinalLatitudeLongitude();
@@ -135,13 +135,16 @@ export class SceneManager {
     createEulerScenes() {
         this.scenesMap = new Map();
         this.eulerAnglesFnc = [Euler_yxy_angle_geometry.createAngleObjects, AnglesVisualizationSVD.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects];
+        this.updateAxialStepFnc = [updateAxialRotationStep_euler, updateAxialRotationStep_svd, updateAxialRotationStep_oneStep, updateAxialRotationStep_axial];
+        this.updateAxialFrameFnc = [updateAxialRotationFrame_euler, updateAxialRotationFrame_axial, updateAxialRotationFrame_oneStep, updateAxialRotationFrame_axial];
         this.views.forEach((view, idx) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames, this.camera, this.rotations[idx], this.humerusGeometry, this.humerusLength)), this);
         this.eulerScenes = Array.from(this.scenesMap.values());
         this.eulerScenes.forEach((eulerScene,idx) => {
-            eulerScene.eulerAnglesFnc = this.eulerAnglesFnc[idx]
-            eulerScene.attachAxialPlanesToHumeri = attachAxialPlanesToHumeri_axial;
-            eulerScene.updateNoAxialRotationGroup = updateNoAxialRotationGroup_axial;
-            eulerScene.attachAxialPlanesToHumeri();
+            eulerScene.eulerAnglesFnc = this.eulerAnglesFnc[idx];
+            eulerScene.initAxialRotation = initAxialRotation;
+            eulerScene.updateAxialRotationStep = this.updateAxialStepFnc[idx];
+            eulerScene.updateAxialRotationFrame = this.updateAxialFrameFnc[idx];
+            eulerScene.initAxialRotation();
         });
     }
 

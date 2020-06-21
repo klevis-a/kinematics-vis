@@ -47,7 +47,7 @@ export class EulerBoneScene extends EulerScene {
             this.scene.remove(step.rotAxis);
             step.arcs.forEach(arc => this.scene.remove(arc), this);
         }, this);
-        this.scene.remove(this.axialGroup);
+        this.scene.remove(this.noAxialGroup);
     }
 
     addHumerus() {
@@ -60,19 +60,22 @@ export class EulerBoneScene extends EulerScene {
         super.goToStep(stepNum);
         if (this.stepHumeri != null) {
             this.updateHumerisBasedOnStep();
-            this.updateNoAxialRotationGroup();
+            this.updateAxialRotationStep();
         }
     }
 
     updateToFrame(frameNum) {
         super.updateToFrame(frameNum);
-        this.updateNoAxialRotationGroup();
+        this.updateAxialRotationFrame(frameNum);
     }
 
-    attachAxialPlanesToHumeri() {
+    initAxialRotation() {
     }
 
-    updateNoAxialRotationGroup() {
+    updateAxialRotationFrame(frameNum) {
+    }
+
+    updateAxialRotationStep() {
     }
 
     updateHumerisBasedOnStep() {
