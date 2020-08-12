@@ -88,7 +88,7 @@ export class TimeSeriesSTAInfo {
         this.TimeSeries = csvResults.data.slice(1);
         this.NumFrames = this.TimeSeries.length;
         this.Markers = new Map();
-        processMarkerData(this.Markers, csvResults.data[0], 14);
+        processMarkerData(this.Markers, csvResults.data[0], 21);
     }
 
     markerPos(markerName, frameNum) {
