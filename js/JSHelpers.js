@@ -19,3 +19,13 @@ export function loadScript(src) {
 export function getRandom(min, max) {
     return Math.random() * (max - min) + min;
 }
+
+export function get_url_param( name, url ) {
+    if (!url) url = location.href;
+    name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+    const regexS = "[\\?&]"+name+"=([^&#]*)";
+    const regex = new RegExp( regexS );
+    const results = regex.exec( url );
+    return results == null ? null : results[1];
+}
+
