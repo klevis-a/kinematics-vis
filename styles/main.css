@@ -1,5 +1,5 @@
 body {
-    margin: 0px;
+    margin: 0;
     overflow: hidden;
     color: white;
     text-align: center;
@@ -38,8 +38,8 @@ body {
 }
 
 .zero {
-    width: 0%;
-    height: 0%;
+    width: 0;
+    height: 0;
 }
 
 #canvas {
@@ -90,4 +90,79 @@ body {
     padding: 5px;
     background-color: black;
     color: white;
+}
+
+#help-div {
+    border-radius: 25px;
+    border: 2px solid #73AD21;
+    position: absolute;
+    background-color: white;
+    left: 30%;
+    top: 7.5%;
+    width: 40%;
+    height: 85%;
+    z-index: 10;
+    color: black;
+    text-align: left;
+    padding: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: auto;
+}
+
+.close {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    width: 32px;
+    height: 32px;
+    opacity: 0.3;
+}
+
+.close:hover {
+    opacity: 1;
+}
+
+.close:before, .close:after {
+    position: absolute;
+    left: 15px;
+    content: ' ';
+    height: 32px;
+    width: 2px;
+    background-color: #333;
+}
+
+.close:before {
+    transform: rotate(45deg);
+}
+
+.close:after {
+    transform: rotate(-45deg);
+}
+
+#close-container {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+#help-btn-div {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    z-index: 10;
+}
+
+#help-btn {
+    color: #666;
+    text-decoration: none;
+    vertical-align: middle;
+    font-size: x-large;
+    font-weight: bolder;
+}
+
+#help-btn:hover {
+    color: #000;
 }

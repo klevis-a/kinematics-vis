@@ -22,3 +22,10 @@ Promise.all([landmarkInit, timeSeriesCsvInit, humerusLoader]).then(([landmarkRes
     const timeSeriesInfo = new STA_CSV_Processor.TimeSeriesSTAInfo(timeSeriesResults);
     const sceneManager = new SceneManager(landmarksInfo, timeSeriesInfo, humerusGeometry);
 });
+
+// close button
+const closeBtn = document.getElementById('help-close-btn');
+const helpDiv = document.getElementById('help-div');
+const helpBtn = document.getElementById('help-btn');
+closeBtn.onclick = () => helpDiv.style.display = "none";
+helpBtn.onclick = () => helpDiv.style.display = "block";
