@@ -17,9 +17,9 @@
             <b>Introduction</b>
             <br/>
             The purpose of this application is to highlight differences between various orientation decomposition
-            sequences for the humerus. Because the user interface is a work in progress, this documentation aims to
-            provide just enough guidance to allow for meaningful interaction with the application. Once the
-            application is more complete, these instructions will be updated.
+            sequences for the humerus, with an emphasis on axial rotation. Because the user interface is a work in
+            progress, this documentation aims to provide just enough guidance to allow for meaningful interaction with
+            the application. Once the application is more complete, these instructions will be updated.
             </p>
 
             <p>
@@ -40,14 +40,15 @@
             system (the triad in the middle of the view) and rotated to its final orientation via a sequence of
             sub-rotations. The two decompositions of interest are "Intrinsic" and "Axial". The "SVD" and "One Step"
             decomposition are ideas that I have experimented with, but will likely not be included in the final version
-            of the application.
+            of the application. In all views the elbow is represented by a thin red rectangle attached to the humerus.
+            Axial rotation is illustrated by the angle between the striped and solid thin red rectangle.
             <br/><br/>
             "Intrinsic" performs a yx'y'' intrinsic Euler angle decomposition of the humerus
-            orientation according to guidelines provided by the International Society of Biomechanics. "Axial"
-            decomposes the orientation of the humerus into two sub-rotations. The first sub-rotation performs the
-            smallest rotation possible to align the long axis of the humerus from its initial state (aligned with the
-            torso) to its final state. The second sub-rotation performs a rotation around the long axis of the humerus
-            to account for axial rotation.
+            orientation according to guidelines provided by the International Society of Biomechanics (ISB). The third
+            sub-rotation (y'') is defined as axial rotation by ISB. "Axial Decomposition" decomposes the orientation of
+            the humerus into two sub-rotations. The first sub-rotation performs the smallest rotation possible to align
+            the long axis of the humerus from its initial state (aligned with the torso) to its final state. The second
+            sub-rotation performs a rotation around the long axis of the humerus to account for axial rotation.
             </p>
 
             <p>
