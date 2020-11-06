@@ -1,5 +1,4 @@
 import {Matrix4, Quaternion, Vector3} from "./vendor/three.js/build/three.module.js";
-import {axisAngleFromQuat} from "./EulerGeometry.js";
 import SVD from './vendor/svd.js'
 
 class EulerDecomposition {
@@ -37,13 +36,26 @@ class EulerDecomposition {
     }
 
     createRotations() {
-        this.R3$$_R2$_R1 = [this.axis_1, this.axis_2$, this.axis_3$$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
-        this.R3$$_R1_R2 = [this.axis_2, this.axis_1, this.axis_3$$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
-        this.R2$_R3$_R1 = [this.axis_1, this.axis_3$, this.axis_2$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
-        this.R2$_R1_R3 = [this.axis_3, this.axis_1, this.axis_2$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
-        this.R1_R2_R3 = [this.axis_3, this.axis_2, this.axis_1].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)), this);
+        this.R3$$_R2$_R1 = [this.axis_1, this.axis_2$, this.axis_3$$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)));
+        this.R3$$_R1_R2 = [this.axis_2, this.axis_1, this.axis_3$$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)));
+        this.R2$_R3$_R1 = [this.axis_1, this.axis_3$, this.axis_2$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)));
+        this.R2$_R1_R3 = [this.axis_3, this.axis_1, this.axis_2$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)));
+        this.R1_R2_R3 = [this.axis_3, this.axis_2, this.axis_1].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)));
         this.R3$$_Rcombo  = [new AxisAngle(this.axis_12_combined, this.angle_12_combined), new AxisAngle(this.axis_3$$, this.angles[2]), new AxisAngle(new Vector3(0, 0, 1), 0)];
     }
+}
+
+export function axisAngleFromQuat(quat) {
+    quat.normalize();
+    let angle = 2 * Math.acos(quat.w);
+    angle = angle > Math.PI ? -(2 * Math.PI - angle) : angle;
+    const s = Math.sqrt(1 - quat.w * quat.w);
+    const axis = new Vector3(quat.x, quat.y, quat.z);
+    if (s >= 0.001) {
+        axis.multiplyScalar(1 / s);
+    }
+
+    return {axis: axis, angle: angle};
 }
 
 export class EulerDecomposition_RY$$_RZ$_RX extends EulerDecomposition{

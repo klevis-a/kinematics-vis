@@ -4,7 +4,7 @@ export function createArc(triad1, triad2, rotAxis, rotAngle, rotPlane, dim, stri
     let coneAxis;
     let coneAngle;
     // it's easier to perform the calculations below if the unit vector we are rotating and the unit vector indicating
-    // the axis or rotation point in the same general direction
+    // the axis of rotation point in the same general direction
     if (rotAxis.dot(triad1.arrowAxis(dim)) > 0) {
         coneAxis = new THREE.Vector3().copy(rotAxis);
         coneAngle = rotAngle;
@@ -47,10 +47,13 @@ export function arrowGeometryFromArcGeometry(arcGeometry, numRadialSegments, num
     const segmentDistance = new THREE.Vector3().subVectors(v1_adjacent, v1).length();
     const arrowSegmentLength = Math.round(arrowLength/segmentDistance);
     const topFirstIndex = ((numRadialSegments+1)*numHeightSegments);
-    const v2 = new THREE.Vector3(arcGeometryPositions[topFirstIndex*3], arcGeometryPositions[topFirstIndex*3+1], arcGeometryPositions[topFirstIndex*3+2]);
+    const v2 = new THREE.Vector3(arcGeometryPositions[topFirstIndex*3], arcGeometryPositions[topFirstIndex*3+1],
+        arcGeometryPositions[topFirstIndex*3+2]);
     // now we compute the tip of the triangle
-    const posBottom = new THREE.Vector3(arcGeometryPositions[arrowSegmentLength*3], arcGeometryPositions[arrowSegmentLength*3+1], arcGeometryPositions[arrowSegmentLength*3+2]);
-    const posTop = new THREE.Vector3(arcGeometryPositions[(topFirstIndex+arrowSegmentLength)*3], arcGeometryPositions[(topFirstIndex+arrowSegmentLength)*3+1], arcGeometryPositions[(topFirstIndex+arrowSegmentLength)*3+2]);
+    const posBottom = new THREE.Vector3(arcGeometryPositions[arrowSegmentLength*3], arcGeometryPositions[arrowSegmentLength*3+1],
+        arcGeometryPositions[arrowSegmentLength*3+2]);
+    const posTop = new THREE.Vector3(arcGeometryPositions[(topFirstIndex+arrowSegmentLength)*3], arcGeometryPositions[(topFirstIndex+arrowSegmentLength)*3+1],
+        arcGeometryPositions[(topFirstIndex+arrowSegmentLength)*3+2]);
     const v3 = new THREE.Vector3().addVectors(posBottom, posTop).multiplyScalar(0.5);
 
     //add vertices and normalize by v1
@@ -85,9 +88,12 @@ export function updateFlatArcArrow(arcArrow, arrowGeometry, drawRange, numRadial
     const arcArrowV2Idx =  arcArrowV1Idx + ((numRadialSegments + 1) * numHeightSegments);
     const arcE1ArrowV3BottomIdx = arrowGeometry.index.array[drawRange - 1] - arrowSegmentOffset;
     const arcE1ArrowV3TopIdx = arcE1ArrowV3BottomIdx + ((numRadialSegments + 1) * numHeightSegments);
-    const v2 = new THREE.Vector3().set(arcPositions[arcArrowV2Idx * 3], arcPositions[arcArrowV2Idx * 3 + 1], arcPositions[arcArrowV2Idx * 3 + 2]);
-    const v3Top = new THREE.Vector3().set(arcPositions[arcE1ArrowV3TopIdx * 3], arcPositions[arcE1ArrowV3TopIdx * 3 + 1], arcPositions[arcE1ArrowV3TopIdx * 3 + 2]);
-    const v3Bottom = new THREE.Vector3().set(arcPositions[arcE1ArrowV3BottomIdx * 3], arcPositions[arcE1ArrowV3BottomIdx * 3 + 1], arcPositions[arcE1ArrowV3BottomIdx * 3 + 2]);
+    const v2 = new THREE.Vector3().set(arcPositions[arcArrowV2Idx * 3], arcPositions[arcArrowV2Idx * 3 + 1],
+        arcPositions[arcArrowV2Idx * 3 + 2]);
+    const v3Top = new THREE.Vector3().set(arcPositions[arcE1ArrowV3TopIdx * 3], arcPositions[arcE1ArrowV3TopIdx * 3 + 1],
+        arcPositions[arcE1ArrowV3TopIdx * 3 + 2]);
+    const v3Bottom = new THREE.Vector3().set(arcPositions[arcE1ArrowV3BottomIdx * 3], arcPositions[arcE1ArrowV3BottomIdx * 3 + 1],
+        arcPositions[arcE1ArrowV3BottomIdx * 3 + 2]);
     const v3 = new THREE.Vector3().addVectors(v3Top, v3Bottom).multiplyScalar(0.5);
     //create CS and normalize
     const x_axis = new THREE.Vector3().subVectors(v2,v1);

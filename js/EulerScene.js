@@ -20,9 +20,8 @@ export class EulerScene {
         trackBallControl.keys = [65, 83, 68];
     }
 
-    constructor(viewElement, renderer, numFrames, camera, rotations, arcStripWidth = 1, triadLength=15, markingStart=5) {
+    constructor(viewElement, renderer, numFrames, camera, arcStripWidth = 1, triadLength=15, markingStart=5) {
         this.camera = camera;
-        this.rotations = rotations;
         this.viewElement = viewElement;
         this.numFrames = numFrames;
         this.renderer = renderer;
@@ -35,8 +34,6 @@ export class EulerScene {
         this.markingsStart = markingStart;
         this.currentStep = 1;
         this.initScene();
-        this.createSteps();
-        this.goToStep(this.currentStep);
     }
 
     dispose() {
@@ -54,8 +51,10 @@ export class EulerScene {
         this.scene.dispose();
     }
 
-    updateToFrame(frameNum) {
-        this.steps[this.currentStep-1].updateToFrame(frameNum);
+    initialize(rotations) {
+        this.rotations = rotations;
+        this.createSteps();
+        this.goToStep(this.currentStep);
     }
 
     createSteps() {
@@ -65,19 +64,20 @@ export class EulerScene {
             const lastQuat = this.quaternions[this.quaternions.length-1];
             const currentQuatRot = new THREE.Quaternion().setFromAxisAngle(rotation.axis, rotation.angle);
             this.quaternions.push(currentQuatRot.multiply(lastQuat));
-        }, this);
+        });
 
         this.steps = this.rotations.map((rotation, idx) => {
-            const eulerStep = new EulerStep.EulerStep(this.quaternions[idx], rotation, this.numFrames, this.triadLength, this.triadAspectRatio, this.markingsStart, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
+            const eulerStep = new EulerStep.EulerStep(this.quaternions[idx], rotation, this.numFrames, this.triadLength,
+                this.triadAspectRatio, this.markingsStart, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
             this.addStepToScene(eulerStep);
             return eulerStep;
-        }, this);
+        });
     }
 
     addStepToScene(step) {
         this.scene.add(step.triad);
         this.scene.add(step.rotAxis);
-        step.arcs.forEach(arc => this.scene.add(arc), this);
+        step.arcs.forEach(arc => this.scene.add(arc));
     }
 
     goToStep(stepNum) {
@@ -87,13 +87,33 @@ export class EulerScene {
            if (idx <= stepNum-2) {
                step.activate();
                step.updateToFrame(step.numFrames);
-           } else if (idx === stepNum -1) {
+           } else if (idx === stepNum-1) {
                step.activate();
                step.updateToFrame(0);
            } else {
                step.deactivate();
            }
         });
+    }
+
+    removeSteps() {
+        this.steps.forEach(step => {
+            // attached humerus does not need to be disposed because both the geometry and material are re-usable
+            step.dispose();
+            this.scene.remove(step.triad);
+            this.scene.remove(step.rotAxis);
+            step.arcs.forEach(arc => this.scene.remove(arc));
+        });
+    }
+
+    reset(rotations) {
+        this.rotations = rotations;
+        this.removeSteps();
+        this.createSteps();
+    }
+
+    updateToFrame(frameNum) {
+        this.steps[this.currentStep-1].updateToFrame(frameNum);
     }
 
     initScene() {

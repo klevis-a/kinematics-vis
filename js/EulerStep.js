@@ -67,7 +67,8 @@ export class EulerStep {
             const drawRange = this.numFrames*this.arcHeightSegments*EulerStep.NUM_INDICES_PER_RADIAL_SEGMENT;
             this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
             this.arcArrows.forEach((arcArrow, idx) => {
-                EulerStep.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments, this.arrowSegmentLength[idx], this.arrowSegmentOffset[idx]);
+                EulerStep.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments,
+                    this.arrowSegmentLength[idx], this.arrowSegmentOffset[idx]);
                 arcArrow.visible = true;
             });
         }
@@ -81,7 +82,8 @@ export class EulerStep {
                 this.arcs.forEach(arc => arc.geometry.setDrawRange(0, drawRange));
                 this.arcArrows.forEach((arcArrow, idx) => {
                     if (drawRange >= this.arrowSegmentLength[idx]*this.arcHeightSegments*EulerStep.NUM_INDICES_PER_RADIAL_SEGMENT) {
-                        EulerStep.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments, this.arrowSegmentLength[idx], this.arrowSegmentOffset[idx]);
+                        EulerStep.updateFlatArcArrow(arcArrow, this.arcs[idx].geometry, drawRange, this.numFrames, this.arcHeightSegments,
+                            this.arrowSegmentLength[idx], this.arrowSegmentOffset[idx]);
                         arcArrow.visible = true;
                     }
                     else {
@@ -159,6 +161,7 @@ export class EulerStep {
         const axisLength = this.triadLength * 1.25;
         const arrowMainRadius = this.triadLength*this.triadAspectRatio * 0.75;
         const arrowMinorRadius = this.arcStripWidth * 0.25;
-        this.rotAxis = new EulerGeometry.RotAxisWithArrow(rotAxisColor, axisRadius, axisLength, arrowMainRadius, arrowMinorRadius, this.rotation.axis, this.rotation.angle);
+        this.rotAxis = new EulerGeometry.RotAxisWithArrow(rotAxisColor, axisRadius, axisLength, arrowMainRadius, arrowMinorRadius,
+            this.rotation.axis, this.rotation.angle);
     }
 }

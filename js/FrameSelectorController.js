@@ -16,7 +16,7 @@ export class FrameSelectorController {
         this.FrameGoCtrl.onclick = () => this.UpdateEulerScenesFnc(this.Timeline.value-1);
         this.Timeline.oninput = () => this.handleTimeLineInput();
         this.Timeline.addEventListener('keydown', (event) => {
-            if (event.keyCode === 37) {
+            if (event.keyCode === 37) { // left arrow
                 const currentVal = parseInt(this.Timeline.value);
                 if (currentVal<=this.Timeline.min) {
                     this.Timeline.value = this.Timeline.min;
@@ -25,7 +25,7 @@ export class FrameSelectorController {
                     this.Timeline.value=currentVal-1;
                 }
             }
-            if (event.keyCode === 39) {
+            if (event.keyCode === 39) { // right arrow
                 const currentVal = parseInt(this.Timeline.value);
                 if (currentVal>=this.Timeline.max) {
                     this.Timeline.value = this.Timeline.max;

@@ -12,13 +12,10 @@ export class Euler_yxy_angle_geometry {
     static createAngleObjects(eulerScene) {
         const triad = eulerScene.finalTriad_angles;
         const humerusLength = eulerScene.humerusLength;
-        const layerId = eulerScene.eulerAnglesLayer;
         const y_axis = triad.arrowAxis(1);
         const [poe_lines_geometry, poe_angle_geometry] = Euler_yxy_angle_geometry.poe_geometry(y_axis, humerusLength);
         const poe_lines = new THREE.Line(poe_lines_geometry, Euler_yxy_angle_geometry.POE_LINES_MATERIAL);
-        poe_lines.layers.set(layerId);
         const poe_angle = new THREE.Mesh(poe_angle_geometry, Euler_yxy_angle_geometry.POE_ANGLE_MATERIAL);
-        poe_angle.layers.set(layerId);
 
         const poe_object = new THREE.Group();
         poe_object.add(poe_lines);
@@ -26,9 +23,7 @@ export class Euler_yxy_angle_geometry {
 
         const [ea_lines_geometry, ea_angle_geometry] = Euler_yxy_angle_geometry.ea_geometry(y_axis, humerusLength);
         const ea_lines = new THREE.Line(ea_lines_geometry, Euler_yxy_angle_geometry.EA_LINES_MATERIAL);
-        ea_lines.layers.set(layerId);
         const ea_angle = new THREE.Mesh(ea_angle_geometry, Euler_yxy_angle_geometry.EA_ANGLE_MATERIAL);
-        ea_angle.layers.set(layerId);
 
         const ea_object = new THREE.Group();
         ea_object.add(ea_lines);
@@ -57,6 +52,7 @@ export class Euler_yxy_angle_geometry {
         const innerRadius = y_neg_xz_z.length()/2;
         const outerRadius = innerRadius + humerusLength/10;
         const poe_angle_geometry = new THREE.RingBufferGeometry(innerRadius, outerRadius, 20, 1, 0, Math.atan2(y_neg.x,y_neg.z));
+        // the rotations below are to align the RingBufferGeometry with the humerus CS
         poe_angle_geometry.rotateY(-Math.PI/2);
         poe_angle_geometry.rotateZ(-Math.PI/2);
         return [poe_lines_geometry, poe_angle_geometry];
@@ -87,13 +83,10 @@ export class Euler_xzy_angle_geometry {
     static createAngleObjects(eulerScene) {
         const triad = eulerScene.finalTriad_angles;
         const humerusLength = eulerScene.humerusLength;
-        const layerId = eulerScene.eulerAnglesLayer;
         const y_axis = triad.arrowAxis(1);
         const [ea_lines_geometry, ea_angle_geometry] = Euler_xzy_angle_geometry.ea_geometry(y_axis, humerusLength);
         const ea_lines = new THREE.Line(ea_lines_geometry, Euler_xzy_angle_geometry.EA_LINES_MATERIAL);
-        ea_lines.layers.set(layerId);
         const ea_angle = new THREE.Mesh(ea_angle_geometry, Euler_xzy_angle_geometry.EA_ANGLE_MATERIAL);
-        ea_angle.layers.set(layerId);
 
         const ea_object = new THREE.Group();
         ea_object.add(ea_lines);
@@ -101,9 +94,7 @@ export class Euler_xzy_angle_geometry {
 
         const [poe_lines_geometry, poe_angle_geometry] = Euler_xzy_angle_geometry.poe_geometry(y_axis, humerusLength);
         const poe_lines = new THREE.Line(poe_lines_geometry, Euler_xzy_angle_geometry.POE_LINES_MATERIAL);
-        poe_lines.layers.set(layerId);
         const poe_angle = new THREE.Mesh(poe_angle_geometry, Euler_xzy_angle_geometry.POE_ANGLE_MATERIAL);
-        poe_angle.layers.set(layerId);
 
         const poe_object = new THREE.Group();
         poe_object.add(poe_lines);
@@ -165,14 +156,12 @@ export class AnglesVisualizationSVD {
     static createAngleObjects(eulerScene) {
         const triad = eulerScene.finalTriad_angles;
         const humerusLength = eulerScene.humerusLength;
-        const layerId = eulerScene.eulerAnglesLayer;
         const y_axis = triad.arrowAxis(1);
 
         //create plane
         const rotAxis = eulerScene.rotations[0].axis;
         const planeGeometry = new THREE.PlaneBufferGeometry(humerusLength*2, humerusLength*2, 1, 1);
         const poe = new THREE.Mesh(planeGeometry, AnglesVisualizationSVD.PLANE_MATERIAL);
-        poe.layers.enable(layerId);
         poe.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), rotAxis));
 
         //create arrow
@@ -189,7 +178,6 @@ export class AnglesVisualizationSVD {
         poe_angle_geometry.rotateY(-Math.PI/2);
         poe_angle_geometry.rotateZ(-Math.PI/2);
         const poe_angle = new THREE.Mesh(poe_angle_geometry, AnglesVisualizationSVD.POE_ANGLE_MATERIAL);
-        poe_angle.layers.set(layerId);
 
         const poeGroup = new THREE.Group();
         poeGroup.add(poe);
@@ -199,7 +187,6 @@ export class AnglesVisualizationSVD {
         const rotAngle_ea = Math.abs(eulerScene.rotations[0].angle);
         const ea_angle_geometry = new THREE.RingBufferGeometry(innerRadius, outerRadius, 20, 1, 0, rotAngle_ea);
         const ea_angle = new THREE.Mesh(ea_angle_geometry, AnglesVisualizationSVD.EA_ANGLE_MATERIAL);
-        ea_angle.layers.set(layerId);
 
         const ea_angle_x = new THREE.Vector3(0, -1, 0);
         const ea_angle_y = new THREE.Vector3().crossVectors(rotAxis, ea_angle_x).normalize();

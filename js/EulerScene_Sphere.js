@@ -1,56 +1,8 @@
-import * as THREE from "./vendor/three.js/build/three.module.js";
-import * as EulerGeometry from "./EulerGeometry.js";
-import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerScene} from "./EulerScene.js";
+import * as THREE from "./vendor/three.js/build/three.module.js";
 
-EulerScene.prototype.update_euler_angles = function() {
-    this.finalTriad_angles.quaternion.copy(this.quaternions[this.quaternions.length-1]);
-    this.finalTriad_angles.updateMatrixWorld();
-    const geometryDispose = child => child.geometry.dispose();
-    this.anglesVis.forEach(anglesVis => {
-        anglesVis.children.forEach(geometryDispose);
-        this.scene.remove(anglesVis);
-    }, this);
-
-    this.add_euler_angles();
-};
-
-EulerScene.prototype.prepare_scene_for_euler_angles = function() {
-    const recursiveSet = child => child.layers.set(this.eulerAnglesLayer);
-    const recursiveEnable = child => child.layers.enable(this.eulerAnglesLayer);
-
-    const sceneObjects = [this.humerus, this.spotlight, this.xyPlane, this.xzPlane, this.yzPlane, this.xAxis, this.yAxis, this.zAxis];
-    sceneObjects.forEach(sceneObject => sceneObject.layers.enable(this.eulerAnglesLayer));
-    this.sphere.traverse(recursiveEnable);
-
-    this.initTriad_angles = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
-    this.scene.add(this.initTriad_angles);
-    this.initHumerus_angles = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);
-    this.initTriad_angles.add(this.initHumerus_angles);
-    this.initTriad_angles.layers.set(this.eulerAnglesLayer);
-
-    this.finalTriad_angles = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 4, 3, this.markingsStart, this.arcStripWidth*3);
-    this.scene.add(this.finalTriad_angles);
-    this.finalHumerus_angles = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);
-    this.finalTriad_angles.add(this.finalHumerus_angles);
-    this.finalTriad_angles.layers.set(this.eulerAnglesLayer);
-
-    const angleObjects = [this.initTriad_angles, this.finalTriad_angles];
-    angleObjects.forEach(complexObject => complexObject.traverse(recursiveSet));
-
-    this.finalTriad_angles.quaternion.copy(this.quaternions[this.quaternions.length-1]);
-    this.finalTriad_angles.updateMatrixWorld();
-
-    this.add_euler_angles();
-};
-
-EulerScene.prototype.add_euler_angles = function() {
-    this.anglesVis = this.eulerAnglesFnc(this);
-    this.anglesVis.forEach(anglesVis => this.scene.add(anglesVis), this)
-};
-
-EulerScene.prototype.addSphere = function() {
-    this.northPole = new THREE.Vector3(0, 1, 0);
+EulerScene.prototype.addSphere = function(northPole) {
+    this.northPole = northPole;
     const sphereGeometry = new THREE.SphereBufferGeometry(this.humerusLength, this.numLongitudeSegments, this.numLatitudeSegments, 0, Math.PI, 0, Math.PI);
     const sphereGeometryEdges = new THREE.EdgesGeometry(sphereGeometry);
     this.sphereEdgesMaterial = new THREE.LineBasicMaterial({color: 0x000000});
@@ -98,7 +50,6 @@ EulerScene.prototype.addFinalLatitudeLongitude = function () {
     this.finalLongitude.renderOrder = 4;
     this.finalLongitude.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(circleNormal, longitudePerpendicular));
     this.scene.add(this.finalLongitude);
-    this.finalLongitude.layers.enable(1);
 
     const latitudeGeometry = new THREE.CircleBufferGeometry(projectedHumeralAxis.length(), 60);
     const latitudeEdgesGeometry = new THREE.EdgesGeometry(latitudeGeometry);
@@ -107,5 +58,19 @@ EulerScene.prototype.addFinalLatitudeLongitude = function () {
     this.finalLatitude.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(circleNormal, this.northPole));
     this.finalLatitude.position.copy(new THREE.Vector3().subVectors(humeral_axis, projectedHumeralAxis));
     this.scene.add(this.finalLatitude);
-    this.finalLatitude.layers.enable(1);
 };
+
+export function enableSphere(boneScene) {
+    boneScene.numLatitudeSegments = 20;
+    boneScene.numLongitudeSegments = 10;
+    boneScene.addEventListener('init', function (event) {
+        const scene = event.target;
+        scene.addSphere(new THREE.Vector3(0, 1, 0));
+        scene.addFinalLatitudeLongitude();
+    });
+    boneScene.addEventListener('reset', function (event) {
+        const scene = event.target;
+        scene.addFinalLatitudeLongitude();
+    });
+}
+
