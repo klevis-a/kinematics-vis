@@ -6,8 +6,8 @@ export class EulerBoneScene extends EulerScene {
     static BONE_COLOR = 0xe3dac9;
     static BONE_MATERIAL = new THREE.MeshPhongMaterial({color: EulerBoneScene.BONE_COLOR, opacity: 0.9, transparent: true});
 
-    constructor(viewElement, renderer, numFrames, camera, humerusGeometry, humerusLength) {
-        super(viewElement, renderer, numFrames, camera, 10, 150, 50);
+    constructor(viewElement, trackballDiv, renderer, numFrames, camera, humerusGeometry, humerusLength) {
+        super(viewElement, trackballDiv, renderer, numFrames, camera, 10, 150, 50);
         this.humerusGeometry = humerusGeometry;
         this.humerusLength = humerusLength;
         this.step0Humerus = new THREE.Mesh(this.humerusGeometry, new THREE.MeshPhongMaterial({color: EulerBoneScene.BONE_COLOR, opacity: 0.5, transparent: true}));

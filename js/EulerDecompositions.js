@@ -168,9 +168,7 @@ export class OneStep {
         this.quat = quat;
         const {axis: axis, angle: angle} = axisAngleFromQuat(this.quat);
         this.rotationSequence = [
-            new AxisAngle(axis, angle),
-            new AxisAngle(new Vector3(0, 0, 1), 0),
-            new AxisAngle(new Vector3(0, 0, 1), 0)
+            new AxisAngle(axis, angle)
         ];
     }
 }
@@ -189,8 +187,7 @@ export class AxialDecomposition {
         }
         this.rotationSequence = [
             new AxisAngle(nonAxialAxis, nonAxialAngle),
-            new AxisAngle(new Vector3().copy(axialAxis), axialAngle),
-            new AxisAngle(new Vector3(0, 0, 1), 0)
+            new AxisAngle(new Vector3().copy(axialAxis), axialAngle)
         ];
 
         /*

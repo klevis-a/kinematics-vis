@@ -77,46 +77,27 @@
     <div id="views">
         <canvas id="canvas"></canvas>
         <div id="view1" class="quarter">
-            <div class="viewLabelBottomLeft">Intrinsic</div>
+            <div id="view1_trackball" class="trackball_div"></div>
+            <div id="view1_ctrls" class="view_controls"></div>
         </div>
         <div id="view2" class="quarter">
-            <div class="viewLabelBottomRight">SVD</div>
+            <div id="view2_trackball" class="trackball_div"></div>
+            <div id="view2_ctrls" class="view_controls"></div>
         </div>
         <div id="view3" class="quarter">
-            <div class="viewLabelBottomLeft">One Step</div>
+            <div id="view3_trackball" class="trackball_div"></div>
+            <div id="view3_ctrls" class="view_controls"></div>
         </div>
         <div id="view4" class="quarter">
-            <div class="viewLabelBottomRight">Axial Decomposition</div>
+            <div id="view4_trackball" class="trackball_div"></div>
+            <div id="view4_ctrls" class="view_controls"></div>
         </div>
     </div>
-    <div id="playControls">
-        <div class="stateControl">
-            <form name="stateCtrlForm">
-                <div>
-                    <input type="radio" id="state1" name="rotationStates" value="1" checked>
-                    <label for="state1">1</label>
-                </div>
-                <div>
-                    <input type="radio" id="state2" name="rotationStates" value="2">
-                    <label for="state2">2</label>
-                </div>
-                <div>
-                    <input type="radio" id="state3" name="rotationStates" value="3">
-                    <label for="state3">3</label>
-                </div>
-            </form>
-        </div>
-        <div id="timelineCtrl">
-            <div id="playPauseCtrl" class="play"></div>
-            <div id="sliderDiv"><input type="range" min="0" max="99" value="0" step="any" class="slider" id="timeline"></div>
-            <div id="frameNum"></div>
-        </div>
-    </div>
-    <div id="frameControl">
-        <div id="frameTimelineCtrl">
-            <div id="frameGoCtrl" class="go"></div>
-            <div id="frameSliderDiv"><input type="range" min="0" max="99" value="0" step="any" class="slider" id="frameTimeline"></div>
-            <div id="frameFrameNum"></div>
+    <div id="captureFrameControl">
+        <div class="timelineCtrl">
+            <div id="captureFrameGoCtrl" class="go"></div>
+            <div class="sliderDiv"><input type="range" min="0" max="99" value="0" step="any" class="slider" id="captureFrameTimeline"></div>
+            <div id="captureFrameNum" class="frameNum"></div>
         </div>
     </div>
     <div id="datGUI"></div>

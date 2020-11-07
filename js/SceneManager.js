@@ -1,6 +1,6 @@
 import {divGeometry} from "./SceneHelpers.js";
 import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
-import {AnimationHelper} from "./AnimationHelper.js";
+import {ViewAnimationHelper} from "./ViewAnimationHelper.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition, OneStep} from "./EulerDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
@@ -20,31 +20,26 @@ export class SceneManager {
         this.humerusGeometry = humerusGeometry;
         this.activeDiv = null;
         this.numFrames = 100; // this dictates the number of frames for each animation - not the number of frames in the capture
-        this.framePeriod = 30; // in ms - meaning that each animation takes 3 seconds
+        this.framePeriod = 10; // in ms - meaning that each animation takes 1 seconds
         this.anglesVisLayer = 1;
         this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
         this.svdDecompClass = svdDecomp(this.timeSeriesInfo);
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.humerus.hhc,
             new Vector3().addVectors(this.landmarksInfo.humerus.me, this.landmarksInfo.humerus.le).multiplyScalar(0.5)).length();
-        this.getTimelineCtrlElements();
         this.getEulerSceneElements();
-        this.getRotationStateRadios();
-        this.getFrameSelectorCtrlElements();
+        this.getCaptureFrameCtrlElements();
         this.createCamera();
         this.createRenderer();
         this.createRotations(0);
         this.createEulerScenes();
-        this.animationHelper = new AnimationHelper(this.eulerScenes, this.numFrames, this.framePeriod, this.playBtn,
-            this.timeline, this.frameNumLbl, this.renderer, this.viewsContainer, true);
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
             this.timeSeriesInfo.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum), (frameNum) => this.updateEulerScenesToFrame(frameNum));
         this.addTrackBallControlsListeners();
-        this.addKeyPress1234Listener();
         this.addDblClickDivListener();
         this.addWindowResizeListener();
-        this.addRotationStateRadiosListener();
         this.createOptionsGUI();
+        this.render();
     }
 
     createRotations(frameNum) {
@@ -66,11 +61,15 @@ export class SceneManager {
 
     createEulerScenes() {
         this.scenesMap = new Map();
+        this.viewAnimationsMap = new Map();
         this.eulerAnglesVisFnc = [Euler_yxy_angle_geometry.createAngleObjects, AnglesVisualizationSVD.createAngleObjects,
             Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects];
         this.axialRotMethods = [AXIAL_ROT_METHODS.EULER, AXIAL_ROT_METHODS.SVD, AXIAL_ROT_METHODS.ONE_STEP, AXIAL_ROT_METHODS.TWO_STEP];
-        this.views.forEach((view) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames,
-            this.camera, this.humerusGeometry, this.humerusLength)));
+        this.views.forEach((view) => {
+            const scene = new EulerBoneScene(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
+                this.numFrames, this.camera, this.humerusGeometry, this.humerusLength);
+            this.scenesMap.set(view.id, scene);
+        });
         this.eulerScenes = Array.from(this.scenesMap.values());
         this.eulerScenes.forEach((eulerScene,idx) => {
             enableSphere(eulerScene);
@@ -80,6 +79,10 @@ export class SceneManager {
             eulerScene.initialize(this.rotations[idx]);
             eulerScene.goToStep(eulerScene.currentStep);
         });
+        this.views.forEach((view) => {
+            this.viewAnimationsMap.set(view.id, new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], this.scenesMap.get(view.id), this.numFrames, this.framePeriod));
+        });
+        this.viewAnimations = Array.from(this.viewAnimationsMap.values());
     }
 
     updateHumerusInScenes(frameNum) {
@@ -89,11 +92,9 @@ export class SceneManager {
 
     updateEulerScenesToFrame(frameNum) {
         this.createRotations(frameNum);
-
         this.eulerScenes.forEach((eulerScene,idx) => {
             eulerScene.reset(this.rotations[idx]);
-            eulerScene.goToStep(eulerScene.currentStep);
-            this.animationHelper.TimelineController.updateTimeLine(0);
+            this.viewAnimations[idx].goToStep(eulerScene.currentStep);
         });
     }
 
@@ -112,12 +113,6 @@ export class SceneManager {
         this.humerusGeometry.applyMatrix4(H_T_BB);
     }
 
-    getTimelineCtrlElements() {
-        this.playBtn = document.getElementById('playPauseCtrl');
-        this.timeline = document.getElementById('timeline');
-        this.frameNumLbl = document.getElementById('frameNum');
-    }
-
     getEulerSceneElements() {
         this.canvas = document.getElementById('canvas');
         this.viewsContainer = document.getElementById('views');
@@ -125,14 +120,10 @@ export class SceneManager {
             document.getElementById('view3'), document.getElementById('view4')];
     }
 
-    getFrameSelectorCtrlElements() {
-        this.frameTimeline = document.getElementById('frameTimeline');
-        this.frameFrameNum = document.getElementById('frameFrameNum');
-        this.frameGoCtrl = document.getElementById('frameGoCtrl');
-    }
-
-    getRotationStateRadios() {
-        this.rotationStateRadios = document.stateCtrlForm.rotationStates;
+    getCaptureFrameCtrlElements() {
+        this.frameTimeline = document.getElementById('captureFrameTimeline');
+        this.frameFrameNum = document.getElementById('captureFrameNum');
+        this.frameGoCtrl = document.getElementById('captureFrameGoCtrl');
     }
 
     createCamera() {
@@ -149,48 +140,37 @@ export class SceneManager {
         this.renderer.setSize(this.viewsContainer.clientWidth, this.viewsContainer.clientHeight);
     }
 
+    render(time) {
+        this.viewAnimations.forEach((animationHelper) => animationHelper.CurrentAnimationFnc(time));
+        if (this.ActiveScene == null) {
+            this.renderer.setScissorTest(true);
+            this.eulerScenes.forEach((eulerScene) => {
+                const {contentLeft: left, contentTop: top, contentWidth: width, contentHeight: height} = eulerScene.viewGeometry;
+                const {contentHeight: parentHeight} = divGeometry(this.viewsContainer);
+                eulerScene.renderer.setScissor(left, parentHeight-top-height, width, height);
+                eulerScene.renderer.setViewport(left, parentHeight-top-height, width, height);
+                if (this.CurrentControl != null) this.CurrentControl.update();
+                eulerScene.renderSceneGraph();
+            });
+        }
+        else {
+            this.renderer.setScissorTest(false);
+            const {contentLeft: left, contentTop: top, contentWidth: width, contentHeight: height} = this.ActiveScene.viewGeometry;
+            const {contentHeight: parentHeight} = divGeometry(this.viewsContainer);
+            this.renderer.setViewport(left, parentHeight-top-height, width, height);
+            if (this.CurrentControl != null) this.CurrentControl.update();
+            this.ActiveScene.renderSceneGraph();
+        }
+        requestAnimationFrame((t) => this.render(t));
+    }
+
     addTrackBallControlsListeners() {
-        const startEventListener = event => this.animationHelper.setCurrentControl(event.target);
+        const startEventListener = event => this.CurrentControl= event.target;
         const endEventListener = event => {
             this.eulerScenes.forEach(eulerScene => eulerScene.controls.target.copy(event.target.target));
         };
         this.eulerScenes.forEach(eulerScene => eulerScene.controls.addEventListener('start', startEventListener));
         this.eulerScenes.forEach(eulerScene => eulerScene.controls.addEventListener('end', endEventListener));
-    }
-
-    addKeyPress1234Listener() {
-        document.addEventListener('keypress', event => {
-            switch (event.keyCode) {
-                case 49:
-                    this.animationHelper.goToStep(1);
-                    this.animationHelper.setFrame(0);
-                    this.animationHelper.TimelineController.updateTimeLine(0);
-                    this.rotationStateRadios[0].checked = true;
-                    this.rotationStateRadios[0].focus();
-                    break;
-                case 50:
-                    this.animationHelper.goToStep(1);
-                    this.animationHelper.setFrame(this.numFrames);
-                    this.animationHelper.TimelineController.updateTimeLine(this.numFrames);
-                    this.rotationStateRadios[0].checked = true;
-                    this.rotationStateRadios[0].focus();
-                    break;
-                case 51:
-                    this.animationHelper.goToStep(2);
-                    this.animationHelper.setFrame(this.numFrames);
-                    this.animationHelper.TimelineController.updateTimeLine(this.numFrames);
-                    this.rotationStateRadios[1].checked = true;
-                    this.rotationStateRadios[1].focus();
-                    break;
-                case 52:
-                    this.animationHelper.goToStep(3);
-                    this.animationHelper.setFrame(this.numFrames);
-                    this.animationHelper.TimelineController.updateTimeLine(this.numFrames);
-                    this.rotationStateRadios[2].checked = true;
-                    this.rotationStateRadios[2].focus();
-                    break;
-            }
-        });
     }
 
     addDblClickDivListener() {
@@ -201,26 +181,26 @@ export class SceneManager {
                 sceneManager.views.forEach(view => {
                     if (view.id === this.id) {
                         view.className = 'full';
-                        view.firstElementChild.style.display = 'block';
+                        view.style.display = 'block';
                     }
                     else {
                         view.className = 'zero';
-                        view.firstElementChild.style.display = 'none';
+                        view.style.display = 'none';
                     }
                 });
-                sceneManager.animationHelper.setActiveScene(sceneManager.scenesMap.get(this.id));
+                sceneManager.ActiveScene = sceneManager.scenesMap.get(this.id);
             } else {
                 sceneManager.activeDiv = null;
                 sceneManager.views.forEach(view => {
                     view.className='quarter';
-                    view.firstElementChild.style.display = 'block';
-
+                    view.style.display = 'block';
                 });
-                sceneManager.animationHelper.setActiveScene(null);
+                sceneManager.ActiveScene = null;
             }
 
         };
-        sceneManager.views.forEach(view => view.addEventListener('dblclick', dblClickListener));
+        this.views.forEach(view => view.addEventListener('dblclick', dblClickListener));
+        this.eulerScenes.forEach((scene) => scene.updateCamera());
     }
 
     addWindowResizeListener() {
@@ -228,14 +208,6 @@ export class SceneManager {
             this.renderer.setSize(this.viewsContainer.clientWidth, this.viewsContainer.clientHeight);
             this.eulerScenes.forEach(eulerScene => eulerScene.updateCamera());
         });
-    }
-
-    addRotationStateRadiosListener() {
-        const animationHelper = this.animationHelper;
-        const changeHandler = function () {
-            animationHelper.goToStep(parseInt(this.value));
-        };
-        this.rotationStateRadios.forEach(radioBtn => radioBtn.addEventListener('change', changeHandler));
     }
 
     createOptionsGUI() {

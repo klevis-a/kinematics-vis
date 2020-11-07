@@ -20,9 +20,10 @@ export class EulerScene {
         trackBallControl.keys = [65, 83, 68];
     }
 
-    constructor(viewElement, renderer, numFrames, camera, arcStripWidth = 1, triadLength=15, markingStart=5) {
-        this.camera = camera;
+    constructor(viewElement, trackballDiv, renderer, numFrames, camera, arcStripWidth = 1, triadLength=15, markingStart=5) {
         this.viewElement = viewElement;
+        this.trackballDiv = trackballDiv;
+        this.camera = camera;
         this.numFrames = numFrames;
         this.renderer = renderer;
         this.scene = new THREE.Scene();
@@ -179,7 +180,7 @@ export class EulerScene {
     }
 
     createControls() {
-        this.controls = new TrackballControls(this.camera, this.viewElement);
+        this.controls = new TrackballControls(this.camera, this.trackballDiv);
         EulerScene.setTrackballControls(this.controls);
         this.controls.target.set(0, 0, 0);
         this.controls.update();

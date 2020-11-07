@@ -1,10 +1,9 @@
 'use strict';
 
 export class TimelineController {
-    constructor(playBtn, timeline, frameNumLbl, numFrames, playFnc, pauseFnc, setFrameFnc) {
+    constructor(playBtn, timeline, numFrames, playFnc, pauseFnc, setFrameFnc) {
         this.PlayBtn = playBtn;
         this.Timeline = timeline;
-        this.FrameNumLbl = frameNumLbl;
         this.NumFrames = numFrames;
         this.Playing = false;
         this.PlayFnc = playFnc;
@@ -15,7 +14,6 @@ export class TimelineController {
         this.Timeline.min = 0;
         this.Timeline.max = this.NumFrames;
         this.Timeline.step = 'any';
-        this.FrameNumLbl.innerHTML = 0;
 
         this.PlayBtn.onclick = () => this.handlePlayBtn();
         this.Timeline.oninput = () => this.handleTimeLineInput();
@@ -55,7 +53,6 @@ export class TimelineController {
     }
 
     handleTimeLineInput() {
-        this.FrameNumLbl.innerHTML = Math.floor(this.Timeline.value);
         this.SetFrameFnc(this.Timeline.value);
     }
 
@@ -73,6 +70,5 @@ export class TimelineController {
 
     updateTimeLine(frameNum) {
         this.Timeline.value = frameNum;
-        this.FrameNumLbl.innerHTML = Math.floor(frameNum);
     }
 }

@@ -1,5 +1,5 @@
 .stateControl {
-    margin: 0px 5px 0px 0px;
+    margin: 0 5px 0 0;
     flex-grow: 0;
     flex-shrink: 0;
 }
@@ -8,13 +8,13 @@
     opacity: 0;
     position: fixed;
     width: 0;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
 }
 
 .stateControl form {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     display: flex;
 }
 
@@ -24,9 +24,8 @@
 }
 
 .stateControl label {
-    display: inline-block;
     background-color: var(--timeline-ctrl-bckg);
-    padding: 0px 8px 0px 5px;
+    padding: 0 8px 0 5px;
     font-weight: bold;
     font-family: Arial, Helvetica, sans-serif;
     height: var(--timeline-ctrl-height);
@@ -37,22 +36,14 @@
     align-items: center;
     flex-grow: 0;
     flex-shrink: 0;
-}
 
-#state1 + label {
-    border: 3px solid var(--timeline-ctrl-fore);
-}
-
-#state2 + label {
-    border-width: 3px 3px 3px 0px;
+    border-width: 3px 3px 3px 0;
     border-style: solid;
     border-color: var(--timeline-ctrl-fore);
 }
 
-#state3 + label {
-    border-width: 3px 3px 3px 0px;
-    border-style: solid;
-    border-color: var(--timeline-ctrl-fore);
+.firstState {
+    border: 3px solid var(--timeline-ctrl-fore) !important;
 }
 
 .stateControl label:hover {
