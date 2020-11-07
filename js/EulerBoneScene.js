@@ -5,9 +5,6 @@ import "./EulerScene_AngleVis.js";
 export class EulerBoneScene extends EulerScene {
     static BONE_COLOR = 0xe3dac9;
     static BONE_MATERIAL = new THREE.MeshPhongMaterial({color: EulerBoneScene.BONE_COLOR, opacity: 0.9, transparent: true});
-    static AXIAL_PLANE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide, depthTest: false});
-    static XLINE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false});
-    static XLINE_MATERIAL_WIRE = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false, wireframe: true});
 
     constructor(viewElement, renderer, numFrames, camera, humerusGeometry, humerusLength) {
         super(viewElement, renderer, numFrames, camera, 10, 150, 50);
@@ -16,11 +13,6 @@ export class EulerBoneScene extends EulerScene {
         this.step0Humerus = new THREE.Mesh(this.humerusGeometry, new THREE.MeshPhongMaterial({color: EulerBoneScene.BONE_COLOR, opacity: 0.5, transparent: true}));
         this.step0Triad.add(this.step0Humerus);
         this.priorStepHumeriVisible = false;
-        this.PLANE_GEOMETRY = new THREE.CircleBufferGeometry(this.triadLength, 16);
-        this.PLANE_GEOMETRY.rotateX(-Math.PI/2);
-        this.THIN_LINE_GEOMETRY = new THREE.PlaneBufferGeometry(this.triadLength*this.triadAspectRatio*0.5, this.triadLength, 1, 5);
-        this.THIN_LINE_GEOMETRY.rotateX(-Math.PI/2);
-        this.THIN_LINE_GEOMETRY.translate(0, 0, this.triadLength/2);
     }
 
     addHumerus() {
@@ -51,12 +43,12 @@ export class EulerBoneScene extends EulerScene {
     goToStep(stepNum) {
         super.goToStep(stepNum);
         this.updateHumeriBasedOnStep();
-        this.updateAxialRotationStep();
+        this.dispatchEvent({type: 'stepChange'});
     }
 
     removeSteps() {
         super.removeSteps();
-        this.scene.remove(this.noAxialGroup);
+        this.dispatchEvent({type: 'removeSteps'});
     }
 
     reset(rotations) {
@@ -66,7 +58,7 @@ export class EulerBoneScene extends EulerScene {
 
     updateToFrame(frameNum) {
         super.updateToFrame(frameNum);
-        this.updateAxialRotationFrame(frameNum);
+        this.dispatchEvent({type: 'frameChange', frameNum: frameNum});
     }
 
     updateHumeriBasedOnStep() {
@@ -78,15 +70,6 @@ export class EulerBoneScene extends EulerScene {
                 stepHumerus.visible = (idx + 1) === this.currentStep;
             }
         });
-    }
-
-    initAxialRotation() {
-    }
-
-    updateAxialRotationFrame(frameNum) {
-    }
-
-    updateAxialRotationStep() {
     }
 }
 

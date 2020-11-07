@@ -1,6 +1,32 @@
 import * as THREE from "./vendor/three.js/build/three.module.js";
 import {EulerBoneScene} from "./EulerBoneScene.js";
 
+EulerBoneScene.AXIAL_PLANE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide, depthTest: false});
+EulerBoneScene.XLINE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false});
+EulerBoneScene.XLINE_MATERIAL_WIRE = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false, wireframe: true});
+
+export const AXIAL_ROT_METHODS = {
+    EULER: {
+        step_update: updateAxialRotationStep_euler,
+        frame_update: updateAxialRotationFrame_euler
+    },
+
+    TWO_STEP: {
+        step_update: updateAxialRotationStep_axial,
+        frame_update: updateAxialRotationFrame_axial
+    },
+
+    ONE_STEP: {
+        step_update: updateAxialRotationStep_oneStep,
+        frame_update: updateAxialRotationFrame_oneStep
+    },
+
+    SVD: {
+        step_update: updateAxialRotationStep_svd,
+        frame_update: updateAxialRotationFrame_axial
+    },
+};
+
 export function initAxialRotation() {
     //this is the axial plane that simply goes along with the the humerus
     this.axialPlane = new THREE.Mesh(this.PLANE_GEOMETRY, EulerBoneScene.AXIAL_PLANE_MATERIAL);
@@ -30,7 +56,7 @@ export function initAxialRotation() {
     this.realAxialRotation = this.rotations[0].axis.y * this.rotations[0].angle;
 
     this.updateAxialRotationStep();
-    this.updateAxialRotationFrame();
+    this.updateAxialRotationFrame(0);
 }
 
 export function updateAxialRotationFrame_oneStep(frameNum) {
@@ -92,4 +118,40 @@ function updateZeroAxialLine_Euler(scene) {
     const currentHumeralAxis = scene.steps[scene.currentStep-1].triad.arrowAxis(1);
     scene.noAxialGroup.setRotationFromQuaternion(scene.steps[scene.currentStep-1].triad.quaternion);
     scene.noAxialGroup.position.copy(new THREE.Vector3().copy(currentHumeralAxis).multiplyScalar(-scene.humerusLength));
+}
+
+export function enableAxialRot(boneScene, updateFnc) {
+    boneScene.PLANE_GEOMETRY = new THREE.CircleBufferGeometry(boneScene.triadLength, 16);
+    boneScene.PLANE_GEOMETRY.rotateX(-Math.PI/2);
+    boneScene.THIN_LINE_GEOMETRY = new THREE.PlaneBufferGeometry(boneScene.triadLength*boneScene.triadAspectRatio*0.5, boneScene.triadLength, 1, 5);
+    boneScene.THIN_LINE_GEOMETRY.rotateX(-Math.PI/2);
+    boneScene.THIN_LINE_GEOMETRY.translate(0, 0, boneScene.triadLength/2);
+
+    boneScene.updateAxialRotationStep = updateFnc.step_update;
+    boneScene.updateAxialRotationFrame = updateFnc.frame_update;
+
+    boneScene.addEventListener('init', function (event) {
+        const scene = event.target;
+        initAxialRotation.call(scene)
+    });
+
+    boneScene.addEventListener('removeSteps', function (event) {
+        const scene = event.target;
+        scene.scene.remove(scene.noAxialGroup);
+    });
+
+    boneScene.addEventListener('stepChange', function (event) {
+        const scene = event.target;
+        scene.updateAxialRotationStep();
+    });
+
+    boneScene.addEventListener('frameChange', function (event) {
+        const scene = event.target;
+        scene.updateAxialRotationFrame(event.frameNum);
+    });
+
+    boneScene.addEventListener('reset', function (event) {
+        const scene = event.target;
+        initAxialRotation.call(scene);
+    });
 }

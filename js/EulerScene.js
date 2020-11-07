@@ -54,7 +54,6 @@ export class EulerScene {
     initialize(rotations) {
         this.rotations = rotations;
         this.createSteps();
-        this.goToStep(this.currentStep);
     }
 
     createSteps() {

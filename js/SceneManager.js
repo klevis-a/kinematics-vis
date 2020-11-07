@@ -8,8 +8,7 @@ import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import "./EulerScene_AngleVis.js";
 import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry, AnglesVisualizationSVD} from "./EulerAnglesGeometry.js";
 import {svdDecomp} from "./EulerDecompositions.js";
-import {initAxialRotation, updateAxialRotationFrame_euler, updateAxialRotationFrame_axial, updateAxialRotationFrame_oneStep,
-    updateAxialRotationStep_axial, updateAxialRotationStep_svd, updateAxialRotationStep_euler, updateAxialRotationStep_oneStep} from "./EulerScene_Axial.js"
+import {AXIAL_ROT_METHODS, enableAxialRot} from "./EulerScene_Axial.js"
 import {enableSphere} from "./EulerScene_Sphere.js";
 import {enableAngleVis} from "./EulerScene_AngleVis.js";
 
@@ -69,8 +68,7 @@ export class SceneManager {
         this.scenesMap = new Map();
         this.eulerAnglesVisFnc = [Euler_yxy_angle_geometry.createAngleObjects, AnglesVisualizationSVD.createAngleObjects,
             Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects];
-        this.updateAxialStepFnc = [updateAxialRotationStep_euler, updateAxialRotationStep_svd, updateAxialRotationStep_oneStep, updateAxialRotationStep_axial];
-        this.updateAxialFrameFnc = [updateAxialRotationFrame_euler, updateAxialRotationFrame_axial, updateAxialRotationFrame_oneStep, updateAxialRotationFrame_axial];
+        this.axialRotMethods = [AXIAL_ROT_METHODS.EULER, AXIAL_ROT_METHODS.SVD, AXIAL_ROT_METHODS.ONE_STEP, AXIAL_ROT_METHODS.TWO_STEP];
         this.views.forEach((view) => this.scenesMap.set(view.id, new EulerBoneScene(view, this.renderer, this.numFrames,
             this.camera, this.humerusGeometry, this.humerusLength)));
         this.eulerScenes = Array.from(this.scenesMap.values());
@@ -78,11 +76,9 @@ export class SceneManager {
             enableSphere(eulerScene);
             // enableAngleVis should be called after enableSphere in order to get the sphere to show up
             enableAngleVis(eulerScene, this.anglesVisLayer, this.eulerAnglesVisFnc[idx]);
+            enableAxialRot(eulerScene, this.axialRotMethods[idx]);
             eulerScene.initialize(this.rotations[idx]);
-            eulerScene.initAxialRotation = initAxialRotation;
-            eulerScene.updateAxialRotationStep = this.updateAxialStepFnc[idx];
-            eulerScene.updateAxialRotationFrame = this.updateAxialFrameFnc[idx];
-            eulerScene.initAxialRotation();
+            eulerScene.goToStep(eulerScene.currentStep);
         });
     }
 
@@ -96,7 +92,6 @@ export class SceneManager {
 
         this.eulerScenes.forEach((eulerScene,idx) => {
             eulerScene.reset(this.rotations[idx]);
-            eulerScene.initAxialRotation();
             eulerScene.goToStep(eulerScene.currentStep);
             this.animationHelper.TimelineController.updateTimeLine(0);
         });
@@ -253,7 +248,7 @@ export class SceneManager {
         this.optionsGUI.add(guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
             this.eulerScenes.forEach(eulerScene => {
                 eulerScene.priorStepHumeriVisible = value;
-                eulerScene.updateHumerisBasedOnStep();
+                eulerScene.updateHumeriBasedOnStep();
             });
         });
         this.optionsGUI.add(guiOptions, 'decompMethod', ["yx'y''", "xz'y''"]).name('Decomposition').onChange(value => {
