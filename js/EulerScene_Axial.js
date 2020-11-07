@@ -59,10 +59,7 @@ export function updateAxialRotationFrame_axial() {
 
 export function updateAxialRotationFrame_euler() {
     if (this.currentStep < 3) {
-        this.steps[this.currentStep-1].triad.updateMatrixWorld();
-        const currentHumeralAxis = this.steps[this.currentStep-1].triad.arrowAxis(1);
-        this.noAxialGroup.setRotationFromQuaternion(this.steps[this.currentStep-1].triad.quaternion);
-        this.noAxialGroup.position.copy(new THREE.Vector3().copy(currentHumeralAxis).multiplyScalar(-this.humerusLength));
+        updateZeroAxialLine_Euler(this);
     }
 }
 
@@ -81,11 +78,18 @@ export function updateAxialRotationStep_svd() {
 export function updateAxialRotationStep_euler() {
     this.stepHumeri[this.currentStep-1].add(this.axialPlane);
     this.stepHumeri[this.currentStep-1].getObjectByName('xLine').visible = (this.currentStep > 2);
-    this.updateAxialRotationFrame(0);
+    updateZeroAxialLine_Euler(this);
 }
 
 export function updateAxialRotationStep_oneStep() {
     this.stepHumeri[this.currentStep-1].add(this.axialPlane);
     this.stepHumeri[this.currentStep-1].getObjectByName('xLine').visible = true;
     this.updateAxialRotationFrame(0);
+}
+
+function updateZeroAxialLine_Euler(scene) {
+    scene.steps[scene.currentStep-1].triad.updateMatrixWorld();
+    const currentHumeralAxis = scene.steps[scene.currentStep-1].triad.arrowAxis(1);
+    scene.noAxialGroup.setRotationFromQuaternion(scene.steps[scene.currentStep-1].triad.quaternion);
+    scene.noAxialGroup.position.copy(new THREE.Vector3().copy(currentHumeralAxis).multiplyScalar(-scene.humerusLength));
 }
