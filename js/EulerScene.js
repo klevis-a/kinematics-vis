@@ -20,7 +20,7 @@ export class EulerScene {
         trackBallControl.keys = [65, 83, 68];
     }
 
-    constructor(viewElement, trackballDiv, renderer, numFrames, camera, arcStripWidth = 1, triadLength=15, markingStart=5) {
+    constructor(viewElement, trackballDiv, renderer, numFrames, camera, arcStripWidth = 10, triadLength=150, markingStart=50) {
         this.viewElement = viewElement;
         this.trackballDiv = trackballDiv;
         this.camera = camera;
@@ -55,6 +55,7 @@ export class EulerScene {
     initialize(rotations) {
         this.rotations = rotations;
         this.createSteps();
+        this.dispatchEvent({type: 'init'});
     }
 
     createSteps() {
@@ -72,6 +73,7 @@ export class EulerScene {
             this.addStepToScene(eulerStep);
             return eulerStep;
         });
+        this.dispatchEvent({type: 'createSteps'});
     }
 
     addStepToScene(step) {
@@ -94,6 +96,8 @@ export class EulerScene {
                step.deactivate();
            }
         });
+
+        this.dispatchEvent({type: 'stepChange'});
     }
 
     removeSteps() {
@@ -104,16 +108,19 @@ export class EulerScene {
             this.scene.remove(step.rotAxis);
             step.arcs.forEach(arc => this.scene.remove(arc));
         });
+        this.dispatchEvent({type: 'removeSteps'});
     }
 
     reset(rotations) {
         this.rotations = rotations;
         this.removeSteps();
         this.createSteps();
+        this.dispatchEvent({type: 'reset'});
     }
 
     updateToFrame(frameNum) {
         this.steps[this.currentStep-1].updateToFrame(frameNum);
+        this.dispatchEvent({type: 'frameChange', frameNum: frameNum});
     }
 
     initScene() {
@@ -201,3 +208,5 @@ export class EulerScene {
         this.spotlight.target = this.step0Triad.origin;
     }
 }
+
+Object.assign(EulerScene.prototype, THREE.EventDispatcher.prototype);

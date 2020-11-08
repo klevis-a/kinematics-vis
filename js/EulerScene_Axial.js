@@ -1,9 +1,9 @@
 import * as THREE from "./vendor/three.js/build/three.module.js";
-import {EulerBoneScene} from "./EulerBoneScene.js";
+import {EulerScene} from "./EulerScene.js";
 
-EulerBoneScene.AXIAL_PLANE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide, depthTest: false});
-EulerBoneScene.XLINE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false});
-EulerBoneScene.XLINE_MATERIAL_WIRE = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false, wireframe: true});
+EulerScene.AXIAL_PLANE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xffffff, side: THREE.DoubleSide, depthTest: false});
+EulerScene.XLINE_MATERIAL = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false});
+EulerScene.XLINE_MATERIAL_WIRE = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false, wireframe: true});
 
 export const AXIAL_ROT_METHODS = {
     EULER: {
@@ -29,14 +29,14 @@ export const AXIAL_ROT_METHODS = {
 
 export function initAxialRotation() {
     //this is the axial plane that simply goes along with the the humerus
-    this.axialPlane = new THREE.Mesh(this.PLANE_GEOMETRY, EulerBoneScene.AXIAL_PLANE_MATERIAL);
+    this.axialPlane = new THREE.Mesh(this.PLANE_GEOMETRY, EulerScene.AXIAL_PLANE_MATERIAL);
     this.axialPlane.name = 'axialPlane';
     this.axialPlane.renderOrder = 2;
     this.axialPlane.position.set(0, 0, 0);
     this.axialPlane.translateY(-this.humerusLength);
     this.stepHumeri[0].add(this.axialPlane);
 
-    this.xLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.XLINE_MATERIAL);
+    this.xLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerScene.XLINE_MATERIAL);
     this.xLine.name = 'xLine';
     this.xLine.visible = false;
     this.xLine.renderOrder = 3;
@@ -45,7 +45,7 @@ export function initAxialRotation() {
 
 
     //this is the axial group that only moves with the humeral axis (i.e. no axial rotation)
-    const xLine_noAxial = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerBoneScene.XLINE_MATERIAL_WIRE);
+    const xLine_noAxial = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerScene.XLINE_MATERIAL_WIRE);
     xLine_noAxial.renderOrder = 3;
     xLine_noAxial.rotateY(Math.PI/2);
 

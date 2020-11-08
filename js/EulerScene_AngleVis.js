@@ -1,6 +1,5 @@
 import * as THREE from "./vendor/three.js/build/three.module.js";
 import * as EulerGeometry from "./EulerGeometry.js";
-import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerScene} from "./EulerScene.js";
 
 EulerScene.prototype.update_angles_vis = function() {
@@ -31,14 +30,14 @@ EulerScene.prototype.prepare_scene_for_angle_vis = function() {
     // add an initial humerus
     this.initTriad_angles = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
     this.scene.add(this.initTriad_angles);
-    this.initHumerus_angles = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);
+    this.initHumerus_angles = new THREE.Mesh(this.humerusGeometry, EulerScene.BONE_MATERIAL);
     this.initTriad_angles.add(this.initHumerus_angles);
     this.initTriad_angles.layers.set(this.anglesVisLayer);
 
     // add a final humerus
     this.finalTriad_angles = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 4, 3, this.markingsStart, this.arcStripWidth*3);
     this.scene.add(this.finalTriad_angles);
-    this.finalHumerus_angles = new THREE.Mesh(this.humerusGeometry, EulerBoneScene.BONE_MATERIAL);
+    this.finalHumerus_angles = new THREE.Mesh(this.humerusGeometry, EulerScene.BONE_MATERIAL);
     this.finalTriad_angles.add(this.finalHumerus_angles);
     this.finalTriad_angles.layers.set(this.anglesVisLayer);
 

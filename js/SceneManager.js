@@ -1,17 +1,17 @@
 import {divGeometry} from "./SceneHelpers.js";
 import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
 import {ViewAnimationHelper} from "./ViewAnimationHelper.js";
-import {EulerBoneScene} from "./EulerBoneScene.js";
 import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition, OneStep} from "./EulerDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
-import "./EulerScene_AngleVis.js";
 import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry, AnglesVisualizationSVD} from "./EulerAnglesGeometry.js";
 import {svdDecomp} from "./EulerDecompositions.js";
 import {AXIAL_ROT_METHODS, enableAxialRot} from "./EulerScene_Axial.js"
+import {EulerScene} from "./EulerScene.js";
 import {enableSphere} from "./EulerScene_Sphere.js";
 import {enableAngleVis} from "./EulerScene_AngleVis.js";
 import {removeAllChildNodes} from "./JSHelpers.js";
+import {enableHumerus} from "./EulerScene_Humerus.js";
 
 export class SceneManager {
 
@@ -127,8 +127,12 @@ export class SceneManager {
     }
 
     createEulerScene(view, method_info, frameNum=0) {
-        const scene = new EulerBoneScene(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
-            this.numFrames, this.camera, this.humerusGeometry, this.humerusLength);
+        const scene = new EulerScene(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
+            this.numFrames, this.camera);
+        // Enabling the various components of the animations should be done in the order below. The EventDispatcher
+        // dispatches event in the order that they are added (and in a single-threaded fashion). Although the features
+        // will largely work if they are not added in the correct order, there might be unforeseen bugs.
+        enableHumerus(scene, this.humerusGeometry, this.humerusLength);
         enableSphere(scene);
         // enableAngleVis should be called after enableSphere in order to get the sphere to show up when the angle
         // visualization checkbox is checked
