@@ -24,6 +24,7 @@ EulerScene.prototype.addSphere = function(northPole) {
 EulerScene.prototype.changeSphere = function(northPole) {
     this.northPole = northPole;
     this.sphere.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), this.northPole));
+    this.addFinalLatitudeLongitude();
 };
 
 EulerScene.prototype.addFinalLatitudeLongitude = function () {
@@ -35,7 +36,7 @@ EulerScene.prototype.addFinalLatitudeLongitude = function () {
         this.finalLatitude.geometry.dispose();
         this.scene.remove(this.finalLatitude);
     }
-    const finalTriad = this.steps[this.steps.length-1].triad;
+    const finalTriad = this.steps[this.steps.length-1].endingTriad;
     finalTriad.updateMatrixWorld(true);
     const humeral_axis = finalTriad.arrowAxis(1).multiplyScalar(-1*this.humerusLength);
     const plane = new THREE.Plane(this.northPole);
