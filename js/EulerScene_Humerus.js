@@ -26,7 +26,7 @@ export function enableHumerus(boneScene, humerusGeometry, humerusLength) {
     boneScene.humerusGeometry = humerusGeometry;
     boneScene.humerusLength = humerusLength;
     boneScene.step0Humerus = new THREE.Mesh(boneScene.humerusGeometry, new THREE.MeshPhongMaterial({color: EulerScene.BONE_COLOR, opacity: 0.5, transparent: true}));
-    boneScene.step0Triad.add(boneScene.step0Humerus);
+    boneScene.referenceTriad.add(boneScene.step0Humerus);
     boneScene.priorStepHumeriVisible = false;
 
     boneScene.addEventListener('init', function (event) {

@@ -38,7 +38,7 @@ export class EulerScene {
     }
 
     dispose() {
-        this.step0Triad.dispose();
+        this.referenceTriad.dispose();
         this.xAxis.geometry.dispose();
         this.xAxis.material.dispose();
         this.yAxis.geometry.dispose();
@@ -112,6 +112,7 @@ export class EulerScene {
     }
 
     reset(rotations) {
+        console.assert(this.rotations.length === rotations.length)
         this.rotations = rotations;
         this.removeSteps();
         this.createSteps();
@@ -146,8 +147,8 @@ export class EulerScene {
     }
 
     createReferenceGeometry() {
-        this.step0Triad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
-        this.scene.add(this.step0Triad);
+        this.referenceTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
+        this.scene.add(this.referenceTriad);
 
         const xAxis_mat = new THREE.LineBasicMaterial({color: 0xff0000});
         const xAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-this.triadLength*2, 0, 0), new THREE.Vector3(this.triadLength*2, 0, 0)]);
@@ -205,7 +206,7 @@ export class EulerScene {
     createSpotlight() {
         this.spotlight = new THREE.SpotLight(0xffffff, 1, 0, Math.PI / 4, 0, 1);
         this.scene.add(this.spotlight);
-        this.spotlight.target = this.step0Triad.origin;
+        this.spotlight.target = this.referenceTriad.origin;
     }
 }
 
