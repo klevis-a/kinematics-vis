@@ -54,7 +54,8 @@ export class SceneManager {
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.EULER,
-                friendly_name: "Euler yx'y''"
+                friendly_name: "Euler yx'y''",
+                north_pole: new Vector3(0, 1, 0)
             }],
 
             ['EULER_XZY', {
@@ -65,7 +66,8 @@ export class SceneManager {
                 },
                 angle_vis_method: Euler_xzy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.EULER,
-                friendly_name: "Cardan xz'y''"
+                friendly_name: "Cardan xz'y''",
+                north_pole: new Vector3(1, 0, 0)
             }],
 
             ['SVD', {
@@ -75,7 +77,8 @@ export class SceneManager {
                 },
                 angle_vis_method: AnglesVisualizationSVD.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.SVD,
-                friendly_name: "SVD"
+                friendly_name: "SVD",
+                north_pole: new Vector3(0, 1, 0)
             }],
 
             ['ONE_STEP', {
@@ -85,7 +88,8 @@ export class SceneManager {
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.ONE_STEP,
-                friendly_name: "One Step"
+                friendly_name: "One Step",
+                north_pole: new Vector3(0, 1, 0)
             }],
 
             ['TWO_STEP', {
@@ -96,7 +100,8 @@ export class SceneManager {
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.TWO_STEP,
-                friendly_name: "Two Step"
+                friendly_name: "Two Step",
+                north_pole: new Vector3(0, 1, 0)
             }]
         ]);
     }
@@ -131,6 +136,7 @@ export class SceneManager {
         enableAxialRot(scene, method_info.axial_rot_method);
         scene.initialize(method_info.decomp_method(this.getFrameQuat(frameNum)));
         scene.goToStep(scene.currentStep);
+        scene.changeSphere(method_info.north_pole);
         const animationHelper = new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], scene, this.numFrames, this.framePeriod);
         return [scene, animationHelper];
     }
