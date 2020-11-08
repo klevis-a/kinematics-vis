@@ -22,8 +22,9 @@ export class SceneManager {
         this.numFrames = 100; // this dictates the number of frames for each animation - not the number of frames in the capture
         this.framePeriod = 10; // in ms - meaning that each animation takes 1 seconds
         this.anglesVisLayer = 1;
-        this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
         this.svdDecompClass = svdDecomp(this.timeSeriesInfo);
+        this.methods = this.decompMethods();
+        this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'SVD'], ['view3', 'ONE_STEP'], ['view4', 'TWO_STEP']]);
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.humerus.hhc,
             new Vector3().addVectors(this.landmarksInfo.humerus.me, this.landmarksInfo.humerus.le).multiplyScalar(0.5)).length();
@@ -31,7 +32,6 @@ export class SceneManager {
         this.getCaptureFrameCtrlElements();
         this.createCamera();
         this.createRenderer();
-        this.createRotations(0);
         this.createEulerScenes();
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
             this.timeSeriesInfo.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum), (frameNum) => this.updateEulerScenesToFrame(frameNum));
@@ -42,59 +42,97 @@ export class SceneManager {
         this.render();
     }
 
-    createRotations(frameNum) {
-        const frameQuat = this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum));
-        const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
-        const eulerDecomp = new this.eulerDecompClass(frameMat);
-        const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
-        const svdDecomp = new this.svdDecompClass(frameQuat);
-        const oneStepDecomp = new OneStep(frameQuat);
-        this.rotations = [
-            eulerDecomp.R3$$_R2$_R1,
-            svdDecomp.rotationSequence,
-            //eulerDecomp.R1_R2_R3,
-            //eulerDecomp.R3$$_Rcombo,
-            oneStepDecomp.rotationSequence,
-            axialDecomp.rotationSequence
-        ]
+    decompMethods() {
+        return new Map([
+            ['EULER_YXY', {
+                decomp_method: (frameQuat) => {
+                    const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
+                    const eulerDecomp = new EulerDecomposition_RY$$_RX$_RY(frameMat);
+                    return eulerDecomp.R3$$_R2$_R1;
+                },
+                angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
+                axial_rot_method: AXIAL_ROT_METHODS.EULER
+            }],
+
+            ['EULER_XZY', {
+                decomp_method: (frameQuat) => {
+                    const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
+                    const eulerDecomp = new EulerDecomposition_RY$$_RZ$_RX(frameMat);
+                    return eulerDecomp.R3$$_R2$_R1;
+                },
+                angle_vis_method: Euler_xzy_angle_geometry.createAngleObjects,
+                axial_rot_method: AXIAL_ROT_METHODS.EULER
+            }],
+
+            ['SVD', {
+                decomp_method: (frameQuat) => {
+                    const svdDecomp = new this.svdDecompClass(frameQuat);
+                    return svdDecomp.rotationSequence;
+                },
+                angle_vis_method: AnglesVisualizationSVD.createAngleObjects,
+                axial_rot_method: AXIAL_ROT_METHODS.SVD
+            }],
+
+            ['ONE_STEP', {
+                decomp_method: (frameQuat) => {
+                    const oneStepDecomp = new OneStep(frameQuat);
+                    return oneStepDecomp.rotationSequence;
+                },
+                angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
+                axial_rot_method: AXIAL_ROT_METHODS.ONE_STEP
+            }],
+
+            ['TWO_STEP', {
+                decomp_method: (frameQuat) => {
+                    const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
+                    const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
+                    return axialDecomp.rotationSequence;
+                },
+                angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
+                axial_rot_method: AXIAL_ROT_METHODS.TWO_STEP
+            }]
+        ]);
+    }
+
+    getFrameQuat(frameNum){
+        return  this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum));
     }
 
     createEulerScenes() {
         this.scenesMap = new Map();
-        this.viewAnimationsMap = new Map();
-        this.eulerAnglesVisFnc = [Euler_yxy_angle_geometry.createAngleObjects, AnglesVisualizationSVD.createAngleObjects,
-            Euler_yxy_angle_geometry.createAngleObjects, Euler_yxy_angle_geometry.createAngleObjects];
-        this.axialRotMethods = [AXIAL_ROT_METHODS.EULER, AXIAL_ROT_METHODS.SVD, AXIAL_ROT_METHODS.ONE_STEP, AXIAL_ROT_METHODS.TWO_STEP];
-        this.views.forEach((view) => {
+        this.initialSceneLayout.forEach((decomp_method, view_id) => {
+            const view = document.getElementById(view_id);
             const scene = new EulerBoneScene(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
                 this.numFrames, this.camera, this.humerusGeometry, this.humerusLength);
-            this.scenesMap.set(view.id, scene);
+            const method_info = this.methods.get(decomp_method);
+            enableSphere(scene);
+            // enableAngleVis should be called after enableSphere in order to get the sphere to show up when the angle
+            // visualization checkbox is checked
+            enableAngleVis(scene, this.anglesVisLayer, method_info.angle_vis_method);
+            enableAxialRot(scene, method_info.axial_rot_method);
+            scene.initialize(method_info.decomp_method(this.getFrameQuat(0)));
+            scene.goToStep(scene.currentStep);
+            const animationHelper = new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], scene, this.numFrames, this.framePeriod);
+
+            this.scenesMap.set(view_id, {
+                view: view,
+                scene: scene,
+                decomp_method: method_info.decomp_method,
+                animation_helper: animationHelper
+            });
         });
-        this.eulerScenes = Array.from(this.scenesMap.values());
-        this.eulerScenes.forEach((eulerScene,idx) => {
-            enableSphere(eulerScene);
-            // enableAngleVis should be called after enableSphere in order to get the sphere to show up
-            enableAngleVis(eulerScene, this.anglesVisLayer, this.eulerAnglesVisFnc[idx]);
-            enableAxialRot(eulerScene, this.axialRotMethods[idx]);
-            eulerScene.initialize(this.rotations[idx]);
-            eulerScene.goToStep(eulerScene.currentStep);
-        });
-        this.views.forEach((view) => {
-            this.viewAnimationsMap.set(view.id, new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], this.scenesMap.get(view.id), this.numFrames, this.framePeriod));
-        });
-        this.viewAnimations = Array.from(this.viewAnimationsMap.values());
     }
 
     updateHumerusInScenes(frameNum) {
-        this.eulerScenes.forEach(eulerScene => eulerScene.humerus.quaternion.copy(
+        this.scenesMap.forEach(scene_obj  => scene_obj.scene.humerus.quaternion.copy(
             this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum))));
     }
 
     updateEulerScenesToFrame(frameNum) {
-        this.createRotations(frameNum);
-        this.eulerScenes.forEach((eulerScene,idx) => {
-            eulerScene.reset(this.rotations[idx]);
-            this.viewAnimations[idx].goToStep(eulerScene.currentStep);
+        const frameQuat = this.getFrameQuat(frameNum);
+        this.scenesMap.forEach(scene_obj => {
+            scene_obj.scene.reset(scene_obj.decomp_method(frameQuat));
+            scene_obj.animation_helper.goToStep(scene_obj.scene.currentStep);
         });
     }
 
@@ -116,8 +154,7 @@ export class SceneManager {
     getEulerSceneElements() {
         this.canvas = document.getElementById('canvas');
         this.viewsContainer = document.getElementById('views');
-        this.views = [document.getElementById('view1'), document.getElementById('view2'),
-            document.getElementById('view3'), document.getElementById('view4')];
+        this.views = [document.getElementById('view1'), document.getElementById('view2'), document.getElementById('view3'), document.getElementById('view4')];
     }
 
     getCaptureFrameCtrlElements() {
@@ -141,16 +178,16 @@ export class SceneManager {
     }
 
     render(time) {
-        this.viewAnimations.forEach((animationHelper) => animationHelper.CurrentAnimationFnc(time));
+        this.scenesMap.forEach(scene_obj => scene_obj.animation_helper.CurrentAnimationFnc(time));
         if (this.ActiveScene == null) {
             this.renderer.setScissorTest(true);
-            this.eulerScenes.forEach((eulerScene) => {
-                const {contentLeft: left, contentTop: top, contentWidth: width, contentHeight: height} = eulerScene.viewGeometry;
+            this.scenesMap.forEach(scene_obj => {
+                const {contentLeft: left, contentTop: top, contentWidth: width, contentHeight: height} = scene_obj.scene.viewGeometry;
                 const {contentHeight: parentHeight} = divGeometry(this.viewsContainer);
-                eulerScene.renderer.setScissor(left, parentHeight-top-height, width, height);
-                eulerScene.renderer.setViewport(left, parentHeight-top-height, width, height);
+                scene_obj.scene.renderer.setScissor(left, parentHeight-top-height, width, height);
+                scene_obj.scene.renderer.setViewport(left, parentHeight-top-height, width, height);
                 if (this.CurrentControl != null) this.CurrentControl.update();
-                eulerScene.renderSceneGraph();
+                scene_obj.scene.renderSceneGraph();
             });
         }
         else {
@@ -167,10 +204,10 @@ export class SceneManager {
     addTrackBallControlsListeners() {
         const startEventListener = event => this.CurrentControl= event.target;
         const endEventListener = event => {
-            this.eulerScenes.forEach(eulerScene => eulerScene.controls.target.copy(event.target.target));
+            this.scenesMap.forEach(scene_obj => scene_obj.scene.controls.target.copy(event.target.target));
         };
-        this.eulerScenes.forEach(eulerScene => eulerScene.controls.addEventListener('start', startEventListener));
-        this.eulerScenes.forEach(eulerScene => eulerScene.controls.addEventListener('end', endEventListener));
+        this.scenesMap.forEach(scene_obj => scene_obj.scene.controls.addEventListener('start', startEventListener));
+        this.scenesMap.forEach(scene_obj => scene_obj.scene.controls.addEventListener('end', endEventListener));
     }
 
     addDblClickDivListener() {
@@ -200,45 +237,29 @@ export class SceneManager {
 
         };
         this.views.forEach(view => view.addEventListener('dblclick', dblClickListener));
-        this.eulerScenes.forEach((scene) => scene.updateCamera());
+        this.scenesMap.forEach(scene_obj => scene_obj.scene.updateCamera());
     }
 
     addWindowResizeListener() {
         window.addEventListener('resize', () => {
             this.renderer.setSize(this.viewsContainer.clientWidth, this.viewsContainer.clientHeight);
-            this.eulerScenes.forEach(eulerScene => eulerScene.updateCamera());
+            this.scenesMap.forEach(scene_obj => scene_obj.scene.updateCamera());
         });
     }
 
     createOptionsGUI() {
         const guiOptions = {
             showAllHumeri: false,
-            decompMethod: "yx'y''",
             showAngles: false
         };
         this.optionsGUI = new GUI({resizable : false, name: 'debugGUI', closeOnTop: true});
         this.optionsGUI.add(guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
-            this.eulerScenes.forEach(eulerScene => {
-                eulerScene.priorStepHumeriVisible = value;
-                eulerScene.updateHumeriBasedOnStep();
+            this.scenesMap.forEach(scene_obj => {
+                scene_obj.scene.priorStepHumeriVisible = value;
+                scene_obj.scene.updateHumeriBasedOnStep();
             });
         });
-        this.optionsGUI.add(guiOptions, 'decompMethod', ["yx'y''", "xz'y''"]).name('Decomposition').onChange(value => {
-            switch (value) {
-                case "yx'y''":
-                    this.eulerDecompClass = EulerDecomposition_RY$$_RX$_RY;
-                    this.eulerScenes[0].anglesVisFnc = Euler_yxy_angle_geometry.createAngleObjects;
-                    this.eulerScenes[0].changeSphere(new Vector3(0, 1, 0));
-                    this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
-                    break;
-                case "xz'y''":
-                    this.eulerDecompClass = EulerDecomposition_RY$$_RZ$_RX;
-                    this.eulerScenes[0].anglesVisFnc = Euler_xzy_angle_geometry.createAngleObjects;
-                    this.eulerScenes[0].changeSphere(new Vector3(1, 0, 0));
-                    this.updateEulerScenesToFrame(this.frameSelectorController.Timeline.value-1);
-                    break;
-            }
-        });
+
         this.optionsGUI.add(guiOptions, 'showAngles').name('Visualize Angles').onChange(value => {
             if (value) {
                 this.camera.layers.set(this.anglesVisLayer);
