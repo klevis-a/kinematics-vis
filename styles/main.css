@@ -77,6 +77,12 @@ body {
     display: flex;
 }
 
+.method_selector {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+
 #datGUI {
     position: absolute;
     top: 0;

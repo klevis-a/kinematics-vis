@@ -7,7 +7,8 @@ export class ViewAnimationHelper {
         this.EulerScene = eulerScene;
         this.NumFrames = numFrames;
         this.FramePeriod = framePeriod;
-        this.createCtrlDiv(ctrlDiv);
+        this.CtrlDiv = ctrlDiv;
+        this.createCtrlDiv();
         const playFnc = (frameNum) => this.play(frameNum);
         const pauseFnc = () => this.pause();
         const setFrameFnc = (frameNum) => this.setFrame(frameNum);
@@ -15,7 +16,8 @@ export class ViewAnimationHelper {
         this.CurrentAnimationFnc = (t) => this.renderNoAnimate(t);
     }
 
-    createCtrlDiv(parentElement) {
+    createCtrlDiv() {
+        const parentElement = this.CtrlDiv;
         const stateCtrlDiv = parentElement.appendChild(document.createElement('div'));
         stateCtrlDiv.setAttribute('class', 'stateControl');
         const stateCtrlForm = stateCtrlDiv.appendChild(document.createElement('form'));

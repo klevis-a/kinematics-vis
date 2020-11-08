@@ -29,3 +29,8 @@ export function get_url_param( name, url ) {
     return results == null ? null : results[1];
 }
 
+export function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}

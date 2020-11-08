@@ -11,6 +11,7 @@ import {svdDecomp} from "./EulerDecompositions.js";
 import {AXIAL_ROT_METHODS, enableAxialRot} from "./EulerScene_Axial.js"
 import {enableSphere} from "./EulerScene_Sphere.js";
 import {enableAngleVis} from "./EulerScene_AngleVis.js";
+import {removeAllChildNodes} from "./JSHelpers.js";
 
 export class SceneManager {
 
@@ -33,6 +34,7 @@ export class SceneManager {
         this.createCamera();
         this.createRenderer();
         this.createEulerScenes();
+        this.createMethodDropdowns();
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
             this.timeSeriesInfo.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum), (frameNum) => this.updateEulerScenesToFrame(frameNum));
         this.addTrackBallControlsListeners();
@@ -51,7 +53,8 @@ export class SceneManager {
                     return eulerDecomp.R3$$_R2$_R1;
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
-                axial_rot_method: AXIAL_ROT_METHODS.EULER
+                axial_rot_method: AXIAL_ROT_METHODS.EULER,
+                friendly_name: "Euler yx'y''"
             }],
 
             ['EULER_XZY', {
@@ -61,7 +64,8 @@ export class SceneManager {
                     return eulerDecomp.R3$$_R2$_R1;
                 },
                 angle_vis_method: Euler_xzy_angle_geometry.createAngleObjects,
-                axial_rot_method: AXIAL_ROT_METHODS.EULER
+                axial_rot_method: AXIAL_ROT_METHODS.EULER,
+                friendly_name: "Cardan xz'y''"
             }],
 
             ['SVD', {
@@ -70,7 +74,8 @@ export class SceneManager {
                     return svdDecomp.rotationSequence;
                 },
                 angle_vis_method: AnglesVisualizationSVD.createAngleObjects,
-                axial_rot_method: AXIAL_ROT_METHODS.SVD
+                axial_rot_method: AXIAL_ROT_METHODS.SVD,
+                friendly_name: "SVD"
             }],
 
             ['ONE_STEP', {
@@ -79,7 +84,8 @@ export class SceneManager {
                     return oneStepDecomp.rotationSequence;
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
-                axial_rot_method: AXIAL_ROT_METHODS.ONE_STEP
+                axial_rot_method: AXIAL_ROT_METHODS.ONE_STEP,
+                friendly_name: "One Step"
             }],
 
             ['TWO_STEP', {
@@ -89,7 +95,8 @@ export class SceneManager {
                     return axialDecomp.rotationSequence;
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
-                axial_rot_method: AXIAL_ROT_METHODS.TWO_STEP
+                axial_rot_method: AXIAL_ROT_METHODS.TWO_STEP,
+                friendly_name: "Two Step"
             }]
         ]);
     }
@@ -100,25 +107,70 @@ export class SceneManager {
 
     createEulerScenes() {
         this.scenesMap = new Map();
-        this.initialSceneLayout.forEach((decomp_method, view_id) => {
+        this.initialSceneLayout.forEach((method_name, view_id) => {
             const view = document.getElementById(view_id);
-            const scene = new EulerBoneScene(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
-                this.numFrames, this.camera, this.humerusGeometry, this.humerusLength);
-            const method_info = this.methods.get(decomp_method);
-            enableSphere(scene);
-            // enableAngleVis should be called after enableSphere in order to get the sphere to show up when the angle
-            // visualization checkbox is checked
-            enableAngleVis(scene, this.anglesVisLayer, method_info.angle_vis_method);
-            enableAxialRot(scene, method_info.axial_rot_method);
-            scene.initialize(method_info.decomp_method(this.getFrameQuat(0)));
-            scene.goToStep(scene.currentStep);
-            const animationHelper = new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], scene, this.numFrames, this.framePeriod);
+            const method_info = this.methods.get(method_name);
+            const [scene, animationHelper] = this.createEulerScene(view, method_info);
 
             this.scenesMap.set(view_id, {
                 view: view,
                 scene: scene,
                 decomp_method: method_info.decomp_method,
                 animation_helper: animationHelper
+            });
+        });
+    }
+
+    createEulerScene(view, method_info, frameNum=0) {
+        const scene = new EulerBoneScene(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
+            this.numFrames, this.camera, this.humerusGeometry, this.humerusLength);
+        enableSphere(scene);
+        // enableAngleVis should be called after enableSphere in order to get the sphere to show up when the angle
+        // visualization checkbox is checked
+        enableAngleVis(scene, this.anglesVisLayer, method_info.angle_vis_method);
+        enableAxialRot(scene, method_info.axial_rot_method);
+        scene.initialize(method_info.decomp_method(this.getFrameQuat(frameNum)));
+        scene.goToStep(scene.currentStep);
+        const animationHelper = new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], scene, this.numFrames, this.framePeriod);
+        return [scene, animationHelper];
+    }
+
+    changeEulerScene(view_id, method_name) {
+        let scene_obj = this.scenesMap.get(view_id);
+        const view = scene_obj.view;
+        const method_info = this.methods.get(method_name);
+        cancelAnimationFrame(this.animationHandle);
+        removeAllChildNodes(scene_obj.animation_helper.CtrlDiv);
+        const [scene, animationHelper] = this.createEulerScene(view, method_info, this.frameSelectorController.Timeline.value - 1);
+
+        this.scenesMap.set(view_id, {
+            view: view,
+            scene: scene,
+            decomp_method: method_info.decomp_method,
+            animation_helper: animationHelper
+        });
+
+        scene_obj = null;
+
+        this.render();
+    }
+
+    createMethodDropdowns() {
+        this.initialSceneLayout.forEach((decomp_method, view_id) => {
+            const view = document.getElementById(view_id);
+            const selectorDiv = view.getElementsByClassName('method_selector')[0];
+            const selector = selectorDiv.appendChild(document.createElement('select'));
+            selector.addEventListener('change', e => {
+                this.changeEulerScene(view_id, e.target.value);
+            });
+
+            this.methods.forEach((method, method_name) => {
+               const option = selector.appendChild(document.createElement('option'));
+               option.setAttribute('value', method_name);
+               option.innerHTML = method.friendly_name;
+               if (decomp_method === method_name) {
+                   option.setAttribute('selected', 'selected');
+               }
             });
         });
     }
@@ -198,7 +250,7 @@ export class SceneManager {
             if (this.CurrentControl != null) this.CurrentControl.update();
             this.ActiveScene.renderSceneGraph();
         }
-        requestAnimationFrame((t) => this.render(t));
+        this.animationHandle = requestAnimationFrame((t) => this.render(t));
     }
 
     addTrackBallControlsListeners() {
