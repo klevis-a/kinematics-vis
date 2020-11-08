@@ -17,7 +17,7 @@ EulerScene.prototype.updateHumeriBasedOnStep = function () {
             stepHumerus.visible = true;
         }
         else {
-            stepHumerus.visible = (idx + 1) === this.currentStep;
+            stepHumerus.visible = idx === this.currentStep;
         }
     });
 };

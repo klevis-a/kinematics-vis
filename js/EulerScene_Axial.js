@@ -60,63 +60,61 @@ export function initAxialRotation() {
 }
 
 export function updateAxialRotationFrame_oneStep(frameNum) {
-    if (this.currentStep === 1) {
-        this.steps[this.currentStep - 1].triad.updateMatrixWorld();
-        this.xLine.getWorldPosition(this.noAxialGroup.position);
-        this.xLine.getWorldQuaternion(this.noAxialGroup.quaternion);
-        this.noAxialGroup.rotateY(-Math.PI / 2);
+    this.steps[this.currentStep].triad.updateMatrixWorld();
+    this.xLine.getWorldPosition(this.noAxialGroup.position);
+    this.xLine.getWorldQuaternion(this.noAxialGroup.quaternion);
+    this.noAxialGroup.rotateY(-Math.PI / 2);
 
-        const currentFrame = Math.floor(frameNum);
-        if (currentFrame >= this.steps[this.currentStep - 1].numFrames) {
-            this.noAxialGroup.rotateY(-this.realAxialRotation);
-        } else {
-            const interpFactor = frameNum / this.steps[this.currentStep - 1].numFrames;
-            this.noAxialGroup.rotateY(-this.realAxialRotation * interpFactor);
-        }
+    const currentFrame = Math.floor(frameNum);
+    if (currentFrame >= this.steps[this.currentStep].numFrames) {
+        this.noAxialGroup.rotateY(-this.realAxialRotation);
+    } else {
+        const interpFactor = frameNum / this.steps[this.currentStep].numFrames;
+        this.noAxialGroup.rotateY(-this.realAxialRotation * interpFactor);
     }
 }
 
 export function updateAxialRotationFrame_axial() {
-    this.steps[this.currentStep-1].triad.updateMatrixWorld();
-    const currentHumeralAxis = this.steps[this.currentStep-1].triad.arrowAxis(1);
+    this.steps[this.currentStep].triad.updateMatrixWorld();
+    const currentHumeralAxis = this.steps[this.currentStep].triad.arrowAxis(1);
     this.noAxialGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), currentHumeralAxis);
     this.noAxialGroup.position.copy(new THREE.Vector3().copy(currentHumeralAxis).multiplyScalar(-this.humerusLength));
 }
 
 export function updateAxialRotationFrame_euler() {
-    if (this.currentStep < 3) {
+    if (this.currentStep < 2) {
         updateZeroAxialLine_Euler(this);
     }
 }
 
 export function updateAxialRotationStep_axial() {
-    this.stepHumeri[this.currentStep - 1].add(this.axialPlane);
-    this.stepHumeri[this.currentStep - 1].getObjectByName('xLine').visible = (this.currentStep > 1);
+    this.stepHumeri[this.currentStep].add(this.axialPlane);
+    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 0);
     this.updateAxialRotationFrame(0);
 }
 
 export function updateAxialRotationStep_svd() {
-    this.stepHumeri[this.currentStep-1].add(this.axialPlane);
-    this.stepHumeri[this.currentStep-1].getObjectByName('xLine').visible = (this.currentStep > 2);
+    this.stepHumeri[this.currentStep].add(this.axialPlane);
+    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 1);
     this.updateAxialRotationFrame(0);
 }
 
 export function updateAxialRotationStep_euler() {
-    this.stepHumeri[this.currentStep-1].add(this.axialPlane);
-    this.stepHumeri[this.currentStep-1].getObjectByName('xLine').visible = (this.currentStep > 2);
+    this.stepHumeri[this.currentStep].add(this.axialPlane);
+    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 1);
     updateZeroAxialLine_Euler(this);
 }
 
 export function updateAxialRotationStep_oneStep() {
-    this.stepHumeri[this.currentStep-1].add(this.axialPlane);
-    this.stepHumeri[this.currentStep-1].getObjectByName('xLine').visible = true;
+    this.stepHumeri[this.currentStep].add(this.axialPlane);
+    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = true;
     this.updateAxialRotationFrame(0);
 }
 
 function updateZeroAxialLine_Euler(scene) {
-    scene.steps[scene.currentStep-1].triad.updateMatrixWorld();
-    const currentHumeralAxis = scene.steps[scene.currentStep-1].triad.arrowAxis(1);
-    scene.noAxialGroup.setRotationFromQuaternion(scene.steps[scene.currentStep-1].triad.quaternion);
+    scene.steps[scene.currentStep].triad.updateMatrixWorld();
+    const currentHumeralAxis = scene.steps[scene.currentStep].triad.arrowAxis(1);
+    scene.noAxialGroup.setRotationFromQuaternion(scene.steps[scene.currentStep].triad.quaternion);
     scene.noAxialGroup.position.copy(new THREE.Vector3().copy(currentHumeralAxis).multiplyScalar(-scene.humerusLength));
 }
 

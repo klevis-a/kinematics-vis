@@ -33,7 +33,7 @@ export class EulerScene {
         this.triadLength = triadLength;
         this.triadAspectRatio = 0.1;
         this.markingsStart = markingStart;
-        this.currentStep = 1;
+        this.currentStep = 0;
         this.initScene();
     }
 
@@ -68,8 +68,11 @@ export class EulerScene {
         });
 
         this.steps = this.rotations.map((rotation, idx) => {
+            // the EulerStep stepNumber parameter is set to idx+1 (one-based indexing) because of how the colors and
+            // markings are are created on EulerStep objects. However, the stepNumber attribute of an EulerStep is not used
+            // otherwise
             const eulerStep = new EulerStep.EulerStep(this.quaternions[idx], rotation, this.numFrames, this.triadLength,
-                this.triadAspectRatio, this.markingsStart, idx+1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
+                this.triadAspectRatio, this.markingsStart, idx + 1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
             this.addStepToScene(eulerStep);
             return eulerStep;
         });
@@ -86,10 +89,10 @@ export class EulerScene {
         this.currentStep = stepNum;
 
         this.steps.forEach((step, idx) => {
-           if (idx <= stepNum-2) {
+           if (idx < stepNum) {
                step.activate();
                step.updateToFrame(step.numFrames);
-           } else if (idx === stepNum-1) {
+           } else if (idx === stepNum) {
                step.activate();
                step.updateToFrame(0);
            } else {
@@ -120,7 +123,7 @@ export class EulerScene {
     }
 
     updateToFrame(frameNum) {
-        this.steps[this.currentStep-1].updateToFrame(frameNum);
+        this.steps[this.currentStep].updateToFrame(frameNum);
         this.dispatchEvent({type: 'frameChange', frameNum: frameNum});
     }
 

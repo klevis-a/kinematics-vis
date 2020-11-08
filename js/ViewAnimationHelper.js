@@ -24,7 +24,7 @@ export class ViewAnimationHelper {
         stateCtrlForm.setAttribute('name', parentElement.id + '_stateCtrlForm');
         const animationHelper = this;
         const changeHandler = function () {
-            animationHelper.goToStep(parseInt(this.value));
+            animationHelper.goToStep(parseInt(this.value) - 1);
         };
         this.EulerScene.rotations.forEach((rotation, idx) => {
             const id = parentElement.id + '_' +  (idx + 1);
