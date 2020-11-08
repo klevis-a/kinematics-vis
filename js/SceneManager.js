@@ -321,7 +321,7 @@ export class SceneManager {
             showAllHumeri: false,
             showAngles: false
         };
-        this.optionsGUI = new GUI({resizable : false, name: 'debugGUI', closeOnTop: true});
+        this.optionsGUI = new GUI({resizable : false, name: 'debugGUI'});
         this.optionsGUI.add(guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
             this.scenesMap.forEach(scene_obj => {
                 scene_obj.scene.priorStepHumeriVisible = value;
