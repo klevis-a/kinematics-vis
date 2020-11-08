@@ -229,6 +229,12 @@ export class SceneManager {
         this.camera.updateProjectionMatrix();
     }
 
+    updateCamera() {
+        const {aspectRatio} = divGeometry(this.views[0]);
+        this.camera.aspect = aspectRatio;
+        this.camera.updateProjectionMatrix();
+    }
+
     createRenderer() {
         this.renderer = new WebGLRenderer({canvas: this.canvas});
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -283,7 +289,7 @@ export class SceneManager {
                         view.style.display = 'none';
                     }
                 });
-                sceneManager.ActiveScene = sceneManager.scenesMap.get(this.id);
+                sceneManager.ActiveScene = sceneManager.scenesMap.get(this.id).scene;
             } else {
                 sceneManager.activeDiv = null;
                 sceneManager.views.forEach(view => {
@@ -292,16 +298,17 @@ export class SceneManager {
                 });
                 sceneManager.ActiveScene = null;
             }
-
+            // there is only one camera in order to enable linking between the scenes
+            sceneManager.updateCamera();
         };
         this.views.forEach(view => view.addEventListener('dblclick', dblClickListener));
-        this.scenesMap.forEach(scene_obj => scene_obj.scene.updateCamera());
     }
 
     addWindowResizeListener() {
         window.addEventListener('resize', () => {
             this.renderer.setSize(this.viewsContainer.clientWidth, this.viewsContainer.clientHeight);
-            this.scenesMap.forEach(scene_obj => scene_obj.scene.updateCamera());
+            // there is only one camera in order to enable linking between the scenes
+            this.updateCamera();
         });
     }
 
