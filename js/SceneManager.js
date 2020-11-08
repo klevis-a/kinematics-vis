@@ -222,7 +222,7 @@ export class SceneManager {
     }
 
     createCamera() {
-        const {aspectRatio} = divGeometry(this.views[0]);
+        const {aspectRatio} = divGeometry(this.viewsContainer);
         const fov = 75;
         this.camera = new PerspectiveCamera(fov, aspectRatio, 1, 2000);
         this.camera.position.set(-500, 0, 0);
@@ -230,7 +230,7 @@ export class SceneManager {
     }
 
     updateCamera() {
-        const {aspectRatio} = divGeometry(this.views[0]);
+        const {aspectRatio} = divGeometry(this.viewsContainer);
         this.camera.aspect = aspectRatio;
         this.camera.updateProjectionMatrix();
     }
@@ -266,7 +266,7 @@ export class SceneManager {
     }
 
     addTrackBallControlsListeners() {
-        const startEventListener = event => this.CurrentControl= event.target;
+        const startEventListener = event => this.CurrentControl = event.target;
         const endEventListener = event => {
             this.scenesMap.forEach(scene_obj => scene_obj.scene.controls.target.copy(event.target.target));
         };
@@ -279,29 +279,29 @@ export class SceneManager {
         const dblClickListener = function () {
             if (sceneManager.activeDiv == null) {
                 sceneManager.activeDiv = this;
-                sceneManager.views.forEach(view => {
-                    if (view.id === this.id) {
-                        view.className = 'full';
-                        view.style.display = 'block';
+                sceneManager.scenesMap.forEach((scene_obj, view_id) => {
+                    if (view_id === this.id) {
+                        scene_obj.view.className = 'full';
+                        scene_obj.view.style.display = 'block';
                     }
                     else {
-                        view.className = 'zero';
-                        view.style.display = 'none';
+                        scene_obj.view.className = 'zero';
+                        scene_obj.view.style.display = 'none';
                     }
                 });
                 sceneManager.ActiveScene = sceneManager.scenesMap.get(this.id).scene;
             } else {
                 sceneManager.activeDiv = null;
-                sceneManager.views.forEach(view => {
-                    view.className='quarter';
-                    view.style.display = 'block';
+                sceneManager.scenesMap.forEach(scene_obj => {
+                    scene_obj.view.className='quarter';
+                    scene_obj.view.style.display = 'block';
                 });
                 sceneManager.ActiveScene = null;
             }
             // there is only one camera in order to enable linking between the scenes
             sceneManager.updateCamera();
         };
-        this.views.forEach(view => view.addEventListener('dblclick', dblClickListener));
+        this.scenesMap.forEach(scene_obj => scene_obj.view.addEventListener('dblclick', dblClickListener));
     }
 
     addWindowResizeListener() {
