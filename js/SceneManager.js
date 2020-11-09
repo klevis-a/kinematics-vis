@@ -27,7 +27,8 @@ export class SceneManager {
         this.svdDecompClass = svdDecomp(this.humerusTrajectory);
         this.methods = this.decompMethods();
         this.createRotations();
-        this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'SVD'], ['view3', 'SIMULTANEOUS'], ['view4', 'SWING_TWIST']]);
+        this.presentedMethods = ['EULER_YXY', 'EULER_XZY', 'SWING_TWIST', 'SIMULTANEOUS'];
+        this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'EULER_XZY'], ['view3', 'SWING_TWIST']]);
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.hhc,
             new Vector3().addVectors(this.landmarksInfo.me, this.landmarksInfo.le).multiplyScalar(0.5)).length();
@@ -203,7 +204,8 @@ export class SceneManager {
                 this.changeEulerScene(view_id, e.target.value);
             });
 
-            this.methods.forEach((method, method_name) => {
+            this.presentedMethods.forEach(method_name => {
+                const method = this.methods.get(method_name);
                const option = selector.appendChild(document.createElement('option'));
                option.setAttribute('value', method_name);
                option.innerHTML = method.friendly_name;
