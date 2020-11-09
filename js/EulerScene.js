@@ -176,15 +176,24 @@ export class EulerScene {
         const planeGeometry = new THREE.PlaneBufferGeometry(this.triadLength*2*2, this.triadLength*2*2);
         const planeEdgesGeometry = new THREE.EdgesGeometry(planeGeometry);
         this.xyPlane = new THREE.LineSegments(planeEdgesGeometry, zAxis_mat);
+        this.xyPlane.visible = false;
         this.scene.add(this.xyPlane);
 
         this.xzPlane = new THREE.LineSegments(planeEdgesGeometry, yAxis_mat);
         this.xzPlane.lookAt(new THREE.Vector3(0, 1, 0));
+        this.xzPlane.visible = false;
         this.scene.add(this.xzPlane);
 
         this.yzPlane = new THREE.LineSegments(planeEdgesGeometry, xAxis_mat);
         this.yzPlane.lookAt(new THREE.Vector3(1, 0, 0));
+        this.yzPlane.visible = false;
         this.scene.add(this.yzPlane);
+    }
+
+    toggleBodyPlaneVisibility(flag) {
+        this.xyPlane.visible = flag;
+        this.xzPlane.visible = flag;
+        this.yzPlane.visible = flag;
     }
 
     createCamera() {

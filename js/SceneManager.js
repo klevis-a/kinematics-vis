@@ -34,6 +34,7 @@ export class SceneManager {
         this.getCaptureFrameCtrlElements();
         this.createCamera();
         this.createRenderer();
+        this.createOptionsGUI();
         this.createEulerScenes();
         this.createMethodDropdowns();
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
@@ -41,7 +42,6 @@ export class SceneManager {
         this.addTrackBallControlsListeners();
         this.addDblClickDivListener();
         this.addWindowResizeListener();
-        this.createOptionsGUI();
         this.render();
     }
 
@@ -161,6 +161,10 @@ export class SceneManager {
         scene.goToStep(scene.currentStep);
         scene.changeSphere(method_info.north_pole);
         const animationHelper = new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], scene, this.numFrames, this.framePeriod);
+        scene.showTriadsArcs(this.guiOptions.showTriadsArcs);
+        scene.priorStepHumeriVisible = this.guiOptions.showAllHumeri;
+        scene.updateHumeriBasedOnStep();
+        scene.toggleBodyPlaneVisibility(this.guiOptions.showBodyPlanes);
         return [scene, animationHelper];
     }
 
@@ -336,33 +340,40 @@ export class SceneManager {
     }
 
     createOptionsGUI() {
-        const guiOptions = {
+        this.guiOptions = {
             showAllHumeri: false,
             showAngles: false,
-            showTriadsArcs: true
+            showTriadsArcs: true,
+            showBodyPlanes: false
         };
         this.optionsGUI = new GUI({resizable : false, name: 'visGUI'});
 
-        this.optionsGUI.add(guiOptions, 'showTriadsArcs').name('Show Triads/Arcs').onChange(value => {
+        this.optionsGUI.add(this.guiOptions, 'showTriadsArcs').name('Show Triads/Arcs').onChange(value => {
             this.scenesMap.forEach(scene_obj => {
                 scene_obj.scene.showTriadsArcs(value);
             });
         });
 
-        this.optionsGUI.add(guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
+        this.optionsGUI.add(this.guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
             this.scenesMap.forEach(scene_obj => {
                 scene_obj.scene.priorStepHumeriVisible = value;
                 scene_obj.scene.updateHumeriBasedOnStep();
             });
         });
 
-        this.optionsGUI.add(guiOptions, 'showAngles').name('Visualize Angles').onChange(value => {
+        this.optionsGUI.add(this.guiOptions, 'showAngles').name('Visualize Angles').onChange(value => {
             if (value) {
                 this.camera.layers.set(this.anglesVisLayer);
             }
             else {
                 this.camera.layers.set(0);
             }
+        });
+
+        this.optionsGUI.add(this.guiOptions, 'showBodyPlanes').name('Show Body Planes').onChange(value => {
+            this.scenesMap.forEach(scene_obj => {
+                scene_obj.scene.toggleBodyPlaneVisibility(value);
+            });
         });
 
         this.optionsGUI.close();
