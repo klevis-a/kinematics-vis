@@ -25,6 +25,11 @@ export const AXIAL_ROT_METHODS = {
         step_update: updateAxialRotationStep_svd,
         frame_update: updateAxialRotationFrame_axial
     },
+
+    SIMULTANEOUS: {
+        step_update: updateAxialRotationStep_simultaneous,
+        frame_update: updateAxialRotationFrame_axial
+    }
 };
 
 export function initAxialRotation() {
@@ -90,6 +95,12 @@ export function updateAxialRotationFrame_euler() {
 export function updateAxialRotationStep_axial() {
     this.stepHumeri[this.currentStep].add(this.axialPlane);
     this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 0);
+    this.updateAxialRotationFrame(0);
+}
+
+export function updateAxialRotationStep_simultaneous() {
+    this.stepHumeri[this.currentStep].add(this.axialPlane);
+    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = true;
     this.updateAxialRotationFrame(0);
 }
 

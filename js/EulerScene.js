@@ -115,7 +115,7 @@ export class EulerScene {
     }
 
     reset(rotations) {
-        console.assert(this.rotations.length === rotations.length)
+        console.assert(this.rotations.length === rotations.length);
         this.rotations = rotations;
         this.removeSteps();
         this.createSteps();

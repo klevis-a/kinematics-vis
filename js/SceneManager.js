@@ -12,6 +12,7 @@ import {enableSphere} from "./EulerScene_Sphere.js";
 import {enableAngleVis} from "./EulerScene_AngleVis.js";
 import {removeAllChildNodes} from "./JSHelpers.js";
 import {enableHumerus} from "./EulerScene_Humerus.js";
+import {EulerSceneSimultaneous} from "./EulerSceneSimultaneous.js";
 
 export class SceneManager {
 
@@ -25,7 +26,7 @@ export class SceneManager {
         this.anglesVisLayer = 1;
         this.svdDecompClass = svdDecomp(this.timeSeriesInfo);
         this.methods = this.decompMethods();
-        this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'SVD'], ['view3', 'ONE_STEP'], ['view4', 'TWO_STEP']]);
+        this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'SVD'], ['view3', 'SIMULTANEOUS'], ['view4', 'TWO_STEP']]);
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.humerus.hhc,
             new Vector3().addVectors(this.landmarksInfo.humerus.me, this.landmarksInfo.humerus.le).multiplyScalar(0.5)).length();
@@ -55,7 +56,8 @@ export class SceneManager {
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.EULER,
                 friendly_name: "Euler yx'y''",
-                north_pole: new Vector3(0, 1, 0)
+                north_pole: new Vector3(0, 1, 0),
+                scene_class: EulerScene
             }],
 
             ['EULER_XZY', {
@@ -67,7 +69,8 @@ export class SceneManager {
                 angle_vis_method: Euler_xzy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.EULER,
                 friendly_name: "Cardan xz'y''",
-                north_pole: new Vector3(1, 0, 0)
+                north_pole: new Vector3(1, 0, 0),
+                scene_class: EulerScene
             }],
 
             ['SVD', {
@@ -78,7 +81,8 @@ export class SceneManager {
                 angle_vis_method: AnglesVisualizationSVD.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.SVD,
                 friendly_name: "SVD",
-                north_pole: new Vector3(0, 1, 0)
+                north_pole: new Vector3(0, 1, 0),
+                scene_class: EulerScene
             }],
 
             ['ONE_STEP', {
@@ -89,7 +93,8 @@ export class SceneManager {
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.ONE_STEP,
                 friendly_name: "One Step",
-                north_pole: new Vector3(0, 1, 0)
+                north_pole: new Vector3(0, 1, 0),
+                scene_class: EulerScene
             }],
 
             ['TWO_STEP', {
@@ -101,7 +106,21 @@ export class SceneManager {
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.TWO_STEP,
                 friendly_name: "Two Step",
-                north_pole: new Vector3(0, 1, 0)
+                north_pole: new Vector3(0, 1, 0),
+                scene_class: EulerScene
+            }],
+
+            ['SIMULTANEOUS', {
+                decomp_method: (frameQuat) => {
+                    const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
+                    const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
+                    return axialDecomp.rotationSequence;
+                },
+                angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
+                axial_rot_method: AXIAL_ROT_METHODS.SIMULTANEOUS,
+                friendly_name: "Simultaneous",
+                north_pole: new Vector3(0, 1, 0),
+                scene_class: EulerSceneSimultaneous
             }]
         ]);
     }
@@ -127,7 +146,7 @@ export class SceneManager {
     }
 
     createEulerScene(view, method_info, frameNum=0) {
-        const scene = new EulerScene(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
+        const scene = new method_info.scene_class(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
             this.numFrames, this.camera);
         // Enabling the various components of the animations should be done in the order below. The EventDispatcher
         // dispatches event in the order that they are added (and in a single-threaded fashion). Although the features

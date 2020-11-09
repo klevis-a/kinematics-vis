@@ -26,7 +26,7 @@ export class ViewAnimationHelper {
         const changeHandler = function () {
             animationHelper.goToStep(parseInt(this.value) - 1);
         };
-        this.EulerScene.rotations.forEach((rotation, idx) => {
+        this.EulerScene.steps.forEach((step, idx) => {
             const id = parentElement.id + '_' +  (idx + 1);
             const stateDiv = stateCtrlForm.appendChild(document.createElement('div'));
             const stateRadio = stateDiv.appendChild(document.createElement('input'));
