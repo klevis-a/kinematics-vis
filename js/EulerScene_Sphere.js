@@ -61,6 +61,12 @@ EulerScene.prototype.addFinalLatitudeLongitude = function () {
     this.scene.add(this.finalLatitude);
 };
 
+EulerScene.prototype.toggleSphereVisibility = function (flag) {
+    this.sphere.visible = flag;
+    this.finalLongitude.visible = flag;
+    this.finalLatitude.visible = flag;
+};
+
 export function enableSphere(boneScene) {
     boneScene.numLatitudeSegments = 20;
     boneScene.numLongitudeSegments = 10;
@@ -72,6 +78,7 @@ export function enableSphere(boneScene) {
     boneScene.addEventListener('reset', function (event) {
         const scene = event.target;
         scene.addFinalLatitudeLongitude();
+        scene.toggleSphereVisibility(scene.sphere.visible);
     });
 }
 

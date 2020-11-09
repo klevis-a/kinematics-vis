@@ -165,6 +165,7 @@ export class SceneManager {
         scene.priorStepHumeriVisible = this.guiOptions.showAllHumeri;
         scene.updateHumeriBasedOnStep();
         scene.toggleBodyPlaneVisibility(this.guiOptions.showBodyPlanes);
+        scene.toggleSphereVisibility(this.guiOptions.showSphere);
         return [scene, animationHelper];
     }
 
@@ -217,6 +218,7 @@ export class SceneManager {
         const frameQuat = this.getFrameQuat(frameNum);
         this.scenesMap.forEach(scene_obj => {
             scene_obj.scene.reset(scene_obj.decomp_method(frameQuat));
+            scene_obj.scene.showTriadsArcs(this.guiOptions.showTriadsArcs);
             scene_obj.animation_helper.goToStep(scene_obj.scene.currentStep);
         });
     }
@@ -344,7 +346,8 @@ export class SceneManager {
             showAllHumeri: false,
             showAngles: false,
             showTriadsArcs: true,
-            showBodyPlanes: false
+            showBodyPlanes: false,
+            showSphere: true
         };
         this.optionsGUI = new GUI({resizable : false, name: 'visGUI'});
 
@@ -373,6 +376,12 @@ export class SceneManager {
         this.optionsGUI.add(this.guiOptions, 'showBodyPlanes').name('Show Body Planes').onChange(value => {
             this.scenesMap.forEach(scene_obj => {
                 scene_obj.scene.toggleBodyPlaneVisibility(value);
+            });
+        });
+
+        this.optionsGUI.add(this.guiOptions, 'showSphere').name('Show Sphere').onChange(value => {
+            this.scenesMap.forEach(scene_obj => {
+                scene_obj.scene.toggleSphereVisibility(value);
             });
         });
 
