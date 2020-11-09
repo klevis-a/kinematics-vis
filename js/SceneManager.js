@@ -1,18 +1,17 @@
 import {divGeometry} from "./SceneHelpers.js";
-import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
+import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3, MathUtils} from "./vendor/three.js/build/three.module.js";
 import {ViewAnimationHelper} from "./ViewAnimationHelper.js";
-import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, SwingTwist, ShortestPath} from "./RotDecompositions.js";
+import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, SwingTwist, ShortestPath, svdDecomp} from "./RotDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry, AnglesVisualizationSVD} from "./EulerAnglesGeometry.js";
-import {svdDecomp} from "./RotDecompositions.js";
 import {AXIAL_ROT_METHODS, enableAxialRot} from "./EulerScene_Axial.js"
 import {EulerScene} from "./EulerScene.js";
 import {enableSphere} from "./EulerScene_Sphere.js";
 import {enableAngleVis} from "./EulerScene_AngleVis.js";
-import {removeAllChildNodes} from "./JSHelpers.js";
 import {enableHumerus} from "./EulerScene_Humerus.js";
 import {EulerSceneSimultaneous} from "./EulerSceneSimultaneous.js";
+import {removeAllChildNodes, range} from "./JSHelpers.js";
 
 export class SceneManager {
 
@@ -21,14 +20,17 @@ export class SceneManager {
         this.humerusTrajectory = humerusTrajectory;
         this.humerusGeometry = humerusGeometry;
         this.activeDiv = null;
-        this.numFrames = 100; // this dictates the number of frames for each animation - not the number of frames in the capture
+        this.numFramesAnimation = 100; // this dictates the number of frames for each animation - not the number of frames in the capture
         this.framePeriod = 10; // in ms - meaning that each animation takes 1 seconds
         this.anglesVisLayer = 1;
+        this.presentedMethods = ['EULER_YXY', 'EULER_XZY', 'SWING_TWIST', 'SIMULTANEOUS'];
+        this.plotMethodNames = new Map([['EULER_YXY', "ISB: yx'y''"], ['EULER_XZY', "Phadke: xz'y''"], ['SWING_TWIST', 'Swing Twist/Simultaneous']]);
+        this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'EULER_XZY'], ['view3', 'SWING_TWIST']]);
+        this.plottingDiv = document.getElementById('view4');
         this.svdDecompClass = svdDecomp(this.humerusTrajectory);
         this.methods = this.decompMethods();
         this.createRotations();
-        this.presentedMethods = ['EULER_YXY', 'EULER_XZY', 'SWING_TWIST', 'SIMULTANEOUS'];
-        this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'EULER_XZY'], ['view3', 'SWING_TWIST']]);
+        this.addPlot();
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.hhc,
             new Vector3().addVectors(this.landmarksInfo.me, this.landmarksInfo.le).multiplyScalar(0.5)).length();
@@ -45,6 +47,60 @@ export class SceneManager {
         this.addDblClickDivListener();
         this.addWindowResizeListener();
         this.render();
+    }
+
+    addPlot() {
+        this.poe = new Map([['EULER_YXY', []], ['EULER_XZY', []], ['SWING_TWIST', []]]);
+        this.rotations.get('EULER_YXY').forEach(rotation => {
+            const angle = MathUtils.radToDeg(rotation[0].angle);
+            this.poe.get('EULER_YXY').push(angle);
+            this.poe.get('SWING_TWIST').push(angle);
+        });
+        this.rotations.get('EULER_XZY').forEach(rotation => {
+            const angle = MathUtils.radToDeg(rotation[1].angle);
+            this.poe.get('EULER_XZY').push(angle);
+        });
+        this.frameNums = range(this.poe.get('EULER_YXY').length).map(val => val + 1);
+        const traces = Array.from(this.poe, ([method_name, data]) => {
+            return {x: this.frameNums, y: data, type: 'scatter', name: this.plotMethodNames.get(method_name)}
+        });
+        const layout = {
+            xaxis: {
+                title: {text: 'Frame Number', standoff: 0},
+                automargin: true
+            },
+            yaxis: {
+                title: {text: 'Angle (deg)', standoff: 5},
+                automargin: true
+            },
+            title: 'Plane of Elevation',
+            showlegend: true,
+            legend: {"orientation": "h"},
+            margin: {l: 50, r: 50, t: 50, b: 50},
+            hovermode: 'closest'
+        };
+        Plotly.newPlot('view4', traces, layout, {scrollZoom: true, responsive: true, displaylogo: false});
+        this.plottingDiv.on('plotly_click', data => {
+            if (data.points.length > 0) {
+                const frameNum = Math.round(data.points[0].x) - 1;
+                this.updateEulerScenesToFrame(frameNum);
+                this.frameSelectorController.updateTimeLine(frameNum);
+            }
+        });
+
+        this.plottingDiv.on('plotly_hover', data => {
+            if (data.points.length > 0) {
+                const frameNum = Math.round(data.points[0].x) - 1;
+                this.updateHumerusInScenes(frameNum);
+                this.frameSelectorController.updateTimeLine(frameNum);
+            }
+        })
+        .on('plotly_unhover', data => {
+            this.scenesMap.forEach(scene_obj => {
+                const scene = scene_obj.scene;
+                scene.humerus.quaternion.copy(scene.steps[scene.steps.length - 1].endingTriad.quaternion);
+            });
+        });
     }
 
     createRotations() {
@@ -66,7 +122,7 @@ export class SceneManager {
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.EULER,
-                friendly_name: "Euler yx'y''",
+                friendly_name: "ISB: yx'y''",
                 north_pole: new Vector3(0, 1, 0),
                 scene_class: EulerScene
             }],
@@ -79,7 +135,7 @@ export class SceneManager {
                 },
                 angle_vis_method: Euler_xzy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.EULER,
-                friendly_name: "Cardan xz'y''",
+                friendly_name: "Phadke: xz'y''",
                 north_pole: new Vector3(1, 0, 0),
                 scene_class: EulerScene
             }],
@@ -154,7 +210,7 @@ export class SceneManager {
     createEulerScene(view, method_name, frameNum=0) {
         const method_info = this.methods.get(method_name);
         const scene = new method_info.scene_class(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
-            this.numFrames, this.camera);
+            this.numFramesAnimation, this.camera);
         // Enabling the various components of the animations should be done in the order below. The EventDispatcher
         // dispatches event in the order that they are added (and in a single-threaded fashion). Although the features
         // will largely work if they are not added in the correct order, there might be unforeseen bugs.
@@ -167,7 +223,7 @@ export class SceneManager {
         scene.initialize(this.rotations.get(method_name)[frameNum]);
         scene.goToStep(scene.currentStep);
         scene.changeSphere(method_info.north_pole);
-        const animationHelper = new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], scene, this.numFrames, this.framePeriod);
+        const animationHelper = new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], scene, this.numFramesAnimation, this.framePeriod);
         scene.showTriadsArcs(this.guiOptions.showTriadsArcs);
         scene.priorStepHumeriVisible = this.guiOptions.showAllHumeri;
         scene.updateHumeriBasedOnStep();
@@ -222,6 +278,9 @@ export class SceneManager {
     }
 
     updateEulerScenesToFrame(frameNum) {
+        if (frameNum < 0)  frameNum = 0;
+        if (frameNum >= this.humerusTrajectory.NumFrames) frameNum = this.humerusTrajectory.NumFrames - 1;
+
         this.scenesMap.forEach(scene_obj => {
             scene_obj.scene.reset(this.rotations.get(scene_obj.method_name)[frameNum]);
             scene_obj.scene.showTriadsArcs(this.guiOptions.showTriadsArcs);

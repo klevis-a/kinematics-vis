@@ -43,4 +43,9 @@ export class FrameSelectorController {
         this.FrameNumLbl.innerHTML = this.Timeline.value;
         this.SetFrameFnc(this.Timeline.value-1);
     }
+
+    updateTimeLine(frameNum) {
+        this.Timeline.value = frameNum + 1;
+        this.FrameNumLbl.innerHTML = this.Timeline.value;
+    }
 }

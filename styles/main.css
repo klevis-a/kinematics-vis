@@ -150,8 +150,8 @@ body {
 
 #help-btn-div {
     position: absolute;
-    right: 3px;
-    top: 3px;
+    left: calc(50% + 3px);
+    bottom: 3px;
     width: 24px;
     height: 24px;
     text-align: center;
