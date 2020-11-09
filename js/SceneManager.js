@@ -26,6 +26,7 @@ export class SceneManager {
         this.anglesVisLayer = 1;
         this.svdDecompClass = svdDecomp(this.humerusTrajectory);
         this.methods = this.decompMethods();
+        this.createRotations();
         this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'SVD'], ['view3', 'SIMULTANEOUS'], ['view4', 'SWING_TWIST']]);
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.hhc,
@@ -43,6 +44,15 @@ export class SceneManager {
         this.addDblClickDivListener();
         this.addWindowResizeListener();
         this.render();
+    }
+
+    createRotations() {
+        this.rotations = new Map(Array.from(this.methods, ([method_name, value]) => [method_name, []]));
+        for(let i=0; i<this.humerusTrajectory.NumFrames; i++) {
+            this.rotations.forEach((method_traj, method_name) => {
+                method_traj.push(this.methods.get(method_name).decomp_method(this.humerusTrajectory.humOrientQuat(i)));
+            });
+        }
     }
 
     decompMethods() {
@@ -125,27 +135,23 @@ export class SceneManager {
         ]);
     }
 
-    getFrameQuat(frameNum){
-        return  this.humerusTrajectory.humOrientQuat(frameNum);
-    }
-
     createEulerScenes() {
         this.scenesMap = new Map();
         this.initialSceneLayout.forEach((method_name, view_id) => {
             const view = document.getElementById(view_id);
-            const method_info = this.methods.get(method_name);
-            const [scene, animationHelper] = this.createEulerScene(view, method_info);
+            const [scene, animationHelper] = this.createEulerScene(view, method_name);
 
             this.scenesMap.set(view_id, {
                 view: view,
                 scene: scene,
-                decomp_method: method_info.decomp_method,
-                animation_helper: animationHelper
+                animation_helper: animationHelper,
+                method_name: method_name,
             });
         });
     }
 
-    createEulerScene(view, method_info, frameNum=0) {
+    createEulerScene(view, method_name, frameNum=0) {
+        const method_info = this.methods.get(method_name);
         const scene = new method_info.scene_class(view, view.getElementsByClassName('trackball_div')[0], this.renderer,
             this.numFrames, this.camera);
         // Enabling the various components of the animations should be done in the order below. The EventDispatcher
@@ -157,7 +163,7 @@ export class SceneManager {
         // visualization checkbox is checked
         enableAngleVis(scene, this.anglesVisLayer, method_info.angle_vis_method);
         enableAxialRot(scene, method_info.axial_rot_method);
-        scene.initialize(method_info.decomp_method(this.getFrameQuat(frameNum)));
+        scene.initialize(this.rotations.get(method_name)[frameNum]);
         scene.goToStep(scene.currentStep);
         scene.changeSphere(method_info.north_pole);
         const animationHelper = new ViewAnimationHelper(view.getElementsByClassName('view_controls')[0], scene, this.numFrames, this.framePeriod);
@@ -172,15 +178,14 @@ export class SceneManager {
     changeEulerScene(view_id, method_name) {
         let scene_obj = this.scenesMap.get(view_id);
         const view = scene_obj.view;
-        const method_info = this.methods.get(method_name);
         cancelAnimationFrame(this.animationHandle);
         removeAllChildNodes(scene_obj.animation_helper.CtrlDiv);
-        const [scene, animationHelper] = this.createEulerScene(view, method_info, this.frameSelectorController.Timeline.value - 1);
+        const [scene, animationHelper] = this.createEulerScene(view, method_name, this.frameSelectorController.Timeline.value - 1);
 
         this.scenesMap.set(view_id, {
             view: view,
             scene: scene,
-            decomp_method: method_info.decomp_method,
+            method_name: method_name,
             animation_helper: animationHelper
         });
 
@@ -190,7 +195,7 @@ export class SceneManager {
     }
 
     createMethodDropdowns() {
-        this.initialSceneLayout.forEach((decomp_method, view_id) => {
+        this.initialSceneLayout.forEach((specified_method_name, view_id) => {
             const view = document.getElementById(view_id);
             const selectorDiv = view.getElementsByClassName('method_selector')[0];
             const selector = selectorDiv.appendChild(document.createElement('select'));
@@ -202,7 +207,7 @@ export class SceneManager {
                const option = selector.appendChild(document.createElement('option'));
                option.setAttribute('value', method_name);
                option.innerHTML = method.friendly_name;
-               if (decomp_method === method_name) {
+               if (specified_method_name === method_name) {
                    option.setAttribute('selected', 'selected');
                }
             });
@@ -215,9 +220,8 @@ export class SceneManager {
     }
 
     updateEulerScenesToFrame(frameNum) {
-        const frameQuat = this.getFrameQuat(frameNum);
         this.scenesMap.forEach(scene_obj => {
-            scene_obj.scene.reset(scene_obj.decomp_method(frameQuat));
+            scene_obj.scene.reset(this.rotations.get(scene_obj.method_name)[frameNum]);
             scene_obj.scene.showTriadsArcs(this.guiOptions.showTriadsArcs);
             scene_obj.animation_helper.goToStep(scene_obj.scene.currentStep);
         });
