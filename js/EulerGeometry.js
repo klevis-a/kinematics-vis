@@ -184,9 +184,9 @@ export class RotAxisWithArrow extends THREE.Object3D {
     }
 
     isSeen(flag) {
-        this.axis.material.visible = false;
-        this.arc.material.visible = false;
-        this.arrow.material.visible = false;
+        this.axis.material.visible = flag;
+        this.arc.material.visible = flag;
+        this.arrow.material.visible = flag;
     }
 
     dispose() {
