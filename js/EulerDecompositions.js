@@ -1,6 +1,33 @@
 import {Matrix4, Quaternion, Vector3} from "./vendor/three.js/build/three.module.js";
 import SVD from './vendor/svd.js'
 
+
+export function axisAngleFromQuat(quat) {
+    quat.normalize();
+    let angle = 2 * Math.acos(quat.w);
+    angle = angle > Math.PI ? -(2 * Math.PI - angle) : angle;
+    const s = Math.sqrt(1 - quat.w * quat.w);
+    const axis = new Vector3(quat.x, quat.y, quat.z);
+    if (s >= 0.001) {
+        axis.multiplyScalar(1 / s);
+    }
+
+    return {axis: axis, angle: angle};
+}
+
+export function quatProject(quat, axis) {
+    const r = new Vector3(quat.x, quat.y, quat.z);
+    const p = new Vector3().copy(axis).multiplyScalar(r.dot(axis));
+    return new Quaternion(p.x, p.y, p.z, quat.w).normalize();
+}
+
+export class AxisAngle {
+    constructor(axis, angle) {
+        this.axis = axis;
+        this.angle = angle;
+    }
+}
+
 class EulerDecomposition {
     constructor(mat4) {
         this.mat4 = mat4;
@@ -36,6 +63,8 @@ class EulerDecomposition {
     }
 
     createRotations() {
+        // There is actually 5 different ways to look at Euler angles. The first view R3$$_R2$_R1 corresponds to
+        // an intrinsic decomposition. The last view R1_R2_R3 corresponds to an extrinsic decomposition.
         this.R3$$_R2$_R1 = [this.axis_1, this.axis_2$, this.axis_3$$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)));
         this.R3$$_R1_R2 = [this.axis_2, this.axis_1, this.axis_3$$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)));
         this.R2$_R3$_R1 = [this.axis_1, this.axis_3$, this.axis_2$].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)));
@@ -43,19 +72,6 @@ class EulerDecomposition {
         this.R1_R2_R3 = [this.axis_3, this.axis_2, this.axis_1].map(entry => new AxisAngle(entry, this.axisAngleMap.get(entry)));
         this.R3$$_Rcombo  = [new AxisAngle(this.axis_12_combined, this.angle_12_combined), new AxisAngle(this.axis_3$$, this.angles[2]), new AxisAngle(new Vector3(0, 0, 1), 0)];
     }
-}
-
-export function axisAngleFromQuat(quat) {
-    quat.normalize();
-    let angle = 2 * Math.acos(quat.w);
-    angle = angle > Math.PI ? -(2 * Math.PI - angle) : angle;
-    const s = Math.sqrt(1 - quat.w * quat.w);
-    const axis = new Vector3(quat.x, quat.y, quat.z);
-    if (s >= 0.001) {
-        axis.multiplyScalar(1 / s);
-    }
-
-    return {axis: axis, angle: angle};
 }
 
 export class EulerDecomposition_RY$$_RZ$_RX extends EulerDecomposition{
@@ -120,16 +136,9 @@ export class EulerDecomposition_RY$$_RX$_RY extends EulerDecomposition{
     extractAngles() {
         if (this.getElement(1, 1) < 1) {
             if (this.getElement(1, 1) > -1) {
-                this.angles[1] = Math.acos(this.getElement(1, 1));
-                if (this.angles[1]> 0) {
-                    this.angles[1] = -this.angles[1];
-                    this.angles[0] = Math.atan2(-this.getElement(0, 1), -this.getElement(2, 1));
-                    this.angles[2] = Math.atan2(-this.getElement(1, 0), this.getElement(1, 2));
-                }
-                else {
-                    this.angles[0] = Math.atan2(this.getElement(0, 1), this.getElement(2, 1));
-                    this.angles[2] = Math.atan2(this.getElement(1, 0), -this.getElement(1, 2));
-                }
+                this.angles[1] = -Math.acos(this.getElement(1, 1));
+                this.angles[0] = Math.atan2(-this.getElement(0, 1), -this.getElement(2, 1));
+                this.angles[2] = Math.atan2(-this.getElement(1, 0), this.getElement(1, 2));
             }
             // r11=-1
             else {
@@ -163,7 +172,7 @@ export class EulerDecomposition_RY$$_RX$_RY extends EulerDecomposition{
     }
 }
 
-export class OneStep {
+export class ShortestPath {
     constructor(quat) {
         this.quat = quat;
         const {axis: axis, angle: angle} = axisAngleFromQuat(this.quat);
@@ -173,13 +182,12 @@ export class OneStep {
     }
 }
 
-export class AxialDecomposition {
+export class SwingTwist {
     constructor(quat, axialAxis) {
         this.quat = quat;
         this.axialAxis = axialAxis;
         this.angles = [];
         this.extractAxialQuat();
-        //this.extractZXQuat();
         const {axis: nonAxialAxis, angle: nonAxialAngle} = axisAngleFromQuat(this.nonAxialQuat);
         let {axis: axialAxisComp, angle: axialAngle} = axisAngleFromQuat(this.axialQuat);
         if (axialAxisComp.dot(axialAxis) < 0) {
@@ -189,57 +197,20 @@ export class AxialDecomposition {
             new AxisAngle(nonAxialAxis, nonAxialAngle),
             new AxisAngle(new Vector3().copy(axialAxis), axialAngle)
         ];
-
-        /*
-        const {axis: zAxis, angle: zAngle} = axisAngleFromQuat(this.zAxisQuat);
-        const {axis: xAxis, angle: xAngle} = axisAngleFromQuat(this.xAxisQuat);
-        //console.log(zAxis);
-        //console.log(xAxis);
-
-        this.rotationSequence = [
-            new AxisAngle(zAxis, zAngle),
-            new AxisAngle(xAxis, xAngle),
-            new AxisAngle(new Vector3().copy(axialAxis), 2 * Math.acos(this.axialQuat.w))
-        ]
-         */
-
-        /*
-        const {axis: zAxis, angle: zAngle} = axisAngleFromQuat(this.zAxisQuat);
-        const {axis: xAxis, angle: xAngle} = axisAngleFromQuat(this.xAxisQuat);
-        xAxis.applyQuaternion(new Quaternion().copy(this.zAxisQuat).conjugate());
-
-        this.rotationSequence = [
-            new AxisAngle(xAxis, xAngle),
-            new AxisAngle(zAxis, zAngle),
-            new AxisAngle(new Vector3().copy(axialAxis), 2 * Math.acos(this.axialQuat.w))
-        ]
-         */
-
-
     }
 
     extractAxialQuat() {
-        const r = new Vector3(this.quat.x, this.quat.y, this.quat.z);
-        const p = new Vector3().copy(this.axialAxis).multiplyScalar(r.dot(this.axialAxis));
-        this.axialQuat = new Quaternion(p.x, p.y, p.z, this.quat.w).normalize();
+        this.axialQuat = quatProject(this.quat, this.axialAxis);
         this.nonAxialQuat = new Quaternion().copy(this.axialQuat).conjugate().multiply(this.quat).normalize();
-    }
-
-    extractZXQuat() {
-        const zAxis =  new Vector3(1, 0, 0);
-        const r = new Vector3(this.nonAxialQuat.x, this.nonAxialQuat.y, this.nonAxialQuat.z);
-        const p = new Vector3().copy(zAxis).multiplyScalar(r.dot(zAxis));
-        this.zAxisQuat = new Quaternion(p.x, p.y, p.z, this.nonAxialQuat.w).normalize();
-        this.xAxisQuat = new Quaternion().multiplyQuaternions(this.nonAxialQuat, new Quaternion().copy(this.zAxisQuat).conjugate());
     }
 }
 
-export function svdDecomp(timeSeriesInfo) {
+export function svdDecomp(humerusTrajectory) {
 
     const y_axes = [];
 
-    for (let i=0; i<timeSeriesInfo.NumFrames; i++) {
-        const humQuat = timeSeriesInfo.humOrientQuat(i);
+    for (let i=0; i<humerusTrajectory.NumFrames; i++) {
+        const humQuat = humerusTrajectory.humOrientQuat(i);
         const humMat = new Matrix4().makeRotationFromQuaternion(humQuat);
         const y_axis = new Vector3().setFromMatrixColumn(humMat, 1);
         y_axes.push([y_axis.x, y_axis.z]);
@@ -262,7 +233,7 @@ export function svdDecomp(timeSeriesInfo) {
     const minDim = q.indexOf(Math.min(...q));
     const majorRotAxis = new Vector3(v[0][minDim], 0, v[1][minDim]);
 
-    const svdDecompClass = class SvdDecompClass{
+    return class SvdDecompClass{
         constructor(quat) {
             this.quat = quat;
             this.mat = new Matrix4().makeRotationFromQuaternion(this.quat);
@@ -290,23 +261,14 @@ export function svdDecomp(timeSeriesInfo) {
 
         extractMajorMinorAxis() {
             this.majorAxisQuat = quatProject(this.nonAxialQuat, majorRotAxis);
+
+            // the decomp below is R_nonaxial = R_major * R_minor - that is the major axis rotation follows the minor
+            // axis rotation
             //this.minorAxisQuat = new Quaternion().copy(this.majorAxisQuat).conjugate().multiply(this.nonAxialQuat).normalize();
+
+            // the decomp below is R_nonaxial = R_minor * R_major - that is the minor axis rotation follows the major
+            // axis rotation
             this.minorAxisQuat = new Quaternion().copy(this.nonAxialQuat).multiply(new Quaternion().copy(this.majorAxisQuat).conjugate());
         }
     };
-
-    return svdDecompClass;
-}
-
-export function quatProject(quat, axis) {
-    const r = new Vector3(quat.x, quat.y, quat.z);
-    const p = new Vector3().copy(axis).multiplyScalar(r.dot(axis));
-    return new Quaternion(p.x, p.y, p.z, quat.w).normalize();
-}
-
-export class AxisAngle {
-    constructor(axis, angle) {
-        this.axis = axis;
-        this.angle = angle;
-    }
 }

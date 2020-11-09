@@ -11,24 +11,24 @@ export const AXIAL_ROT_METHODS = {
         frame_update: updateAxialRotationFrame_euler
     },
 
-    TWO_STEP: {
-        step_update: updateAxialRotationStep_axial,
-        frame_update: updateAxialRotationFrame_axial
+    SWING_TWIST: {
+        step_update: updateAxialRotationStep_swingTwist,
+        frame_update: updateAxialRotationFrame_swingTwist
     },
 
     ONE_STEP: {
-        step_update: updateAxialRotationStep_oneStep,
-        frame_update: updateAxialRotationFrame_oneStep
+        step_update: updateAxialRotationStep_shortestPath,
+        frame_update: updateAxialRotationFrame_shortestPath
     },
 
     SVD: {
         step_update: updateAxialRotationStep_svd,
-        frame_update: updateAxialRotationFrame_axial
+        frame_update: updateAxialRotationFrame_swingTwist
     },
 
     SIMULTANEOUS: {
         step_update: updateAxialRotationStep_simultaneous,
-        frame_update: updateAxialRotationFrame_axial
+        frame_update: updateAxialRotationFrame_swingTwist
     }
 };
 
@@ -64,7 +64,7 @@ export function initAxialRotation() {
     this.updateAxialRotationFrame(0);
 }
 
-export function updateAxialRotationFrame_oneStep(frameNum) {
+export function updateAxialRotationFrame_shortestPath(frameNum) {
     this.steps[this.currentStep].triad.updateMatrixWorld();
     this.xLine.getWorldPosition(this.noAxialGroup.position);
     this.xLine.getWorldQuaternion(this.noAxialGroup.quaternion);
@@ -79,7 +79,7 @@ export function updateAxialRotationFrame_oneStep(frameNum) {
     }
 }
 
-export function updateAxialRotationFrame_axial() {
+export function updateAxialRotationFrame_swingTwist() {
     this.steps[this.currentStep].triad.updateMatrixWorld();
     const currentHumeralAxis = this.steps[this.currentStep].triad.arrowAxis(1);
     this.noAxialGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), currentHumeralAxis);
@@ -92,7 +92,7 @@ export function updateAxialRotationFrame_euler() {
     }
 }
 
-export function updateAxialRotationStep_axial() {
+export function updateAxialRotationStep_swingTwist() {
     this.stepHumeri[this.currentStep].add(this.axialPlane);
     this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 0);
     this.updateAxialRotationFrame(0);
@@ -116,7 +116,7 @@ export function updateAxialRotationStep_euler() {
     updateZeroAxialLine_Euler(this);
 }
 
-export function updateAxialRotationStep_oneStep() {
+export function updateAxialRotationStep_shortestPath() {
     this.stepHumeri[this.currentStep].add(this.axialPlane);
     this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = true;
     this.updateAxialRotationFrame(0);

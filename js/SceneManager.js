@@ -1,7 +1,7 @@
 import {divGeometry} from "./SceneHelpers.js";
 import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
 import {ViewAnimationHelper} from "./ViewAnimationHelper.js";
-import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, AxialDecomposition, OneStep} from "./EulerDecompositions.js";
+import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, SwingTwist, ShortestPath} from "./EulerDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry, AnglesVisualizationSVD} from "./EulerAnglesGeometry.js";
@@ -26,7 +26,7 @@ export class SceneManager {
         this.anglesVisLayer = 1;
         this.svdDecompClass = svdDecomp(this.humerusTrajectory);
         this.methods = this.decompMethods();
-        this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'SVD'], ['view3', 'SIMULTANEOUS'], ['view4', 'TWO_STEP']]);
+        this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'SVD'], ['view3', 'SIMULTANEOUS'], ['view4', 'SWING_TWIST']]);
         this.normalizeHumerusGeometry();
         this.humerusLength = new Vector3().subVectors(this.landmarksInfo.hhc,
             new Vector3().addVectors(this.landmarksInfo.me, this.landmarksInfo.le).multiplyScalar(0.5)).length();
@@ -85,27 +85,27 @@ export class SceneManager {
                 scene_class: EulerScene
             }],
 
-            ['ONE_STEP', {
+            ['SHORTEST_PATH', {
                 decomp_method: (frameQuat) => {
-                    const oneStepDecomp = new OneStep(frameQuat);
+                    const oneStepDecomp = new ShortestPath(frameQuat);
                     return oneStepDecomp.rotationSequence;
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
                 axial_rot_method: AXIAL_ROT_METHODS.ONE_STEP,
-                friendly_name: "One Step",
+                friendly_name: "Shortest Path",
                 north_pole: new Vector3(0, 1, 0),
                 scene_class: EulerScene
             }],
 
-            ['TWO_STEP', {
+            ['SWING_TWIST', {
                 decomp_method: (frameQuat) => {
                     const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
-                    const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
+                    const axialDecomp = new SwingTwist(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
                     return axialDecomp.rotationSequence;
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
-                axial_rot_method: AXIAL_ROT_METHODS.TWO_STEP,
-                friendly_name: "Two Step",
+                axial_rot_method: AXIAL_ROT_METHODS.SWING_TWIST,
+                friendly_name: "Swing Twist",
                 north_pole: new Vector3(0, 1, 0),
                 scene_class: EulerScene
             }],
@@ -113,7 +113,7 @@ export class SceneManager {
             ['SIMULTANEOUS', {
                 decomp_method: (frameQuat) => {
                     const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
-                    const axialDecomp = new AxialDecomposition(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
+                    const axialDecomp = new SwingTwist(frameQuat, new Vector3().setFromMatrixColumn(frameMat,1));
                     return axialDecomp.rotationSequence;
                 },
                 angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
