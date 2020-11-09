@@ -1,11 +1,11 @@
 import {divGeometry} from "./SceneHelpers.js";
 import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
 import {ViewAnimationHelper} from "./ViewAnimationHelper.js";
-import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, SwingTwist, ShortestPath} from "./EulerDecompositions.js";
+import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, SwingTwist, ShortestPath} from "./RotDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry, AnglesVisualizationSVD} from "./EulerAnglesGeometry.js";
-import {svdDecomp} from "./EulerDecompositions.js";
+import {svdDecomp} from "./RotDecompositions.js";
 import {AXIAL_ROT_METHODS, enableAxialRot} from "./EulerScene_Axial.js"
 import {EulerScene} from "./EulerScene.js";
 import {enableSphere} from "./EulerScene_Sphere.js";

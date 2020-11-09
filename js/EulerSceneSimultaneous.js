@@ -1,7 +1,7 @@
 import {EulerScene} from "./EulerScene.js";
 import * as THREE from "./vendor/three.js/build/three.module.js";
 import * as EulerStep from "./EulerStep.js";
-import {axisAngleFromQuat, AxisAngle} from "./EulerDecompositions.js";
+import {axisAngleFromQuat} from "./RotDecompositions.js";
 
 
 class EulerStepSimultaneous extends EulerStep.EulerStep {
