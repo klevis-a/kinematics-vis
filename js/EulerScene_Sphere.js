@@ -10,15 +10,16 @@ EulerScene.prototype.addSphere = function(northPole) {
     this.sphere = new THREE.LineSegments(sphereGeometryEdges, this.sphereEdgesMaterial);
     this.scene.add(this.sphere);
 
-    const longitudeDeltaAngle = Math.PI/this.numLongitudeSegments;
-    for (let i=1; i<this.numLongitudeSegments; i++) {
-        const points = [];
-        points.push(new THREE.Vector3());
-        points.push(new THREE.Vector3(Math.cos(i*longitudeDeltaAngle)*this.humerusLength, 0, Math.sin(i*longitudeDeltaAngle)*this.humerusLength));
-        const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-        const line = new THREE.Line(lineGeometry, this.sphereEdgesMaterial);
-        this.sphere.add(line);
-    }
+    // the lines below are drawn at the equator - they can be useful but also add visual comlexity so I am removing them for now
+    // const longitudeDeltaAngle = Math.PI/this.numLongitudeSegments;
+    // for (let i=1; i<this.numLongitudeSegments; i++) {
+    //     const points = [];
+    //     points.push(new THREE.Vector3());
+    //     points.push(new THREE.Vector3(Math.cos(i*longitudeDeltaAngle)*this.humerusLength, 0, Math.sin(i*longitudeDeltaAngle)*this.humerusLength));
+    //     const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+    //     const line = new THREE.Line(lineGeometry, this.sphereEdgesMaterial);
+    //     this.sphere.add(line);
+    // }
 };
 
 EulerScene.prototype.changeSphere = function(northPole) {
