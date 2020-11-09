@@ -239,7 +239,7 @@ export function svdDecomp(timeSeriesInfo) {
     const y_axes = [];
 
     for (let i=0; i<timeSeriesInfo.NumFrames; i++) {
-        const humQuat = timeSeriesInfo.torsoOrientQuat(i).conjugate().multiply(timeSeriesInfo.humOrientQuat(i));
+        const humQuat = timeSeriesInfo.humOrientQuat(i);
         const humMat = new Matrix4().makeRotationFromQuaternion(humQuat);
         const y_axis = new Vector3().setFromMatrixColumn(humMat, 1);
         y_axes.push([y_axis.x, y_axis.z]);

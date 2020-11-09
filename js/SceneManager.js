@@ -16,20 +16,20 @@ import {EulerSceneSimultaneous} from "./EulerSceneSimultaneous.js";
 
 export class SceneManager {
 
-    constructor(landmarksInfo, timeSeriesInfo, humerusGeometry) {
+    constructor(landmarksInfo, humerusTrajectory, humerusGeometry) {
         this.landmarksInfo = landmarksInfo;
-        this.timeSeriesInfo = timeSeriesInfo;
+        this.humerusTrajectory = humerusTrajectory;
         this.humerusGeometry = humerusGeometry;
         this.activeDiv = null;
         this.numFrames = 100; // this dictates the number of frames for each animation - not the number of frames in the capture
         this.framePeriod = 10; // in ms - meaning that each animation takes 1 seconds
         this.anglesVisLayer = 1;
-        this.svdDecompClass = svdDecomp(this.timeSeriesInfo);
+        this.svdDecompClass = svdDecomp(this.humerusTrajectory);
         this.methods = this.decompMethods();
         this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'SVD'], ['view3', 'SIMULTANEOUS'], ['view4', 'TWO_STEP']]);
         this.normalizeHumerusGeometry();
-        this.humerusLength = new Vector3().subVectors(this.landmarksInfo.humerus.hhc,
-            new Vector3().addVectors(this.landmarksInfo.humerus.me, this.landmarksInfo.humerus.le).multiplyScalar(0.5)).length();
+        this.humerusLength = new Vector3().subVectors(this.landmarksInfo.hhc,
+            new Vector3().addVectors(this.landmarksInfo.me, this.landmarksInfo.le).multiplyScalar(0.5)).length();
         this.getEulerSceneElements();
         this.getCaptureFrameCtrlElements();
         this.createCamera();
@@ -37,7 +37,7 @@ export class SceneManager {
         this.createEulerScenes();
         this.createMethodDropdowns();
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
-            this.timeSeriesInfo.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum), (frameNum) => this.updateEulerScenesToFrame(frameNum));
+            this.humerusTrajectory.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum), (frameNum) => this.updateEulerScenesToFrame(frameNum));
         this.addTrackBallControlsListeners();
         this.addDblClickDivListener();
         this.addWindowResizeListener();
@@ -126,7 +126,7 @@ export class SceneManager {
     }
 
     getFrameQuat(frameNum){
-        return  this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum));
+        return  this.humerusTrajectory.humOrientQuat(frameNum);
     }
 
     createEulerScenes() {
@@ -206,7 +206,7 @@ export class SceneManager {
 
     updateHumerusInScenes(frameNum) {
         this.scenesMap.forEach(scene_obj  => scene_obj.scene.humerus.quaternion.copy(
-            this.timeSeriesInfo.torsoOrientQuat(frameNum).conjugate().multiply(this.timeSeriesInfo.humOrientQuat(frameNum))));
+            this.humerusTrajectory.humOrientQuat(frameNum)));
     }
 
     updateEulerScenesToFrame(frameNum) {
@@ -218,9 +218,9 @@ export class SceneManager {
     }
 
     normalizeHumerusGeometry() {
-        const hhc = this.landmarksInfo.humerus.hhc;
-        const le = this.landmarksInfo.humerus.le;
-        const me = this.landmarksInfo.humerus.me;
+        const hhc = this.landmarksInfo.hhc;
+        const le = this.landmarksInfo.le;
+        const me = this.landmarksInfo.me;
         const y_axis = new Vector3().addVectors(me, le).multiplyScalar(0.5).multiplyScalar(-1).add(hhc);
         const x_axis = new Vector3().subVectors(me, le).cross(y_axis);
         const z_axis = new Vector3().crossVectors(x_axis, y_axis);
