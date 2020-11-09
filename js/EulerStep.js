@@ -98,6 +98,13 @@ export class EulerStep {
         }
     }
 
+    isSeen(flag) {
+        this.triad.isSeen(flag);
+        this.rotAxis.isSeen(flag);
+        this.arcs.forEach(arc => arc.material.visible = flag);
+        this.arcArrows.forEach(arcArrow => arcArrow.material.visible = flag);
+    }
+
     deactivate() {
         this.triad.visible = false;
         this.rotAxis.visible = false;

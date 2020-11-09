@@ -27,6 +27,11 @@ export class FatArrow extends THREE.Object3D {
         this.add(this.cone);
     }
 
+    isSeen(flag) {
+        this.line.material.visible = flag;
+        this.cone.material.visible = flag;
+    }
+
     dispose() {
         this.line.geometry.dispose();
         this.line.material.dispose();
@@ -114,6 +119,11 @@ export class Triad extends THREE.Object3D{
         this.updateMatrixWorld(true);
     }
 
+    isSeen(flag) {
+        this.origin.material.visible = flag;
+        this.arrows.forEach(arrow => arrow.isSeen(flag));
+    }
+
     dispose() {
         // no need to dispose of the origin material since it is static
         this.origin.geometry.dispose();
@@ -171,6 +181,12 @@ export class RotAxisWithArrow extends THREE.Object3D {
             this.arrow.position.set(0, 0, -this.arrowMainRadius * 0.75);
             this.arrow.quaternion.setFromUnitVectors(new THREE.Vector3().setFromMatrixColumn(this.arrow.matrixWorld, 1), new THREE.Vector3(1, 0, 0));
         }
+    }
+
+    isSeen(flag) {
+        this.axis.material = false;
+        this.arc.material = false;
+        this.arrow.material = false;
     }
 
     dispose() {

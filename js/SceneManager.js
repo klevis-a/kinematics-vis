@@ -338,9 +338,17 @@ export class SceneManager {
     createOptionsGUI() {
         const guiOptions = {
             showAllHumeri: false,
-            showAngles: false
+            showAngles: false,
+            showTriadsArcs: true
         };
-        this.optionsGUI = new GUI({resizable : false, name: 'debugGUI'});
+        this.optionsGUI = new GUI({resizable : false, name: 'visGUI'});
+
+        this.optionsGUI.add(guiOptions, 'showTriadsArcs').name('Show Triads/Arcs').onChange(value => {
+            this.scenesMap.forEach(scene_obj => {
+                scene_obj.scene.showTriadsArcs(value);
+            });
+        });
+
         this.optionsGUI.add(guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
             this.scenesMap.forEach(scene_obj => {
                 scene_obj.scene.priorStepHumeriVisible = value;
@@ -356,6 +364,7 @@ export class SceneManager {
                 this.camera.layers.set(0);
             }
         });
+
         this.optionsGUI.close();
         document.getElementById('datGUI').appendChild(this.optionsGUI.domElement);
     }

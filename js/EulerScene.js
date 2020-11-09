@@ -127,6 +127,11 @@ export class EulerScene {
         this.dispatchEvent({type: 'frameChange', frameNum: frameNum});
     }
 
+    showTriadsArcs(flag) {
+        this.steps.forEach(step => step.isSeen(flag));
+        this.referenceTriad.isSeen(flag);
+    }
+
     initScene() {
         if (this.camera == null) this.createCamera();
         this.createControls();
