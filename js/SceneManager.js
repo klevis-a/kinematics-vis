@@ -1,5 +1,5 @@
 import {divGeometry} from "./SceneHelpers.js";
-import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3, MathUtils} from "./vendor/three.js/build/three.module.js";
+import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
 import {ViewAnimationHelper} from "./ViewAnimationHelper.js";
 import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, SwingTwist, ShortestPath, svdDecomp} from "./RotDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
@@ -11,7 +11,8 @@ import {enableSphere} from "./EulerScene_Sphere.js";
 import {enableAngleVis} from "./EulerScene_AngleVis.js";
 import {enableHumerus} from "./EulerScene_Humerus.js";
 import {EulerSceneSimultaneous} from "./EulerSceneSimultaneous.js";
-import {removeAllChildNodes, range} from "./JSHelpers.js";
+import {removeAllChildNodes} from "./JSHelpers.js";
+import {PlotlyPlotter} from "./PlotlyPlotter.js";
 
 export class SceneManager {
 
@@ -24,9 +25,8 @@ export class SceneManager {
         this.framePeriod = 10; // in ms - meaning that each animation takes 1 seconds
         this.anglesVisLayer = 1;
         this.presentedMethods = ['EULER_YXY', 'EULER_XZY', 'SWING_TWIST', 'SIMULTANEOUS'];
-        this.plotMethodNames = new Map([['EULER_YXY', "ISB: yx'y''"], ['EULER_XZY', "Phadke: xz'y''"], ['SWING_TWIST', 'Swing Twist/Simultaneous']]);
         this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'EULER_XZY'], ['view3', 'SWING_TWIST']]);
-        this.plottingDiv = document.getElementById('view4');
+        this.getPlottingElements();
         this.svdDecompClass = svdDecomp(this.humerusTrajectory);
         this.methods = this.decompMethods();
         this.createRotations();
@@ -50,57 +50,33 @@ export class SceneManager {
     }
 
     addPlot() {
-        this.poe = new Map([['EULER_YXY', []], ['EULER_XZY', []], ['SWING_TWIST', []]]);
-        this.rotations.get('EULER_YXY').forEach(rotation => {
-            const angle = MathUtils.radToDeg(rotation[0].angle);
-            this.poe.get('EULER_YXY').push(angle);
-            this.poe.get('SWING_TWIST').push(angle);
-        });
-        this.rotations.get('EULER_XZY').forEach(rotation => {
-            const angle = MathUtils.radToDeg(rotation[1].angle);
-            this.poe.get('EULER_XZY').push(angle);
-        });
-        this.frameNums = range(this.poe.get('EULER_YXY').length).map(val => val + 1);
-        const traces = Array.from(this.poe, ([method_name, data]) => {
-            return {x: this.frameNums, y: data, type: 'scatter', name: this.plotMethodNames.get(method_name)}
-        });
-        const layout = {
-            xaxis: {
-                title: {text: 'Frame Number', standoff: 0},
-                automargin: true
-            },
-            yaxis: {
-                title: {text: 'Angle (deg)', standoff: 5},
-                automargin: true
-            },
-            title: 'Plane of Elevation',
-            showlegend: true,
-            legend: {"orientation": "h"},
-            margin: {l: 50, r: 50, t: 50, b: 50},
-            hovermode: 'closest'
-        };
-        Plotly.newPlot('view4', traces, layout, {scrollZoom: true, responsive: true, displaylogo: false});
-        this.plottingDiv.on('plotly_click', data => {
+        const plotMethodNames = new Map([['EULER_YXY', "ISB: yx'y''"], ['EULER_XZY', "Phadke: xz'y''"], ['SWING_TWIST', 'Swing Twist/Simultaneous']]);
+
+        const on_Click = data => {
             if (data.points.length > 0) {
                 const frameNum = Math.round(data.points[0].x) - 1;
                 this.updateEulerScenesToFrame(frameNum);
                 this.frameSelectorController.updateTimeLine(frameNum);
             }
-        });
+        };
 
-        this.plottingDiv.on('plotly_hover', data => {
+        const on_Hover = data => {
             if (data.points.length > 0) {
                 const frameNum = Math.round(data.points[0].x) - 1;
                 this.updateHumerusInScenes(frameNum);
                 this.frameSelectorController.updateTimeLine(frameNum);
             }
-        })
-        .on('plotly_unhover', data => {
+        };
+
+        const on_Unhover = data => {
             this.scenesMap.forEach(scene_obj => {
                 const scene = scene_obj.scene;
                 scene.humerus.quaternion.copy(scene.steps[scene.steps.length - 1].endingTriad.quaternion);
             });
-        });
+        };
+
+        this.plotter = new PlotlyPlotter(this.rotations, this.poeDiv, this.eaDiv, this.axialRotDiv, plotMethodNames,
+            on_Click, on_Hover, on_Unhover, this.plotSelectorDiv);
     }
 
     createRotations() {
@@ -301,6 +277,14 @@ export class SceneManager {
         const BB_T_H = new Matrix4().makeBasis(x_axis, y_axis, z_axis).setPosition(hhc);
         const H_T_BB = new Matrix4().getInverse(BB_T_H);
         this.humerusGeometry.applyMatrix4(H_T_BB);
+    }
+
+    getPlottingElements() {
+        this.plottingDiv = document.getElementById('view4');
+        this.poeDiv = document.getElementById('poe');
+        this.eaDiv = document.getElementById('ea');
+        this.axialRotDiv = document.getElementById('axialRot');
+        this.plotSelectorDiv = document.getElementById('plotSelector');
     }
 
     getEulerSceneElements() {
