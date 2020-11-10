@@ -49,14 +49,14 @@ EulerScene.prototype.addFinalLatitudeLongitude = function () {
     const longitudeGeometry = new THREE.CircleBufferGeometry(this.humerusLength, 60);
     const longitudeEdgesGeometry = new THREE.EdgesGeometry(longitudeGeometry);
     this.finalLongitude = new THREE.LineSegments(longitudeEdgesGeometry, this.finalLatLongMaterial);
-    this.finalLongitude.renderOrder = 4;
+    this.finalLongitude.renderOrder = 3;
     this.finalLongitude.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(circleNormal, longitudePerpendicular));
     this.scene.add(this.finalLongitude);
 
     const latitudeGeometry = new THREE.CircleBufferGeometry(projectedHumeralAxis.length(), 60);
     const latitudeEdgesGeometry = new THREE.EdgesGeometry(latitudeGeometry);
     this.finalLatitude = new THREE.LineSegments(latitudeEdgesGeometry, this.finalLatLongMaterial);
-    this.finalLatitude.renderOrder = 4;
+    this.finalLatitude.renderOrder = 3;
     this.finalLatitude.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(circleNormal, this.northPole));
     this.finalLatitude.position.copy(new THREE.Vector3().subVectors(humeral_axis, projectedHumeralAxis));
     this.scene.add(this.finalLatitude);
