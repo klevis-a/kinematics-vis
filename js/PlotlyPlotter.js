@@ -2,8 +2,9 @@ import {MathUtils} from "./vendor/three.js/build/three.module.js";
 import {range} from "./JSHelpers.js";
 
 export class PlotlyPlotter {
-    constructor(rotations, poeDiv, eaDiv, axialRotDiv, plotMethodNames, onClick, onHover, onUnhover, plotSelectorDiv) {
+    constructor(rotations, realAxialRot, poeDiv, eaDiv, axialRotDiv, plotMethodNames, onClick, onHover, onUnhover, plotSelectorDiv) {
         this.rotations = rotations;
+        this.realAxialRot = realAxialRot;
         this.poeDiv = poeDiv;
         this.eaDiv = eaDiv;
         this.axialRotDiv = axialRotDiv;
@@ -81,6 +82,8 @@ export class PlotlyPlotter {
             const angle = MathUtils.radToDeg(rotation[1].angle);
             this.axialRot.get('SWING_TWIST').push(angle);
         });
+        this.axialRot.set('REAL_AXIAL', this.realAxialRot.map(rot => MathUtils.radToDeg(rot)));
+
 
         // frame numbers
         this.frameNums = range(this.poe.get('EULER_YXY').length).map(val => val + 1);

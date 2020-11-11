@@ -17,7 +17,7 @@ export class LandmarksInfo {
 
 export class HumerusTrajectory {
     static get FRAME_PERIOD() {
-        return 10;
+        return 0.01;
     }
 
     static get HUM_POS() {

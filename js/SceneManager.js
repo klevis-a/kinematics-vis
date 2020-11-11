@@ -1,7 +1,7 @@
 import {divGeometry} from "./SceneHelpers.js";
 import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
 import {ViewAnimationHelper} from "./ViewAnimationHelper.js";
-import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, SwingTwist, ShortestPath, svdDecomp} from "./RotDecompositions.js";
+import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, SwingTwist, ShortestPath, svdDecomp, realAxialRotation} from "./RotDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import {Euler_yxy_angle_geometry, Euler_xzy_angle_geometry, AnglesVisualizationSVD} from "./EulerAnglesGeometry.js";
@@ -50,7 +50,7 @@ export class SceneManager {
     }
 
     addPlot() {
-        const plotMethodNames = new Map([['EULER_YXY', "ISB: yx'y''"], ['EULER_XZY', "Phadke: xz'y''"], ['SWING_TWIST', 'Swing Twist/Simultaneous']]);
+        const plotMethodNames = new Map([['EULER_YXY', "ISB: yx'y''"], ['EULER_XZY', "Phadke: xz'y''"], ['SWING_TWIST', 'Swing Twist'], ['REAL_AXIAL', 'Real Axial Rotation']]);
 
         const on_Click = data => {
             if (data.points.length > 0) {
@@ -75,7 +75,7 @@ export class SceneManager {
             });
         };
 
-        this.plotter = new PlotlyPlotter(this.rotations, this.poeDiv, this.eaDiv, this.axialRotDiv, plotMethodNames,
+        this.plotter = new PlotlyPlotter(this.rotations, realAxialRotation(this.humerusTrajectory), this.poeDiv, this.eaDiv, this.axialRotDiv, plotMethodNames,
             on_Click, on_Hover, on_Unhover, this.plotSelectorDiv);
     }
 
