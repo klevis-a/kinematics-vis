@@ -11,16 +11,18 @@ function loadPapaParse() {
 }
 
 const csvPathParam = get_url_param('csvpath');
-const csvPath =  './csv/N005_F_R_47/'.concat(csvPathParam ? csvPathParam : 'N005_CA_t01.csv');
+const csvPath =  './csv_all/N005_F_R_47/'.concat(csvPathParam ? csvPathParam : 'N005_CA_t01.csv');
 const csvLoaderInit = loadPapaParse().then(papa => new CSVLoader(papa));
-const landmarkInit = csvLoaderInit.then(csvLoader => csvLoader.loadCsv('./csv/N005_F_R_47/N005_F_R_47_humerus_landmarks.csv'));
+const humerusLandmarkInit = csvLoaderInit.then(csvLoader => csvLoader.loadCsv('./csv_all/N005_F_R_47/N005_F_R_47_humerus_landmarks.csv'));
+const scapulaLandmarkInit = csvLoaderInit.then(csvLoader => csvLoader.loadCsv('./csv_all/N005_F_R_47/N005_F_R_47_scapula_landmarks.csv'));
 const humerusTrajectoryInit = csvLoaderInit.then((csvLoader) => csvLoader.loadCsv(csvPath));
 const humerusLoader = promiseLoadSTL('./models/humerus.stl');
 
-Promise.all([landmarkInit, humerusTrajectoryInit, humerusLoader]).then(([landmarkResults, humerusTrajectoryResults, humerusGeometry]) => {
-    const landmarksInfo = new Csv_Processor.LandmarksInfo(landmarkResults.data);
-    const humerusTrajectory = new Csv_Processor.HumerusTrajectory(humerusTrajectoryResults.data);
-    const sceneManager = new SceneManager(landmarksInfo, humerusTrajectory, humerusGeometry);
+Promise.all([humerusLandmarkInit, scapulaLandmarkInit, humerusTrajectoryInit, humerusLoader]).then(([humerusLandmarksCsv, scapulaLandmarksCsv, humerusTrajectoryResults, humerusGeometry]) => {
+    const humerusLandmarks = new Csv_Processor.HumerusLandmarks(humerusLandmarksCsv.data);
+    const scapulaLandmarks = new Csv_Processor.HumerusLandmarks(scapulaLandmarksCsv.data);
+    const humerusTrajectory = new Csv_Processor.Trajectory(humerusTrajectoryResults.data);
+    const sceneManager = new SceneManager(humerusLandmarks, scapulaLandmarks, humerusTrajectory, humerusGeometry);
 });
 
 // close button

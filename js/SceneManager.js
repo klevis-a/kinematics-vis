@@ -1,5 +1,5 @@
 import {divGeometry} from "./SceneHelpers.js";
-import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3} from "./vendor/three.js/build/three.module.js";
+import {WebGLRenderer, Matrix4, PerspectiveCamera, Vector3, Quaternion} from "./vendor/three.js/build/three.module.js";
 import {ViewAnimationHelper} from "./ViewAnimationHelper.js";
 import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, SwingTwist, ShortestPath, svdDecomp, realAxialRotation} from "./RotDecompositions.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
@@ -16,9 +16,10 @@ import {PlotlyPlotter} from "./PlotlyPlotter.js";
 
 export class SceneManager {
 
-    constructor(landmarksInfo, humerusTrajectory, humerusGeometry) {
-        this.landmarksInfo = landmarksInfo;
-        this.humerusTrajectory = humerusTrajectory;
+    constructor(humerusLandmarks, scapulaLandmarks, trajectory, humerusGeometry) {
+        this.humersLandmarks = humerusLandmarks;
+        this.scapulaLandmarks = scapulaLandmarks;
+        this.trajectory = trajectory;
         this.humerusGeometry = humerusGeometry;
         this.activeDiv = null;
         this.numFramesAnimation = 100; // this dictates the number of frames for each animation - not the number of frames in the capture
@@ -27,13 +28,13 @@ export class SceneManager {
         this.presentedMethods = ['EULER_YXY', 'EULER_XZY', 'SWING_TWIST', 'SIMULTANEOUS'];
         this.initialSceneLayout = new Map([['view1', 'EULER_YXY'], ['view2', 'EULER_XZY'], ['view3', 'SWING_TWIST']]);
         this.getPlottingElements();
-        this.svdDecompClass = svdDecomp(this.humerusTrajectory);
+        this.svdDecompClass = svdDecomp(this.trajectory);
         this.methods = this.decompMethods();
         this.createRotations();
         this.addPlot();
         this.normalizeHumerusGeometry();
-        this.humerusLength = new Vector3().subVectors(this.landmarksInfo.hhc,
-            new Vector3().addVectors(this.landmarksInfo.me, this.landmarksInfo.le).multiplyScalar(0.5)).length();
+        this.humerusLength = new Vector3().subVectors(this.humersLandmarks.hhc,
+            new Vector3().addVectors(this.humersLandmarks.me, this.humersLandmarks.le).multiplyScalar(0.5)).length();
         this.getEulerSceneElements();
         this.getCaptureFrameCtrlElements();
         this.createCamera();
@@ -42,7 +43,7 @@ export class SceneManager {
         this.createEulerScenes();
         this.createMethodDropdowns();
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
-            this.humerusTrajectory.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum), (frameNum) => this.updateEulerScenesToFrame(frameNum));
+            this.trajectory.NumFrames, (frameNum) => this.updateHumerusInScenes(frameNum), (frameNum) => this.updateEulerScenesToFrame(frameNum));
         this.addTrackBallControlsListeners();
         this.addDblClickDivListener();
         this.addWindowResizeListener();
@@ -75,15 +76,16 @@ export class SceneManager {
             });
         };
 
-        this.plotter = new PlotlyPlotter(this.rotations, realAxialRotation(this.humerusTrajectory), this.poeDiv, this.eaDiv, this.axialRotDiv, plotMethodNames,
+        this.plotter = new PlotlyPlotter(this.rotations, realAxialRotation(this.trajectory), this.poeDiv, this.eaDiv, this.axialRotDiv, plotMethodNames,
             on_Click, on_Hover, on_Unhover, this.plotSelectorDiv);
     }
 
     createRotations() {
         this.rotations = new Map(Array.from(this.methods, ([method_name, value]) => [method_name, []]));
-        for(let i=0; i<this.humerusTrajectory.NumFrames; i++) {
+        for(let i=0; i<this.trajectory.NumFrames; i++) {
             this.rotations.forEach((method_traj, method_name) => {
-                method_traj.push(this.methods.get(method_name).decomp_method(this.humerusTrajectory.humOrientQuat(i)));
+                const humQuat = new Quaternion().copy(this.trajectory.torsoOrientQuat(i)).conjugate().multiply(this.trajectory.humOrientQuat(i));
+                method_traj.push(this.methods.get(method_name).decomp_method(humQuat));
             });
         }
     }
@@ -249,13 +251,15 @@ export class SceneManager {
     }
 
     updateHumerusInScenes(frameNum) {
-        this.scenesMap.forEach(scene_obj  => scene_obj.scene.humerus.quaternion.copy(
-            this.humerusTrajectory.humOrientQuat(frameNum)));
+        this.scenesMap.forEach(scene_obj  => {
+            const humQuat = new Quaternion().copy(this.trajectory.torsoOrientQuat(frameNum)).conjugate().multiply(this.trajectory.humOrientQuat(frameNum));
+            scene_obj.scene.humerus.quaternion.copy(humQuat);
+        });
     }
 
     updateEulerScenesToFrame(frameNum) {
         if (frameNum < 0)  frameNum = 0;
-        if (frameNum >= this.humerusTrajectory.NumFrames) frameNum = this.humerusTrajectory.NumFrames - 1;
+        if (frameNum >= this.trajectory.NumFrames) frameNum = this.trajectory.NumFrames - 1;
 
         this.scenesMap.forEach(scene_obj => {
             scene_obj.scene.reset(this.rotations.get(scene_obj.method_name)[frameNum]);
@@ -265,9 +269,9 @@ export class SceneManager {
     }
 
     normalizeHumerusGeometry() {
-        const hhc = this.landmarksInfo.hhc;
-        const le = this.landmarksInfo.le;
-        const me = this.landmarksInfo.me;
+        const hhc = this.humersLandmarks.hhc;
+        const le = this.humersLandmarks.le;
+        const me = this.humersLandmarks.me;
         const y_axis = new Vector3().addVectors(me, le).multiplyScalar(0.5).multiplyScalar(-1).add(hhc);
         const x_axis = new Vector3().subVectors(me, le).cross(y_axis);
         const z_axis = new Vector3().crossVectors(x_axis, y_axis);

@@ -1,30 +1,53 @@
 import * as THREE from "./vendor/three.js/build/three.module.js";
 
-export class LandmarksInfo {
-    static HUMERUS_COLS = [1, 4];
-
-    static HUMERUS_HHC = {row: 1, col: LandmarksInfo.HUMERUS_COLS};
-    static HUMERUS_LE = {row: 2, col: LandmarksInfo.HUMERUS_COLS};
-    static HUMERUS_ME = {row: 3, col: LandmarksInfo.HUMERUS_COLS};
+export class HumerusLandmarks {
+    static COLS = [1, 4];
 
     constructor(landmarksData) {
         this.LandmarksData = landmarksData;
-        this.hhc = new THREE.Vector3(...this.LandmarksData[LandmarksInfo.HUMERUS_HHC.row].slice(...LandmarksInfo.HUMERUS_HHC.col));
-        this.le = new THREE.Vector3(...this.LandmarksData[LandmarksInfo.HUMERUS_LE.row].slice(...LandmarksInfo.HUMERUS_LE.col));
-        this.me = new THREE.Vector3(...this.LandmarksData[LandmarksInfo.HUMERUS_ME.row].slice(...LandmarksInfo.HUMERUS_ME.col));
+        this.hhc = new THREE.Vector3(...this.LandmarksData[1].slice(...HumerusLandmarks.COLS));
+        this.le = new THREE.Vector3(...this.LandmarksData[2].slice(...HumerusLandmarks.COLS));
+        this.me = new THREE.Vector3(...this.LandmarksData[3].slice(...HumerusLandmarks.COLS));
     }
 }
 
-export class HumerusTrajectory {
+export class ScapulaLandmarks {
+    static COLS = [1, 4];
+
+    constructor(landmarksData) {
+        this.LandmarksData = landmarksData;
+        this.gc = new THREE.Vector3(...this.LandmarksData[1].slice(...ScapulaLandmarks.COLS));
+        this.ia = new THREE.Vector3(...this.LandmarksData[2].slice(...ScapulaLandmarks.COLS));
+        this.ts = new THREE.Vector3(...this.LandmarksData[3].slice(...ScapulaLandmarks.COLS));
+        this.pla = new THREE.Vector3(...this.LandmarksData[4].slice(...ScapulaLandmarks.COLS));
+        this.ac = new THREE.Vector3(...this.LandmarksData[5].slice(...ScapulaLandmarks.COLS));
+    }
+}
+
+export class Trajectory {
     static get FRAME_PERIOD() {
         return 0.01;
     }
 
-    static get HUM_POS() {
+    static get TORSO_POS() {
         return [0, 3];
     }
-    static get HUM_ORIENT() {
+    static get TORSO_ORIENT() {
         return [3, 7];
+    }
+
+    static get SCAPULA_POS() {
+        return [7, 10];
+    }
+    static get SCAPULA_ORIENT() {
+        return [10, 14];
+    }
+
+    static get HUM_POS() {
+        return [14, 17];
+    }
+    static get HUM_ORIENT() {
+        return [17, 21];
     }
 
     constructor(trajData) {
@@ -32,12 +55,47 @@ export class HumerusTrajectory {
         this.NumFrames = this.TimeSeries.length;
     }
 
+    // torso
+    torsoPos(frameNum) {
+        return this.TimeSeries[frameNum].slice(...Trajectory.TORSO_POS);
+    }
+
+    torsoOrient(frameNum) {
+        return this.TimeSeries[frameNum].slice(...Trajectory.TORSO_ORIENT);
+    }
+
+    torsoPosVector(frameNum) {
+        return new THREE.Vector3(...this.torsoPos(frameNum));
+    }
+
+    torsoOrientQuat(frameNum) {
+        return new THREE.Quaternion(...this.torsoOrient(frameNum));
+    }
+
+    // scapula
+    scapPos(frameNum) {
+        return this.TimeSeries[frameNum].slice(...Trajectory.SCAPULA_POS);
+    }
+
+    scapOrient(frameNum) {
+        return this.TimeSeries[frameNum].slice(...Trajectory.SCAPULA_ORIENT);
+    }
+
+    scapPosVector(frameNum) {
+        return new THREE.Vector3(...this.scapPos(frameNum));
+    }
+
+    scapOrientQuat(frameNum) {
+        return new THREE.Quaternion(...this.scapOrient(frameNum));
+    }
+
+    // humerus
     humPos(frameNum) {
-        return this.TimeSeries[frameNum].slice(...HumerusTrajectory.HUM_POS);
+        return this.TimeSeries[frameNum].slice(...Trajectory.HUM_POS);
     }
 
     humOrient(frameNum) {
-        return this.TimeSeries[frameNum].slice(...HumerusTrajectory.HUM_ORIENT);
+        return this.TimeSeries[frameNum].slice(...Trajectory.HUM_ORIENT);
     }
 
     humPosVector(frameNum) {

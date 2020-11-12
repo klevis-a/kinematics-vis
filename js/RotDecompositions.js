@@ -1,6 +1,6 @@
 import {Matrix4, Quaternion, Vector3, Matrix3} from "./vendor/three.js/build/three.module.js";
 import SVD from './vendor/svd.js'
-import {HumerusTrajectory} from "./Csv_Processor.js";
+import {Trajectory} from "./Csv_Processor.js";
 
 
 export function axisAngleFromQuat(quat) {
@@ -288,7 +288,7 @@ function addMatrices (A, B) {
 
 export function angularVelocity(humerusTrajectory) {
     // time between frames in seconds
-    const dt = HumerusTrajectory.FRAME_PERIOD;
+    const dt = Trajectory.FRAME_PERIOD;
 
     // first represent as matrix3
     const traj_mat3 = [];
@@ -325,7 +325,7 @@ export function angularVelocity(humerusTrajectory) {
 
 export function realAxialRotation(humerusTrajectory) {
     // time between frames in seconds
-    const dt = HumerusTrajectory.FRAME_PERIOD;
+    const dt = Trajectory.FRAME_PERIOD;
 
     // compute angular velocity
     const {angular_velocity, traj_mat3} = angularVelocity(humerusTrajectory);
