@@ -19,7 +19,7 @@ EulerScene.prototype.prepare_scene_for_angle_vis = function() {
     const recursiveEnable = child => child.layers.enable(this.anglesVisLayer);
 
     // enable scene objects
-    const sceneObjects = [this.humerus, this.spotlight, this.xyPlane, this.xzPlane, this.yzPlane, this.xAxis, this.yAxis, this.zAxis];
+    const sceneObjects = [this.bone, this.spotlight, this.xyPlane, this.xzPlane, this.yzPlane, this.xAxis, this.yAxis, this.zAxis];
     sceneObjects.forEach(sceneObject => sceneObject.layers.enable(this.anglesVisLayer));
     if (this.sphere) {
         this.sphere.traverse(recursiveEnable);
@@ -30,14 +30,14 @@ EulerScene.prototype.prepare_scene_for_angle_vis = function() {
     // add an initial humerus
     this.initTriad_angles = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
     this.scene.add(this.initTriad_angles);
-    this.initHumerus_angles = new THREE.Mesh(this.humerusGeometry, EulerScene.BONE_MATERIAL);
+    this.initHumerus_angles = new THREE.Mesh(this.boneGeometry, EulerScene.BONE_MATERIAL);
     this.initTriad_angles.add(this.initHumerus_angles);
     this.initTriad_angles.layers.set(this.anglesVisLayer);
 
     // add a final humerus
     this.finalTriad_angles = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 4, 3, this.markingsStart, this.arcStripWidth*3);
     this.scene.add(this.finalTriad_angles);
-    this.finalHumerus_angles = new THREE.Mesh(this.humerusGeometry, EulerScene.BONE_MATERIAL);
+    this.finalHumerus_angles = new THREE.Mesh(this.boneGeometry, EulerScene.BONE_MATERIAL);
     this.finalTriad_angles.add(this.finalHumerus_angles);
     this.finalTriad_angles.layers.set(this.anglesVisLayer);
 

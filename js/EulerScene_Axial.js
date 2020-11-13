@@ -39,7 +39,7 @@ export function initAxialRotation() {
     this.axialPlane.renderOrder = 2;
     this.axialPlane.position.set(0, 0, 0);
     this.axialPlane.translateY(-this.humerusLength);
-    this.stepHumeri[0].add(this.axialPlane);
+    this.stepBones[0].add(this.axialPlane);
 
     this.xLine = new THREE.Mesh(this.THIN_LINE_GEOMETRY, EulerScene.XLINE_MATERIAL);
     this.xLine.name = 'xLine';
@@ -93,32 +93,32 @@ export function updateAxialRotationFrame_euler() {
 }
 
 export function updateAxialRotationStep_swingTwist() {
-    this.stepHumeri[this.currentStep].add(this.axialPlane);
-    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 0);
+    this.stepBones[this.currentStep].add(this.axialPlane);
+    this.stepBones[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 0);
     this.updateAxialRotationFrame(0);
 }
 
 export function updateAxialRotationStep_simultaneous() {
-    this.stepHumeri[this.currentStep].add(this.axialPlane);
-    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = true;
+    this.stepBones[this.currentStep].add(this.axialPlane);
+    this.stepBones[this.currentStep].getObjectByName('xLine').visible = true;
     this.updateAxialRotationFrame(0);
 }
 
 export function updateAxialRotationStep_svd() {
-    this.stepHumeri[this.currentStep].add(this.axialPlane);
-    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 1);
+    this.stepBones[this.currentStep].add(this.axialPlane);
+    this.stepBones[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 1);
     this.updateAxialRotationFrame(0);
 }
 
 export function updateAxialRotationStep_euler() {
-    this.stepHumeri[this.currentStep].add(this.axialPlane);
-    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 1);
+    this.stepBones[this.currentStep].add(this.axialPlane);
+    this.stepBones[this.currentStep].getObjectByName('xLine').visible = (this.currentStep > 1);
     updateZeroAxialLine_Euler(this);
 }
 
 export function updateAxialRotationStep_shortestPath() {
-    this.stepHumeri[this.currentStep].add(this.axialPlane);
-    this.stepHumeri[this.currentStep].getObjectByName('xLine').visible = true;
+    this.stepBones[this.currentStep].add(this.axialPlane);
+    this.stepBones[this.currentStep].getObjectByName('xLine').visible = true;
     this.updateAxialRotationFrame(0);
 }
 

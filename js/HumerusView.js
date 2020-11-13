@@ -2,7 +2,7 @@ import {Vector3} from "./vendor/three.js/build/three.module.js";
 import {AnglesVisualizationSVD, Euler_xzy_angle_geometry, Euler_yxy_angle_geometry} from "./EulerAnglesGeometry.js";
 import {EulerScene} from "./EulerScene.js";
 import {EulerSceneSimultaneous} from "./EulerSceneSimultaneous.js";
-import {enableHumerus} from "./EulerScene_Humerus.js";
+import {enableBone} from "./EulerScene_Bone.js";
 import {enableSphere} from "./EulerScene_Sphere.js";
 import {enableAngleVis} from "./EulerScene_AngleVis.js";
 import {enableAxialRot, AXIAL_ROT_METHODS} from "./EulerScene_Axial.js";
@@ -75,10 +75,12 @@ export class HumerusView extends BaseView{
 
     createEulerScene() {
         this.eulerScene = new this.method_info.scene_class(this.scene_div, this.renderer, this.numAnimFrames, this.camera);
+        // humerus length is needed for visualizations
+        this.eulerScene.humerusLength = this.humerusLength;
         // Enabling the various components of the animations should be done in the order below. The EventDispatcher
         // dispatches event in the order that they are added (and in a single-threaded fashion). Although the features
         // will largely work if they are not added in the correct order, there might be unforeseen bugs.
-        enableHumerus(this.eulerScene, this.humerusGeometry, this.humerusLength);
+        enableBone(this.eulerScene, this.humerusGeometry, this.humerusLength);
         enableSphere(this.eulerScene);
         // enableAngleVis should be called after enableSphere in order to get the sphere to show up when the angle
         // visualization checkbox is checked
@@ -128,7 +130,7 @@ export class HumerusView extends BaseView{
     }
 
     previewFrame(frameNum) {
-        this.eulerScene.humerus.quaternion.copy(this.rotationHelper.humerusQuat(frameNum));
+        this.eulerScene.bone.quaternion.copy(this.rotationHelper.humerusQuat(frameNum));
     }
 
     setFrame(frameNum) {
@@ -168,8 +170,8 @@ export class HumerusView extends BaseView{
     }
 
     priorStepHumeriVisible(event) {
-        this.eulerScene.priorStepHumeriVisible = event.visibility;
-        this.eulerScene.updateHumeriBasedOnStep();
+        this.eulerScene.priorStepBonesVisible = event.visibility;
+        this.eulerScene.updateBonesBasedOnStep();
     }
 
     toggleBodyPlaneVisibility(event) {
