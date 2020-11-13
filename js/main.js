@@ -1,4 +1,4 @@
-import {SceneManager} from "./SceneManager.js";
+import {ViewManager} from "./ViewManager.js";
 import {CSVLoader} from "./CSVLoader.js";
 import {promiseLoadSTL} from "./MiscThreeHelpers.js";
 import * as Csv_Processor from "./Csv_Processor.js";
@@ -17,12 +17,14 @@ const humerusLandmarkInit = csvLoaderInit.then(csvLoader => csvLoader.loadCsv('.
 const scapulaLandmarkInit = csvLoaderInit.then(csvLoader => csvLoader.loadCsv('./csv_all/N005_F_R_47/N005_F_R_47_scapula_landmarks.csv'));
 const humerusTrajectoryInit = csvLoaderInit.then((csvLoader) => csvLoader.loadCsv(csvPath));
 const humerusLoader = promiseLoadSTL('./models/humerus.stl');
+const scapulaLoader = promiseLoadSTL('./models/scapula.stl');
 
-Promise.all([humerusLandmarkInit, scapulaLandmarkInit, humerusTrajectoryInit, humerusLoader]).then(([humerusLandmarksCsv, scapulaLandmarksCsv, humerusTrajectoryResults, humerusGeometry]) => {
+Promise.all([humerusLandmarkInit, scapulaLandmarkInit, humerusTrajectoryInit, humerusLoader, scapulaLoader])
+    .then(([humerusLandmarksCsv, scapulaLandmarksCsv, humerusTrajectoryResults, humerusGeometry, scapulaGeometry]) => {
     const humerusLandmarks = new Csv_Processor.HumerusLandmarks(humerusLandmarksCsv.data);
-    const scapulaLandmarks = new Csv_Processor.HumerusLandmarks(scapulaLandmarksCsv.data);
+    const scapulaLandmarks = new Csv_Processor.ScapulaLandmarks(scapulaLandmarksCsv.data);
     const humerusTrajectory = new Csv_Processor.Trajectory(humerusTrajectoryResults.data);
-    const sceneManager = new SceneManager(humerusLandmarks, scapulaLandmarks, humerusTrajectory, humerusGeometry);
+    const sceneManager = new ViewManager(humerusLandmarks, scapulaLandmarks, humerusTrajectory, humerusGeometry, scapulaGeometry);
 });
 
 // close button

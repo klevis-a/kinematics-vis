@@ -286,23 +286,16 @@ function addMatrices (A, B) {
     return C;
 };
 
-export function angularVelocity(humerusTrajectory) {
+export function angularVelocity(traj_mat3) {
     // time between frames in seconds
     const dt = Trajectory.FRAME_PERIOD;
 
-    // first represent as matrix3
-    const traj_mat3 = [];
-    for(let i=0; i<humerusTrajectory.NumFrames; i++) {
-        const mat3 = new Matrix3().setFromMatrix4((new Matrix4()).makeRotationFromQuaternion(humerusTrajectory.humOrientQuat(i)));
-        traj_mat3.push(mat3);
-    }
-
     //compute the symmetric derivative of matrix3
     const traj_derivative = [];
-    for(let i=0; i<humerusTrajectory.NumFrames; i++) {
+    for(let i=0; i<traj_mat3.length; i++) {
         if(i===0) {
             traj_derivative.push(addMatrices(traj_mat3[i+1], new Matrix3().copy(traj_mat3[i]).multiplyScalar(-1)).multiplyScalar(1/dt));
-        } else if (i===(humerusTrajectory.NumFrames-1)) {
+        } else if (i===(traj_mat3.length-1)) {
             traj_derivative.push(addMatrices(traj_mat3[i], new Matrix3().copy(traj_mat3[i-1]).multiplyScalar(-1)).multiplyScalar(1/dt));
         } else {
             traj_derivative.push(addMatrices(traj_mat3[i+1], new Matrix3().copy(traj_mat3[i-1]).multiplyScalar(-1)).multiplyScalar(1/(2*dt)));
@@ -314,37 +307,44 @@ export function angularVelocity(humerusTrajectory) {
     // {3,2}, {1,3}, and {2,1} components. See https://threejs.org/docs/#api/en/math/Matrix3.elements for how the indices
     // below map to the aforementioned ones
     const angVel = [];
-    for(let i=0; i<humerusTrajectory.NumFrames; i++) {
+    for(let i=0; i<traj_mat3.length; i++) {
         const angVelTensor = new Matrix3().multiplyMatrices(traj_derivative[i], new Matrix3().copy(traj_mat3[i]).transpose());
         angVel.push(new Vector3(angVelTensor.elements[5], angVelTensor.elements[6], angVelTensor.elements[1]))
     }
 
-    return {angular_velocity: angVel, traj_mat3: traj_mat3};
+    return angVel;
 }
 
 
-export function realAxialRotation(humerusTrajectory) {
+export function realAxialRotation(rotationHelper) {
     // time between frames in seconds
     const dt = Trajectory.FRAME_PERIOD;
 
+    // first represent as matrix3
+    const traj_mat3 = [];
+    for(let i=0; i<rotationHelper.th_quat.length; i++) {
+        const mat3 = new Matrix3().setFromMatrix4((new Matrix4()).makeRotationFromQuaternion(rotationHelper.th_quat[i]));
+        traj_mat3.push(mat3);
+    }
+
     // compute angular velocity
-    const {angular_velocity, traj_mat3} = angularVelocity(humerusTrajectory);
+    const angular_velocity = angularVelocity(traj_mat3);
 
     // first find handle the rotation from identity to the resting humerus orientation
-    const shortestAxisAngle = new ShortestPath(humerusTrajectory.humOrientQuat(0)).rotationSequence[0];
+    const shortestAxisAngle = new ShortestPath(rotationHelper.th_quat[0]).rotationSequence[0];
     const shortestAngle = shortestAxisAngle.angle * shortestAxisAngle.axis.y;
 
     // now handle the rest of the trajectory
 
     // first project the angular velocity vector onto the shaft axis for each frame
     const angVel_proj = [];
-    for(let i=0; i<humerusTrajectory.NumFrames; i++) {
+    for(let i=0; i<rotationHelper.th_quat.length; i++) {
         angVel_proj.push(angular_velocity[i].dot(new Vector3().setFromMatrix3Column(traj_mat3[i], 1)));
     }
 
     // now compute real axial rotation via the trapezoidal rule
     const axialRot = [];
-    for(let i=0; i<humerusTrajectory.NumFrames; i++) {
+    for(let i=0; i<rotationHelper.th_quat.length; i++) {
         if (i===0) {
             axialRot.push(shortestAngle);
         }

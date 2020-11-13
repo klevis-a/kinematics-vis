@@ -18,9 +18,10 @@ export function computeCameraDistance(bbSize, cameraAspect, cameraFov, fitOffset
 
 export function divGeometry(divElement)
 {
+    const boundingRect = divElement.getBoundingClientRect();
     return {
-        contentLeft: divElement.offsetLeft + divElement.clientLeft,
-        contentTop: divElement.offsetTop + divElement.clientTop,
+        contentLeft: boundingRect.left,
+        contentTop: boundingRect.top,
         contentWidth: divElement.clientWidth,
         contentHeight: divElement.clientHeight,
         aspectRatio: divElement.clientWidth/divElement.clientHeight

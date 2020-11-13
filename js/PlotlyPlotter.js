@@ -45,48 +45,48 @@ export class PlotlyPlotter {
 
     prepareData() {
         // get poe angles
-        this.poe = new Map([['EULER_YXY', []], ['EULER_XZY', []], ['SWING_TWIST', []]]);
-        this.rotations.get('EULER_YXY').forEach(rotation => {
+        this.poe = new Map([['HUM_EULER_YXY', []], ['HUM_EULER_XZY', []], ['HUM_SWING_TWIST', []]]);
+        this.rotations.get('HUM_EULER_YXY').forEach(rotation => {
             const angle = MathUtils.radToDeg(rotation[0].angle);
-            this.poe.get('EULER_YXY').push(angle);
-            this.poe.get('SWING_TWIST').push(angle);
+            this.poe.get('HUM_EULER_YXY').push(angle);
+            this.poe.get('HUM_SWING_TWIST').push(angle);
         });
-        this.rotations.get('EULER_XZY').forEach(rotation => {
+        this.rotations.get('HUM_EULER_XZY').forEach(rotation => {
             const angle = MathUtils.radToDeg(rotation[1].angle);
-            this.poe.get('EULER_XZY').push(angle);
+            this.poe.get('HUM_EULER_XZY').push(angle);
         });
 
         // get ea angles
-        this.ea = new Map([['EULER_YXY', []], ['EULER_XZY', []], ['SWING_TWIST', []]]);
-        this.rotations.get('EULER_YXY').forEach(rotation => {
+        this.ea = new Map([['HUM_EULER_YXY', []], ['HUM_EULER_XZY', []], ['HUM_SWING_TWIST', []]]);
+        this.rotations.get('HUM_EULER_YXY').forEach(rotation => {
             const angle = MathUtils.radToDeg(rotation[1].angle);
-            this.ea.get('EULER_YXY').push(angle);
-            this.ea.get('SWING_TWIST').push(angle);
+            this.ea.get('HUM_EULER_YXY').push(angle);
+            this.ea.get('HUM_SWING_TWIST').push(angle);
         });
-        this.rotations.get('EULER_XZY').forEach(rotation => {
+        this.rotations.get('HUM_EULER_XZY').forEach(rotation => {
             const angle = MathUtils.radToDeg(rotation[0].angle);
-            this.ea.get('EULER_XZY').push(angle);
+            this.ea.get('HUM_EULER_XZY').push(angle);
         });
 
         // get axial rotation angle
-        this.axialRot = new Map([['EULER_YXY', []], ['EULER_XZY', []], ['SWING_TWIST', []]]);
-        this.rotations.get('EULER_YXY').forEach(rotation => {
+        this.axialRot = new Map([['HUM_EULER_YXY', []], ['HUM_EULER_XZY', []], ['HUM_SWING_TWIST', []]]);
+        this.rotations.get('HUM_EULER_YXY').forEach(rotation => {
             const angle = MathUtils.radToDeg(rotation[2].angle);
-            this.axialRot.get('EULER_YXY').push(angle);
+            this.axialRot.get('HUM_EULER_YXY').push(angle);
         });
-        this.rotations.get('EULER_XZY').forEach(rotation => {
+        this.rotations.get('HUM_EULER_XZY').forEach(rotation => {
             const angle = MathUtils.radToDeg(rotation[2].angle);
-            this.axialRot.get('EULER_XZY').push(angle);
+            this.axialRot.get('HUM_EULER_XZY').push(angle);
         });
-        this.rotations.get('SWING_TWIST').forEach(rotation => {
+        this.rotations.get('HUM_SWING_TWIST').forEach(rotation => {
             const angle = MathUtils.radToDeg(rotation[1].angle);
-            this.axialRot.get('SWING_TWIST').push(angle);
+            this.axialRot.get('HUM_SWING_TWIST').push(angle);
         });
-        this.axialRot.set('REAL_AXIAL', this.realAxialRot.map(rot => MathUtils.radToDeg(rot)));
+        this.axialRot.set('HUM_REAL_AXIAL', this.realAxialRot.map(rot => MathUtils.radToDeg(rot)));
 
 
         // frame numbers
-        this.frameNums = range(this.poe.get('EULER_YXY').length).map(val => val + 1);
+        this.frameNums = range(this.poe.get('HUM_EULER_YXY').length).map(val => val + 1);
     }
 
     commonPlotLayout() {

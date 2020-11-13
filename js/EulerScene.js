@@ -20,9 +20,8 @@ export class EulerScene {
         trackBallControl.keys = [65, 83, 68];
     }
 
-    constructor(viewElement, trackballDiv, renderer, numFrames, camera, arcStripWidth = 10, triadLength=150, markingStart=50) {
+    constructor(viewElement, renderer, numFrames, camera, arcStripWidth = 10, triadLength=150, markingStart=50) {
         this.viewElement = viewElement;
-        this.trackballDiv = trackballDiv;
         this.camera = camera;
         this.numFrames = numFrames;
         this.renderer = renderer;
@@ -34,6 +33,7 @@ export class EulerScene {
         this.triadAspectRatio = 0.1;
         this.markingsStart = markingStart;
         this.currentStep = 0;
+        this.triadsArcsVisible = true;
         this.initScene();
     }
 
@@ -56,6 +56,7 @@ export class EulerScene {
         this.rotations = rotations;
         this.createSteps();
         this.dispatchEvent({type: 'init'});
+        this.showTriadsArcs();
     }
 
     createSteps() {
@@ -120,6 +121,7 @@ export class EulerScene {
         this.removeSteps();
         this.createSteps();
         this.dispatchEvent({type: 'reset'});
+        this.showTriadsArcs();
     }
 
     updateToFrame(frameNum) {
@@ -127,14 +129,13 @@ export class EulerScene {
         this.dispatchEvent({type: 'frameChange', frameNum: frameNum});
     }
 
-    showTriadsArcs(flag) {
-        this.steps.forEach(step => step.isSeen(flag));
-        this.referenceTriad.isSeen(flag);
+    showTriadsArcs() {
+        this.steps.forEach(step => step.isSeen(this.triadsArcsVisible));
+        this.referenceTriad.isSeen(this.triadsArcsVisible);
     }
 
     initScene() {
         if (this.camera == null) this.createCamera();
-        this.createControls();
         this.createReferenceGeometry();
         this.createSpotlight();
     }
@@ -199,13 +200,13 @@ export class EulerScene {
     createCamera() {
         const {aspectRatio} = this.viewGeometry;
         const fov = 75;
-        this.camera = new THREE.PerspectiveCamera(fov, aspectRatio, 0.1, 100);
-        this.camera.position.set(0, 0, 30);
+        this.camera = new THREE.PerspectiveCamera(fov, aspectRatio, 1, 2000);
+        this.camera.position.set(-500, 0, 0);
         this.camera.updateProjectionMatrix();
     }
 
     createControls() {
-        this.controls = new TrackballControls(this.camera, this.trackballDiv);
+        this.controls = new TrackballControls(this.camera, this.viewElement);
         EulerScene.setTrackballControls(this.controls);
         this.controls.target.set(0, 0, 0);
         this.controls.update();

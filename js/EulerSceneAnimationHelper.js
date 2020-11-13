@@ -2,7 +2,7 @@
 
 import {TimelineController} from "./TimelineController.js";
 
-export class ViewAnimationHelper {
+export class EulerSceneAnimationHelper {
     constructor(ctrlDiv, eulerScene, numFrames, framePeriod) {
         this.EulerScene = eulerScene;
         this.NumFrames = numFrames;
