@@ -5,8 +5,7 @@ import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import {normalizeHumerusGeometry, normalizeScapulaGeometry} from "./StlGeometryTools.js";
 import {RotationHelper} from "./RotationHelper.js";
 import {HumerusView} from "./HumerusView.js";
-import {PlotlyPlotter} from "./PlotlyPlotter.js";
-import {realAxialRotation} from "./RotDecompositions.js";
+import {PlotManager} from "./PlotManager.js";
 import {removeAllChildNodes} from "./JSHelpers.js";
 import {PreviewView} from "./PreviewView.js";
 import {ScapulaView} from "./ScapulaView.js";
@@ -82,8 +81,6 @@ export class ViewManager {
     }
 
     addPlot() {
-        const plotMethodNames = new Map([['HUM_EULER_YXY', "ISB: yx'y''"], ['HUM_EULER_XZY', "Phadke: xz'y''"], ['HUM_SWING_TWIST', 'Swing Twist'], ['HUM_REAL_AXIAL', 'Real Axial Rotation']]);
-
         const on_Click = data => {
             if (data.points.length > 0) {
                 const frameNum = Math.round(data.points[0].x) - 1;
@@ -107,8 +104,7 @@ export class ViewManager {
             });
         };
 
-        this.plotter = new PlotlyPlotter(this.rotationHelper.th_rotations, realAxialRotation(this.rotationHelper), this.poeDiv, this.eaDiv, this.axialRotDiv, plotMethodNames,
-            on_Click, on_Hover, on_Unhover, this.plotSelectorDiv);
+        this.plotter = new PlotManager(this.rotationHelper, on_Click, on_Hover, on_Unhover, this.plotsContainerDiv, this.plotSelectorDiv, 'axialRot');
     }
 
     previewFrame(frameNum) {
@@ -201,10 +197,7 @@ export class ViewManager {
     }
 
     getPlottingElements() {
-        this.plottingDiv = document.getElementById('view4');
-        this.poeDiv = document.getElementById('poe');
-        this.eaDiv = document.getElementById('ea');
-        this.axialRotDiv = document.getElementById('axialRot');
+        this.plotsContainerDiv = document.getElementById('plots');
         this.plotSelectorDiv = document.getElementById('plotSelector');
     }
 

@@ -366,14 +366,14 @@ export function angularVelocity(traj_mat3) {
 }
 
 
-export function realAxialRotation(rotationHelper) {
+export function realAxialRotation(quatTraj) {
     // time between frames in seconds
     const dt = Trajectory.FRAME_PERIOD;
 
     // first represent as matrix3
     const traj_mat3 = [];
-    for(let i=0; i<rotationHelper.th_quat.length; i++) {
-        const mat3 = new Matrix3().setFromMatrix4((new Matrix4()).makeRotationFromQuaternion(rotationHelper.th_quat[i]));
+    for(let i=0; i<quatTraj.length; i++) {
+        const mat3 = new Matrix3().setFromMatrix4((new Matrix4()).makeRotationFromQuaternion(quatTraj[i]));
         traj_mat3.push(mat3);
     }
 
@@ -381,20 +381,20 @@ export function realAxialRotation(rotationHelper) {
     const angular_velocity = angularVelocity(traj_mat3);
 
     // first find handle the rotation from identity to the resting humerus orientation
-    const shortestAxisAngle = new ShortestPath(rotationHelper.th_quat[0]).rotationSequence[0];
+    const shortestAxisAngle = new ShortestPath(quatTraj[0]).rotationSequence[0];
     const shortestAngle = shortestAxisAngle.angle * shortestAxisAngle.axis.y;
 
     // now handle the rest of the trajectory
 
     // first project the angular velocity vector onto the shaft axis for each frame
     const angVel_proj = [];
-    for(let i=0; i<rotationHelper.th_quat.length; i++) {
+    for(let i=0; i<quatTraj.length; i++) {
         angVel_proj.push(angular_velocity[i].dot(new Vector3().setFromMatrix3Column(traj_mat3[i], 1)));
     }
 
     // now compute real axial rotation via the trapezoidal rule
     const axialRot = [];
-    for(let i=0; i<rotationHelper.th_quat.length; i++) {
+    for(let i=0; i<quatTraj.length; i++) {
         if (i===0) {
             axialRot.push(shortestAngle);
         }
