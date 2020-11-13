@@ -42,6 +42,7 @@ export class ViewManager {
         this.rotationHelper = new RotationHelper(this.trajectory);
 
         // create scenes
+        this.currentExplodedFrame = 0;
         this.createCamera();
         this.createRenderer();
         this.trackballStartEventListener = event => this.CurrentControl = event.target;
@@ -99,8 +100,8 @@ export class ViewManager {
 
         const on_Unhover = data => {
             this.viewsMap.forEach(scene_obj => {
-                const scene = scene_obj.eulerScene;
-                scene.humerus.quaternion.copy(scene.steps[scene.steps.length - 1].endingTriad.quaternion);
+                this.previewFrame(this.currentExplodedFrame);
+                this.frameSelectorController.updateTimeLine(this.currentExplodedFrame);
             });
         };
 
@@ -118,6 +119,7 @@ export class ViewManager {
         if (frameNum < 0)  frameNum = 0;
         if (frameNum >= this.trajectory.NumFrames) frameNum = this.trajectory.NumFrames - 1;
         this.viewsMap.forEach((scene, view_id) => scene.setFrame(frameNum));
+        this.currentExplodedFrame = frameNum;
     }
 
     createHumerusView(method_name) {
