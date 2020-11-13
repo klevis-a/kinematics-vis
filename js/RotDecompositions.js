@@ -137,6 +137,7 @@ export class EulerDecomposition_RY$$_RX$_RY extends EulerDecomposition{
     extractAngles() {
         if (this.getElement(1, 1) < 1) {
             if (this.getElement(1, 1) > -1) {
+                // acoording to Wu et al. (Journal of Biomechanics) negative denotes elevation hence the sign below
                 this.angles[1] = -Math.acos(this.getElement(1, 1));
                 this.angles[0] = Math.atan2(-this.getElement(0, 1), -this.getElement(2, 1));
                 this.angles[2] = Math.atan2(-this.getElement(1, 0), this.getElement(1, 2));
@@ -167,6 +168,55 @@ export class EulerDecomposition_RY$$_RX$_RY extends EulerDecomposition{
 
         const afterRot2 = new Matrix4().makeRotationAxis(this.axis_2$, this.angles[1]).multiply(afterRot1);
         this.axis_3$$ = new Vector3().setFromMatrixColumn(afterRot2,1);
+        const {axis, angle} = axisAngleFromQuat(new Quaternion().setFromRotationMatrix(afterRot2));
+        this.axis_12_combined = axis;
+        this.angle_12_combined = angle;
+    }
+}
+
+export class EulerDecomposition_RZ$$_RX$_RY extends EulerDecomposition{
+    constructor(mat4) {
+        super(mat4);
+        this.angles = [];
+        this.extractAngles();
+        this.createAxes();
+        super.createAxisAngleMap();
+        super.createRotations();
+    }
+
+    extractAngles() {
+        if (this.getElement(1, 2) < 1) {
+            if (this.getElement(1, 2) > -1) {
+                this.angles[1] = Math.asin(-this.getElement(1, 2));
+                this.angles[0] = Math.atan2(this.getElement(0, 2), this.getElement(2, 2));
+                this.angles[2] = Math.atan2(this.getElement(1, 0), this.getElement(1, 1));
+            }
+            // r12=-1
+            else {
+                this.angles[0] = -Math.atan2(-this.getElement(0,1),this.getElement(0,0));
+                this.angles[1] = Math.PI/2;
+                this.angles[2] = 0;
+            }
+        }
+        // r12=+1
+        else {
+            this.angles[0] = Math.atan2(-this.getElement(0,1),this.getElement(0,0));
+            this.angles[1] = -Math.PI/2;
+            this.angles[2] = 0;
+        }
+    }
+
+    createAxes() {
+        this.axis_1 = new Vector3(0, 1, 0);
+        this.axis_2 = new Vector3(1, 0, 0);
+        this.axis_3 = new Vector3(0, 0, 1);
+
+        const afterRot1 = new Matrix4().makeRotationAxis(this.axis_1, this.angles[0]);
+        this.axis_2$ = new Vector3().setFromMatrixColumn(afterRot1,0);
+        this.axis_3$ = new Vector3().setFromMatrixColumn(afterRot1,2);
+
+        const afterRot2 = new Matrix4().makeRotationAxis(this.axis_2$, this.angles[1]).multiply(afterRot1);
+        this.axis_3$$ = new Vector3().setFromMatrixColumn(afterRot2,2);
         const {axis, angle} = axisAngleFromQuat(new Quaternion().setFromRotationMatrix(afterRot2));
         this.axis_12_combined = axis;
         this.angle_12_combined = angle;

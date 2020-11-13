@@ -7,6 +7,9 @@ export class BaseView {
     postDomAttach(sceneManager) {
     }
 
+    initializeVisualOptions(sceneManager) {
+    }
+
     get viewGeometry() {
     }
 

@@ -9,6 +9,7 @@ import {PlotlyPlotter} from "./PlotlyPlotter.js";
 import {realAxialRotation} from "./RotDecompositions.js";
 import {removeAllChildNodes} from "./JSHelpers.js";
 import {PreviewView} from "./PreviewView.js";
+import {ScapulaView} from "./ScapulaView.js";
 
 export class ViewManager {
 
@@ -30,7 +31,7 @@ export class ViewManager {
 
         // gui options
         this.guiOptions = {
-            showAllHumeri: false,
+            showAllBones: false,
             showAngles: false,
             showTriadsArcs: true,
             showBodyPlanes: false,
@@ -56,10 +57,11 @@ export class ViewManager {
             ['HUM_EULER_XZY', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus Phadke: xz'y''"}],
             ['HUM_SWING_TWIST', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus Swing Twist"}],
             ['HUM_SIMULTANEOUS', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus Simultaneous"}],
-            ['PREVIEW', {creationFnc: method_name => this.createPreviewView(method_name), friendly_name: "Preview"}]
+            ['PREVIEW', {creationFnc: method_name => this.createPreviewView(method_name), friendly_name: "Preview"}],
+            ['SCAP_EULER_YXZ', {creationFnc: method_name => this.createScapulaView(method_name), friendly_name: "Scapula ISB: yx'z''"}]
         ]);
 
-        this.initialViewLayout = new Map([['view1', 'HUM_EULER_YXY'], ['view2', 'HUM_EULER_XZY'], ['view3', 'PREVIEW']]);
+        this.initialViewLayout = new Map([['view1', 'HUM_EULER_YXY'], ['view2', 'SCAP_EULER_YXZ'], ['view3', 'PREVIEW']]);
         this.createViews();
         this.createMethodDropdowns();
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
@@ -125,14 +127,18 @@ export class ViewManager {
     createHumerusView(method_name) {
         const view =  new HumerusView(this.camera, this.renderer, this.rotationHelper, method_name, this.humerusGeometry, this.humerusLength, this.anglesVisLayer);
         view.subscribeEvents(this);
-        view.sceneManagerEventListeners.forEach((fnc, event_name) => {
-            fnc({target: this, visibility: this.guiOptions[event_name]});
-        });
+        view.initializeVisualOptions(this);
         return {scene: view, div: view.parent_div};
     }
 
     createPreviewView(method_name) {
         const view = new PreviewView(this.renderer, this.rotationHelper, this.humerusGeometry, this.scapulaGeometry, this.humerusLength);
+        return {scene: view, div: view.parent_div};
+    }
+
+    createScapulaView(method_name) {
+        const view = new ScapulaView(this.renderer, this.rotationHelper, this.scapulaGeometry);
+        view.subscribeEvents(this);
         return {scene: view, div: view.parent_div};
     }
 
@@ -303,8 +309,8 @@ export class ViewManager {
             this.dispatchEvent({type: 'showTriadsArcs', visibility: value});
         });
 
-        this.optionsGUI.add(this.guiOptions, 'showAllHumeri').name('Prior Steps Humeri').onChange(value => {
-            this.dispatchEvent({type:'showAllHumeri', visibility: value});
+        this.optionsGUI.add(this.guiOptions, 'showAllBones').name('Prior Steps Bones').onChange(value => {
+            this.dispatchEvent({type:'showAllBones', visibility: value});
         });
 
         this.optionsGUI.add(this.guiOptions, 'showAngles').name('Visualize Angles').onChange(value => {

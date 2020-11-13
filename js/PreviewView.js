@@ -32,6 +32,9 @@ export class PreviewView extends BaseView{
         this.humScapScene.createControls();
     }
 
+    initializeVisualOptions(sceneManager) {
+    }
+
     get viewGeometry() {
         return this.humScapScene.viewGeometry;
     }

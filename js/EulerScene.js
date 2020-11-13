@@ -135,7 +135,6 @@ export class EulerScene {
     }
 
     initScene() {
-        if (this.camera == null) this.createCamera();
         this.createReferenceGeometry();
         this.createSpotlight();
     }

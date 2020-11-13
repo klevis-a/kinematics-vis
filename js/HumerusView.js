@@ -80,7 +80,7 @@ export class HumerusView extends BaseView{
         // Enabling the various components of the animations should be done in the order below. The EventDispatcher
         // dispatches event in the order that they are added (and in a single-threaded fashion). Although the features
         // will largely work if they are not added in the correct order, there might be unforeseen bugs.
-        enableBone(this.eulerScene, this.humerusGeometry, this.humerusLength);
+        enableBone(this.eulerScene, this.humerusGeometry);
         enableSphere(this.eulerScene);
         // enableAngleVis should be called after enableSphere in order to get the sphere to show up when the angle
         // visualization checkbox is checked
@@ -109,6 +109,13 @@ export class HumerusView extends BaseView{
         this.eulerScene.createControls();
         this.eulerScene.controls.addEventListener('start', sceneManager.trackballStartEventListener);
         this.eulerScene.controls.addEventListener('end', sceneManager.trackballEndEventListener);
+    }
+
+    initializeVisualOptions(sceneManager) {
+        this.showTriadsArcs({visibility: sceneManager.guiOptions.showTriadsArcs});
+        this.priorStepHumeriVisible({visibility: sceneManager.guiOptions.showAllBones});
+        this.toggleBodyPlaneVisibility({visibility: sceneManager.guiOptions.showBodyPlanes});
+        this.toggleSphereVisibility({visibility: sceneManager.guiOptions.showSphere});
     }
 
     get viewGeometry() {
@@ -150,8 +157,8 @@ export class HumerusView extends BaseView{
 
         // prior step humeri visibility
         const priorStepsHumeriVisibilityListener = event => this.priorStepHumeriVisible(event);
-        sceneManager.addEventListener('showAllHumeri', priorStepsHumeriVisibilityListener);
-        this.sceneManagerEventListeners.set('showAllHumeri', priorStepsHumeriVisibilityListener);
+        sceneManager.addEventListener('showAllBones', priorStepsHumeriVisibilityListener);
+        this.sceneManagerEventListeners.set('showAllBones', priorStepsHumeriVisibilityListener);
 
         // body plane visibility
         const bodyPlanesVisibilityListener = event => this.toggleBodyPlaneVisibility(event);

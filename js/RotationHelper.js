@@ -2,6 +2,7 @@ import {Matrix4, Quaternion, Vector3} from "./vendor/three.js/build/three.module
 import {
     EulerDecomposition_RY$$_RX$_RY,
     EulerDecomposition_RY$$_RZ$_RX,
+    EulerDecomposition_RZ$$_RX$_RY,
     ShortestPath,
     SwingTwist,
     svdDecomp
@@ -19,6 +20,7 @@ export class RotationHelper {
         // do not make an attempt to call this.humerus_methods before humerus_svdDecompClass is set
         this.th_rotations = new Map(Array.from(this.humerus_methods, ([method_name, value]) => [method_name, []]));
         this.gh_rotations = new Map(Array.from(this.humerus_methods, ([method_name, value]) => [method_name, []]));
+        this.st_rotations = new Map(Array.from(this.scapula_methods, ([method_name, value]) => [method_name, []]));
         this.th_quat = [];
         this.st_quat = [];
         this.gh_quat = [];
@@ -50,6 +52,9 @@ export class RotationHelper {
             });
             this.gh_rotations.forEach((method_traj, method_name) => {
                 method_traj.push(this.humerus_methods.get(method_name)(gh_quat));
+            });
+            this.st_rotations.forEach((method_traj, method_name) => {
+                method_traj.push(this.scapula_methods.get(method_name)(st_quat));
             });
         }
         this.currentHumerusBase = HUMERUS_BASE.TORSO;
@@ -100,6 +105,10 @@ export class RotationHelper {
     scapPos(frameNum) {
         return this.st_pos[frameNum];
     }
+
+    scapulaRotation(method_name, frameNum) {
+        return this.st_rotations.get(method_name)[frameNum];
+    }
 }
 
 // lazy methods getter
@@ -142,6 +151,25 @@ Object.defineProperty(RotationHelper.prototype, 'humerus_methods', {
         ]);
 
         Object.defineProperty(this, 'humerus_methods', {
+            value: methods
+        });
+
+        return methods;
+    }
+});
+
+// lazy methods getter
+Object.defineProperty(RotationHelper.prototype, 'scapula_methods', {
+    get: function() {
+        const methods = new Map([
+            ['SCAP_EULER_YXZ', frameQuat => {
+                const frameMat = new Matrix4().makeRotationFromQuaternion(frameQuat);
+                const eulerDecomp = new EulerDecomposition_RZ$$_RX$_RY(frameMat);
+                return eulerDecomp.R3$$_R2$_R1;
+            }]
+        ]);
+
+        Object.defineProperty(this, 'scapula_methods', {
             value: methods
         });
 
