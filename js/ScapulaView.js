@@ -78,6 +78,7 @@ export class ScapulaView extends BaseView{
     }
 
     setFrame(frameNum) {
+        this.previewFrame(frameNum);
         this.eulerScene.reset(this.rotationHelper.scapulaRotation('SCAP_EULER_YXZ', frameNum));
         this.animationHelper.goToStep(this.eulerScene.currentStep);
     }

@@ -143,6 +143,7 @@ export class HumerusView extends BaseView{
     }
 
     setFrame(frameNum) {
+        this.previewFrame(frameNum);
         this.eulerScene.reset(this.humerusRotation(this.method_name, frameNum));
         this.animationHelper.goToStep(this.eulerScene.currentStep);
     }
