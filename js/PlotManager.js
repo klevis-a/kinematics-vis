@@ -119,10 +119,49 @@ export class PlotManager {
         this.createPlot('axialRot', traces, layout, layout.title);
     }
 
+    humerusIsbPlot() {
+        const layout = this.commonPlotLayout();
+        layout.title = this.plotNames.get('HUM_EULER_YXY');
+        const traces = [
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[0], type: 'scatter', name: 'Plane of Elevation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[1], type: 'scatter', name: 'Angle of Elevation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[2], type: 'scatter', name: 'Axial Rotation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('TRUE_AXIAL_ROTATION'), type: 'scatter', name: this.plotNames.get('TRUE_AXIAL_ROTATION')}
+        ];
+        this.createPlot('humerusIsb', traces, layout, layout.title);
+    }
+
+    humerusPhadkePlot() {
+        const layout = this.commonPlotLayout();
+        layout.title = this.plotNames.get('HUM_EULER_XZY');
+        const traces = [
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[0], type: 'scatter', name: 'Angle of Elevation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[1], type: 'scatter', name: 'Angle of Flexion/Horizontal Abd/Add'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[2], type: 'scatter', name: 'Axial Rotation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('TRUE_AXIAL_ROTATION'), type: 'scatter', name: this.plotNames.get('TRUE_AXIAL_ROTATION')}
+        ];
+        this.createPlot('humerusPhadke', traces, layout, layout.title);
+    }
+
+    humerusSwingTwistPlot() {
+        const layout = this.commonPlotLayout();
+        layout.title = this.plotNames.get('HUM_SWING_TWIST');
+        const traces = [
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[0], type: 'scatter', name: 'Plane of Elevation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[1], type: 'scatter', name: 'Angle of Elevation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_SWING_TWIST'), type: 'scatter', name: 'Axial Rotation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('TRUE_AXIAL_ROTATION'), type: 'scatter', name: this.plotNames.get('TRUE_AXIAL_ROTATION')}
+        ];
+        this.createPlot('humerusSwingTwist', traces, layout, layout.title);
+    }
+
     createPlots() {
         this.poePlot();
         this.eaPlot();
         this.axialRotPlot();
+        this.humerusIsbPlot();
+        this.humerusPhadkePlot();
+        this.humerusSwingTwistPlot();
     }
 
     addPlotSelector() {
