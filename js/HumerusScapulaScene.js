@@ -19,6 +19,7 @@ export class HumerusScapulaScene {
         this.humerusLength = humerusLength;
         this.humerus = new THREE.Mesh(this.humerusGeometry, HumerusScapulaScene.BONE_MATERIAL);
         this.scapula = new THREE.Mesh(this.scapulaGeometry, HumerusScapulaScene.BONE_MATERIAL);
+        this.scapula.add(new THREE.AxesHelper(this.humerusLength/2));
         this.initScene();
     }
 
