@@ -6,6 +6,7 @@ import {divGeometry} from "./SceneHelpers.js"
 import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
 import {Triad} from "./EulerGeometry.js";
 import {EulerStep} from "./EulerStep.js"
+import {defaultCamera} from "./BaseView.js";
 
 
 export class EulerScene {
@@ -199,10 +200,7 @@ export class EulerScene {
 
     createCamera() {
         const {aspectRatio} = this.viewGeometry;
-        const fov = 75;
-        this.camera = new PerspectiveCamera(fov, aspectRatio, 1, 2000);
-        this.camera.position.set(-500, 0, 0);
-        this.camera.updateProjectionMatrix();
+        this.camera = defaultCamera(aspectRatio);
     }
 
     createControls() {

@@ -46,6 +46,8 @@ export class ScapulaView extends BaseView{
 
     postDomAttach(viewManager) {
         this.eulerScene.createCamera();
+        this.eulerScene.camera.position.set(-325, 200, -225);
+        this.eulerScene.camera.updateProjectionMatrix();
         this.eulerScene.createControls();
     }
 

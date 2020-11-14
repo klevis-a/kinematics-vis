@@ -6,6 +6,7 @@ import {Scene, MeshPhongMaterial, Mesh, Color, AxesHelper, SphereBufferGeometry,
 import {divGeometry} from "./SceneHelpers.js"
 import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
 import {EulerScene} from "./EulerScene.js";
+import {defaultCamera} from "./BaseView.js";
 
 export class HumerusScapulaScene {
     static BONE_MATERIAL = new MeshPhongMaterial({color: EulerScene.BONE_COLOR});
@@ -105,9 +106,8 @@ export class HumerusScapulaScene {
 
     createCamera() {
         const {aspectRatio} = this.viewGeometry;
-        const fov = 75;
-        this.camera = new PerspectiveCamera(fov, aspectRatio, 1, 2000);
-        this.camera.position.set(-500, 0, 0);
+        this.camera = defaultCamera(aspectRatio);
+        this.camera.position.set(-425, 200, 225);
         this.camera.updateProjectionMatrix();
     }
 

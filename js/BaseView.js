@@ -1,5 +1,7 @@
 'use strict';
 
+import {PerspectiveCamera} from "./vendor/three.js/build/three.module.js";
+
 export class BaseView {
 
     constructor() {
@@ -35,4 +37,12 @@ export class BaseView {
 
     dispose() {
     }
+}
+
+export function defaultCamera(aspectRatio) {
+    const fov = 75;
+    const camera = new PerspectiveCamera(fov, aspectRatio, 1, 2000);
+    camera.position.set(-425, 200, -225);
+    camera.updateProjectionMatrix();
+    return camera;
 }

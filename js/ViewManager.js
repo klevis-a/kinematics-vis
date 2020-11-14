@@ -9,6 +9,7 @@ import {PlotManager} from "./PlotManager.js";
 import {removeAllChildNodes} from "./JSHelpers.js";
 import {PreviewView} from "./PreviewView.js";
 import {ScapulaView} from "./ScapulaView.js";
+import {defaultCamera} from "./BaseView.js";
 
 export class ViewManager {
 
@@ -217,10 +218,7 @@ export class ViewManager {
 
     createCamera() {
         const {aspectRatio} = divGeometry(this.viewsContainer);
-        const fov = 75;
-        this.camera = new PerspectiveCamera(fov, aspectRatio, 1, 2000);
-        this.camera.position.set(-500, 0, 0);
-        this.camera.updateProjectionMatrix();
+        this.camera = defaultCamera(aspectRatio);
     }
 
     updateCamera() {
