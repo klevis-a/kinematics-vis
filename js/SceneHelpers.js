@@ -1,9 +1,9 @@
 'use strict';
 
-import * as THREE from './vendor/three.js/build/three.module.js';
+import {Box3} from "./vendor/three.js/build/three.module.js";
 
 export function boundingBox_objects(objects) {
-    const bb = new THREE.Box3();
+    const bb = new Box3();
     for(const object of objects) bb.expandByObject(object);
     return  bb;
 }

@@ -1,3 +1,5 @@
+'use strict';
+
 export class FrameSelectorController {
     constructor(timeline, frameNumLbl, frameGoCtrl, numFrames, setFrameFnc, updateEulerScenesFnc) {
         this.Timeline = timeline;

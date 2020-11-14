@@ -1,3 +1,5 @@
+'use strict';
+
 import {enableBone} from "./EulerScene_Bone.js";
 import {EulerSceneAnimationHelper} from "./EulerSceneAnimationHelper.js";
 import {generateUUID} from "./JSHelpers.js";

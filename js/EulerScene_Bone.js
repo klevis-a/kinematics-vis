@@ -1,11 +1,13 @@
+'use strict';
+
 import {EulerScene} from "./EulerScene.js";
-import * as THREE from "./vendor/three.js/build/three.module.js";
+import {MeshPhongMaterial, Mesh} from "./vendor/three.js/build/three.module.js";
 
 EulerScene.BONE_COLOR = 0xe3dac9;
-EulerScene.BONE_MATERIAL = new THREE.MeshPhongMaterial({color: EulerScene.BONE_COLOR, opacity: 0.9, transparent: true});
+EulerScene.BONE_MATERIAL = new MeshPhongMaterial({color: EulerScene.BONE_COLOR, opacity: 0.9, transparent: true});
 
 EulerScene.prototype.addBone = function () {
-    this.bone = new THREE.Mesh(this.boneGeometry, new THREE.MeshPhongMaterial({color: EulerScene.BONE_COLOR,
+    this.bone = new Mesh(this.boneGeometry, new MeshPhongMaterial({color: EulerScene.BONE_COLOR,
         opacity: 0.5, transparent: true}));
     this.bone.quaternion.copy(this.quaternions[this.quaternions.length-1]);
     this.scene.add(this.bone);
@@ -24,7 +26,7 @@ EulerScene.prototype.updateBonesBasedOnStep = function () {
 
 export function enableBone(boneScene, boneGeometry) {
     boneScene.boneGeometry = boneGeometry;
-    boneScene.step0Bone = new THREE.Mesh(boneScene.boneGeometry, new THREE.MeshPhongMaterial({color: EulerScene.BONE_COLOR, opacity: 0.5, transparent: true}));
+    boneScene.step0Bone = new Mesh(boneScene.boneGeometry, new MeshPhongMaterial({color: EulerScene.BONE_COLOR, opacity: 0.5, transparent: true}));
     boneScene.referenceTriad.add(boneScene.step0Bone);
     boneScene.priorStepBonesVisible = false;
 
@@ -42,7 +44,7 @@ export function enableBone(boneScene, boneGeometry) {
         const scene = event.target;
         scene.stepBones = [];
         scene.steps.forEach(step => {
-            const boneMesh = new THREE.Mesh(this.boneGeometry, EulerScene.BONE_MATERIAL);
+            const boneMesh = new Mesh(this.boneGeometry, EulerScene.BONE_MATERIAL);
             boneMesh.renderOrder = 1;
             scene.stepBones.push(boneMesh);
             step.triad.add(boneMesh);

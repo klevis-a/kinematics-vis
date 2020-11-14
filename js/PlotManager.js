@@ -1,3 +1,5 @@
+'use strict';
+
 import {MathUtils} from "./vendor/three.js/build/three.module.js";
 import {range} from "./JSHelpers.js";
 import {realAxialRotation} from "./RotDecompositions.js";

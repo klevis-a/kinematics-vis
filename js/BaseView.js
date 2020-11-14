@@ -1,3 +1,5 @@
+'use strict';
+
 export class BaseView {
 
     constructor() {

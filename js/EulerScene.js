@@ -1,10 +1,11 @@
 'use strict';
 
-import * as THREE from './vendor/three.js/build/three.module.js';
-import * as SceneHelpers from "./SceneHelpers.js"
+import {Scene, Color, Quaternion, LineBasicMaterial, BufferGeometry, PlaneBufferGeometry, EdgesGeometry,
+    Line, LineSegments, Vector3, PerspectiveCamera, HemisphereLight, SpotLight, EventDispatcher} from './vendor/three.js/build/three.module.js';
+import {divGeometry} from "./SceneHelpers.js"
 import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
-import * as EulerGeometry from "./EulerGeometry.js";
-import * as EulerStep from "./EulerStep.js"
+import {Triad} from "./EulerGeometry.js";
+import {EulerStep} from "./EulerStep.js"
 
 
 export class EulerScene {
@@ -25,8 +26,8 @@ export class EulerScene {
         this.camera = camera;
         this.numFrames = numFrames;
         this.renderer = renderer;
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(EulerScene.SCENE_COLOR);
+        this.scene = new Scene();
+        this.scene.background = new Color(EulerScene.SCENE_COLOR);
         this.arcHeightSegments = 1;
         this.arcStripWidth = arcStripWidth;
         this.triadLength = triadLength;
@@ -60,11 +61,11 @@ export class EulerScene {
     }
 
     createSteps() {
-        this.quaternions = [new THREE.Quaternion()];
+        this.quaternions = [new Quaternion()];
 
         this.rotations.forEach(rotation => {
             const lastQuat = this.quaternions[this.quaternions.length-1];
-            const currentQuatRot = new THREE.Quaternion().setFromAxisAngle(rotation.axis, rotation.angle);
+            const currentQuatRot = new Quaternion().setFromAxisAngle(rotation.axis, rotation.angle);
             this.quaternions.push(currentQuatRot.multiply(lastQuat));
         });
 
@@ -72,7 +73,7 @@ export class EulerScene {
             // the EulerStep stepNumber parameter is set to idx+1 (one-based indexing) because of how the colors and
             // markings are are created on EulerStep objects. However, the stepNumber attribute of an EulerStep is not used
             // otherwise
-            const eulerStep = new EulerStep.EulerStep(this.quaternions[idx], rotation, this.numFrames, this.triadLength,
+            const eulerStep = new EulerStep(this.quaternions[idx], rotation, this.numFrames, this.triadLength,
                 this.triadAspectRatio, this.markingsStart, idx + 1, this.arcStripWidth, this.numFrames, this.arcHeightSegments);
             this.addStepToScene(eulerStep);
             return eulerStep;
@@ -140,12 +141,12 @@ export class EulerScene {
     }
 
     renderSceneGraph() {
-        this.spotlight.position.addVectors(this.camera.position, new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).multiplyScalar(10));
+        this.spotlight.position.addVectors(this.camera.position, new Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).multiplyScalar(10));
         this.renderer.render(this.scene, this.camera);
     }
 
     get viewGeometry() {
-        return SceneHelpers.divGeometry(this.viewElement);
+        return divGeometry(this.viewElement);
     }
 
     updateCamera() {
@@ -155,37 +156,37 @@ export class EulerScene {
     }
 
     createReferenceGeometry() {
-        this.referenceTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
+        this.referenceTriad = new Triad(this.triadLength, this.triadAspectRatio, 1, 0, this.markingsStart, this.arcStripWidth*3);
         this.scene.add(this.referenceTriad);
 
-        const xAxis_mat = new THREE.LineBasicMaterial({color: 0xff0000});
-        const xAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-this.triadLength*2, 0, 0), new THREE.Vector3(this.triadLength*2, 0, 0)]);
-        this.xAxis = new THREE.Line(xAxis_geo, xAxis_mat);
+        const xAxis_mat = new LineBasicMaterial({color: 0xff0000});
+        const xAxis_geo = new BufferGeometry().setFromPoints([new Vector3(-this.triadLength*2, 0, 0), new Vector3(this.triadLength*2, 0, 0)]);
+        this.xAxis = new Line(xAxis_geo, xAxis_mat);
         this.scene.add(this.xAxis);
 
-        const yAxis_mat = new THREE.LineBasicMaterial({color: 0x00ff00});
-        const yAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -this.triadLength*2, 0), new THREE.Vector3(0, this.triadLength*2, 0)]);
-        this.yAxis = new THREE.Line(yAxis_geo, yAxis_mat);
+        const yAxis_mat = new LineBasicMaterial({color: 0x00ff00});
+        const yAxis_geo = new BufferGeometry().setFromPoints([new Vector3(0, -this.triadLength*2, 0), new Vector3(0, this.triadLength*2, 0)]);
+        this.yAxis = new Line(yAxis_geo, yAxis_mat);
         this.scene.add(this.yAxis);
 
-        const zAxis_mat = new THREE.LineBasicMaterial({color: 0x0000ff});
-        const zAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, -this.triadLength*2), new THREE.Vector3(0, 0, this.triadLength*2)]);
-        this.zAxis = new THREE.Line(zAxis_geo, zAxis_mat);
+        const zAxis_mat = new LineBasicMaterial({color: 0x0000ff});
+        const zAxis_geo = new BufferGeometry().setFromPoints([new Vector3(0, 0, -this.triadLength*2), new Vector3(0, 0, this.triadLength*2)]);
+        this.zAxis = new Line(zAxis_geo, zAxis_mat);
         this.scene.add(this.zAxis);
 
-        const planeGeometry = new THREE.PlaneBufferGeometry(this.triadLength*2*2, this.triadLength*2*2);
-        const planeEdgesGeometry = new THREE.EdgesGeometry(planeGeometry);
-        this.xyPlane = new THREE.LineSegments(planeEdgesGeometry, zAxis_mat);
+        const planeGeometry = new PlaneBufferGeometry(this.triadLength*2*2, this.triadLength*2*2);
+        const planeEdgesGeometry = new EdgesGeometry(planeGeometry);
+        this.xyPlane = new LineSegments(planeEdgesGeometry, zAxis_mat);
         this.xyPlane.visible = false;
         this.scene.add(this.xyPlane);
 
-        this.xzPlane = new THREE.LineSegments(planeEdgesGeometry, yAxis_mat);
-        this.xzPlane.lookAt(new THREE.Vector3(0, 1, 0));
+        this.xzPlane = new LineSegments(planeEdgesGeometry, yAxis_mat);
+        this.xzPlane.lookAt(new Vector3(0, 1, 0));
         this.xzPlane.visible = false;
         this.scene.add(this.xzPlane);
 
-        this.yzPlane = new THREE.LineSegments(planeEdgesGeometry, xAxis_mat);
-        this.yzPlane.lookAt(new THREE.Vector3(1, 0, 0));
+        this.yzPlane = new LineSegments(planeEdgesGeometry, xAxis_mat);
+        this.yzPlane.lookAt(new Vector3(1, 0, 0));
         this.yzPlane.visible = false;
         this.scene.add(this.yzPlane);
     }
@@ -199,7 +200,7 @@ export class EulerScene {
     createCamera() {
         const {aspectRatio} = this.viewGeometry;
         const fov = 75;
-        this.camera = new THREE.PerspectiveCamera(fov, aspectRatio, 1, 2000);
+        this.camera = new PerspectiveCamera(fov, aspectRatio, 1, 2000);
         this.camera.position.set(-500, 0, 0);
         this.camera.updateProjectionMatrix();
     }
@@ -212,7 +213,7 @@ export class EulerScene {
     }
 
     createHemisphereLight() {
-        this.hemisphereLight = new THREE.HemisphereLight(
+        this.hemisphereLight = new HemisphereLight(
             0xffffff, // sky color
             0x000000, // ground color
             1.25, // intensity
@@ -221,10 +222,10 @@ export class EulerScene {
     }
 
     createSpotlight() {
-        this.spotlight = new THREE.SpotLight(0xffffff, 1, 0, Math.PI / 4, 0, 1);
+        this.spotlight = new SpotLight(0xffffff, 1, 0, Math.PI / 4, 0, 1);
         this.scene.add(this.spotlight);
         this.spotlight.target = this.referenceTriad.origin;
     }
 }
 
-Object.assign(EulerScene.prototype, THREE.EventDispatcher.prototype);
+Object.assign(EulerScene.prototype, EventDispatcher.prototype);

@@ -1,25 +1,27 @@
 'use strict';
 
-import * as THREE from './vendor/three.js/build/three.module.js';
-import * as SceneHelpers from "./SceneHelpers.js"
+import {Scene, MeshPhongMaterial, Mesh, Color, AxesHelper, SphereBufferGeometry, MeshStandardMaterial, Matrix4,
+    Line, LineBasicMaterial, BufferGeometry, PlaneBufferGeometry, LineSegments, EdgesGeometry, PerspectiveCamera,
+    SpotLight, Vector3} from './vendor/three.js/build/three.module.js';
+import {divGeometry} from "./SceneHelpers.js"
 import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
 import {EulerScene} from "./EulerScene.js";
 
 export class HumerusScapulaScene {
-    static BONE_MATERIAL = new THREE.MeshPhongMaterial({color: EulerScene.BONE_COLOR});
+    static BONE_MATERIAL = new MeshPhongMaterial({color: EulerScene.BONE_COLOR});
 
     constructor(viewElement, renderer, humerusGeometry, scapulaGeometry, humerusLength, triadLength=150) {
         this.viewElement = viewElement;
         this.renderer = renderer;
         this.triadLength = triadLength;
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(EulerScene.SCENE_COLOR);
+        this.scene = new Scene();
+        this.scene.background = new Color(EulerScene.SCENE_COLOR);
         this.humerusGeometry = humerusGeometry;
         this.scapulaGeometry = scapulaGeometry;
         this.humerusLength = humerusLength;
-        this.humerus = new THREE.Mesh(this.humerusGeometry, HumerusScapulaScene.BONE_MATERIAL);
-        this.scapula = new THREE.Mesh(this.scapulaGeometry, HumerusScapulaScene.BONE_MATERIAL);
-        this.scapula.add(new THREE.AxesHelper(this.humerusLength/2));
+        this.humerus = new Mesh(this.humerusGeometry, HumerusScapulaScene.BONE_MATERIAL);
+        this.scapula = new Mesh(this.scapulaGeometry, HumerusScapulaScene.BONE_MATERIAL);
+        this.scapula.add(new AxesHelper(this.humerusLength/2));
         this.initScene();
     }
 
@@ -28,9 +30,9 @@ export class HumerusScapulaScene {
         const retractFactor = 0.8;
         const radius = hhcDistance*retractFactor;
         const verticalScalingFactor = this.humerusLength/radius;
-        const geometry = new THREE.SphereBufferGeometry(radius, 32, 32, 0, Math.PI*2, 0, Math.PI/2);
-        geometry.applyMatrix4(new THREE.Matrix4().makeScale(1.0, verticalScalingFactor, 1.0).setPosition(0, -verticalScalingFactor*0.8*radius, 0));
-        this.ellipsoid = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({color: EulerScene.BONE_COLOR}));
+        const geometry = new SphereBufferGeometry(radius, 32, 32, 0, Math.PI*2, 0, Math.PI/2);
+        geometry.applyMatrix4(new Matrix4().makeScale(1.0, verticalScalingFactor, 1.0).setPosition(0, -verticalScalingFactor*0.8*radius, 0));
+        this.ellipsoid = new Mesh(geometry, new MeshStandardMaterial({color: EulerScene.BONE_COLOR}));
         this.scene.add(this.ellipsoid);
     }
 
@@ -54,12 +56,12 @@ export class HumerusScapulaScene {
     }
 
     renderSceneGraph() {
-        this.spotlight.position.addVectors(this.camera.position, new THREE.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).multiplyScalar(10));
+        this.spotlight.position.addVectors(this.camera.position, new Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).multiplyScalar(10));
         this.renderer.render(this.scene, this.camera);
     }
 
     get viewGeometry() {
-        return SceneHelpers.divGeometry(this.viewElement);
+        return divGeometry(this.viewElement);
     }
 
     updateCamera() {
@@ -69,34 +71,34 @@ export class HumerusScapulaScene {
     }
 
     createReferenceGeometry() {
-        const xAxis_mat = new THREE.LineBasicMaterial({color: 0xff0000});
-        const xAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-this.triadLength*2, 0, 0), new THREE.Vector3(this.triadLength*2, 0, 0)]);
-        this.xAxis = new THREE.Line(xAxis_geo, xAxis_mat);
+        const xAxis_mat = new LineBasicMaterial({color: 0xff0000});
+        const xAxis_geo = new BufferGeometry().setFromPoints([new Vector3(-this.triadLength*2, 0, 0), new Vector3(this.triadLength*2, 0, 0)]);
+        this.xAxis = new Line(xAxis_geo, xAxis_mat);
         this.scene.add(this.xAxis);
 
-        const yAxis_mat = new THREE.LineBasicMaterial({color: 0x00ff00});
-        const yAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -this.triadLength*2, 0), new THREE.Vector3(0, this.triadLength*2, 0)]);
-        this.yAxis = new THREE.Line(yAxis_geo, yAxis_mat);
+        const yAxis_mat = new LineBasicMaterial({color: 0x00ff00});
+        const yAxis_geo = new BufferGeometry().setFromPoints([new Vector3(0, -this.triadLength*2, 0), new Vector3(0, this.triadLength*2, 0)]);
+        this.yAxis = new Line(yAxis_geo, yAxis_mat);
         this.scene.add(this.yAxis);
 
-        const zAxis_mat = new THREE.LineBasicMaterial({color: 0x0000ff});
-        const zAxis_geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, -this.triadLength*2), new THREE.Vector3(0, 0, this.triadLength*2)]);
-        this.zAxis = new THREE.Line(zAxis_geo, zAxis_mat);
+        const zAxis_mat = new LineBasicMaterial({color: 0x0000ff});
+        const zAxis_geo = new BufferGeometry().setFromPoints([new Vector3(0, 0, -this.triadLength*2), new Vector3(0, 0, this.triadLength*2)]);
+        this.zAxis = new Line(zAxis_geo, zAxis_mat);
         this.scene.add(this.zAxis);
 
-        const planeGeometry = new THREE.PlaneBufferGeometry(this.triadLength*2*2, this.triadLength*2*2);
-        const planeEdgesGeometry = new THREE.EdgesGeometry(planeGeometry);
-        this.xyPlane = new THREE.LineSegments(planeEdgesGeometry, zAxis_mat);
+        const planeGeometry = new PlaneBufferGeometry(this.triadLength*2*2, this.triadLength*2*2);
+        const planeEdgesGeometry = new EdgesGeometry(planeGeometry);
+        this.xyPlane = new LineSegments(planeEdgesGeometry, zAxis_mat);
         this.xyPlane.visible = false;
         this.scene.add(this.xyPlane);
 
-        this.xzPlane = new THREE.LineSegments(planeEdgesGeometry, yAxis_mat);
-        this.xzPlane.lookAt(new THREE.Vector3(0, 1, 0));
+        this.xzPlane = new LineSegments(planeEdgesGeometry, yAxis_mat);
+        this.xzPlane.lookAt(new Vector3(0, 1, 0));
         this.xzPlane.visible = false;
         this.scene.add(this.xzPlane);
 
-        this.yzPlane = new THREE.LineSegments(planeEdgesGeometry, xAxis_mat);
-        this.yzPlane.lookAt(new THREE.Vector3(1, 0, 0));
+        this.yzPlane = new LineSegments(planeEdgesGeometry, xAxis_mat);
+        this.yzPlane.lookAt(new Vector3(1, 0, 0));
         this.yzPlane.visible = false;
         this.scene.add(this.yzPlane);
     }
@@ -104,7 +106,7 @@ export class HumerusScapulaScene {
     createCamera() {
         const {aspectRatio} = this.viewGeometry;
         const fov = 75;
-        this.camera = new THREE.PerspectiveCamera(fov, aspectRatio, 1, 2000);
+        this.camera = new PerspectiveCamera(fov, aspectRatio, 1, 2000);
         this.camera.position.set(-500, 0, 0);
         this.camera.updateProjectionMatrix();
     }
@@ -117,9 +119,9 @@ export class HumerusScapulaScene {
     }
 
     createSpotlight() {
-        this.spotlight = new THREE.SpotLight(0xffffff, 1, 0, Math.PI / 4, 0, 1);
+        this.spotlight = new SpotLight(0xffffff, 1, 0, Math.PI / 4, 0, 1);
         this.scene.add(this.spotlight);
-        this.spotlight.target.position.copy(new THREE.Vector3());
+        this.spotlight.target.position.copy(new Vector3());
     }
 }
 

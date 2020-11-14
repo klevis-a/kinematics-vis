@@ -1,3 +1,5 @@
+'use strict';
+
 import {Matrix4, Vector3} from "./vendor/three.js/build/three.module.js";
 
 export function normalizeHumerusGeometry(humerusLandmarks, humerusGeometry) {

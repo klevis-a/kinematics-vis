@@ -1,17 +1,19 @@
-import * as EulerStepStatic from "./EulerStepStatic.js";
-import * as THREE from "./vendor/three.js/build/three.module.js";
-import * as EulerGeometry from "./EulerGeometry.js";
+'use strict';
+
+import {createArc, arrowGeometryFromArcGeometry, updateFlatArcArrow}  from "./EulerStepStatic.js";
+import {Quaternion, Plane, MeshBasicMaterial, DoubleSide, Mesh} from "./vendor/three.js/build/three.module.js";
+import {Triad, RotAxisWithArrow} from "./EulerGeometry.js";
 
 export class EulerStep {
     static NUM_INDICES_PER_RADIAL_SEGMENT = 6;
-    static createArc = EulerStepStatic.createArc;
-    static arrowGeometryFromArcGeometry = EulerStepStatic.arrowGeometryFromArcGeometry;
-    static updateFlatArcArrow = EulerStepStatic.updateFlatArcArrow;
+    static createArc = createArc;
+    static arrowGeometryFromArcGeometry = arrowGeometryFromArcGeometry;
+    static updateFlatArcArrow = updateFlatArcArrow;
 
     constructor(quatStart, rotation, numFrames, triadLength, triadAspectRatio, markingsStart, stepNumber, arcStripWidth, numArcRadialSegments, arcHeightSegments) {
         this.quatStart = quatStart;
         this.rotation = rotation;
-        this.quatEnd = new THREE.Quaternion().setFromAxisAngle(rotation.axis, rotation.angle).multiply(quatStart);
+        this.quatEnd = new Quaternion().setFromAxisAngle(rotation.axis, rotation.angle).multiply(quatStart);
         this.numFrames = numFrames;
         this.triadLength = triadLength;
         this.triadAspectRatio = triadAspectRatio;
@@ -57,7 +59,7 @@ export class EulerStep {
             this.triad.quaternion.copy(this.endingTriad.quaternion);
         } else {
             const interpFactor = frameNum/this.numFrames;
-            THREE.Quaternion.slerp(this.startingTriad.quaternion, this.endingTriad.quaternion, this.triad.quaternion, interpFactor);
+            Quaternion.slerp(this.startingTriad.quaternion, this.endingTriad.quaternion, this.triad.quaternion, interpFactor);
         }
     }
 
@@ -118,9 +120,9 @@ export class EulerStep {
     }
 
     createTriads() {
-        this.startingTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 0, 0, this.markingsStart, this.arcStripWidth*3);
-        this.endingTriad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, 0, 0, this.markingsStart, this.arcStripWidth*3);
-        this.triad = new EulerGeometry.Triad(this.triadLength, this.triadAspectRatio, this.stepNumber+1,
+        this.startingTriad = new Triad(this.triadLength, this.triadAspectRatio, 0, 0, this.markingsStart, this.arcStripWidth*3);
+        this.endingTriad = new Triad(this.triadLength, this.triadAspectRatio, 0, 0, this.markingsStart, this.arcStripWidth*3);
+        this.triad = new Triad(this.triadLength, this.triadAspectRatio, this.stepNumber+1,
             this.stepNumber, this.markingsStart, this.arcStripWidth*3);
 
         this.startingTriad.quaternion.copy(this.quatStart);
@@ -133,11 +135,11 @@ export class EulerStep {
     }
 
     createArcs() {
-        const rotPlane = new THREE.Plane(this.rotation.axis);
+        const rotPlane = new Plane(this.rotation.axis);
         const arcsStartingDistance = this.markingsStart + this.arcStripWidth;
         for(let dim=0; dim<3; dim++) {
-            const arcMaterial = new THREE.MeshBasicMaterial({color: EulerGeometry.Triad.colorFromDimAndIntensity(dim, this.triad.colorIntensity), depthTest: false});
-            arcMaterial.side = THREE.DoubleSide;
+            const arcMaterial = new MeshBasicMaterial({color: Triad.colorFromDimAndIntensity(dim, this.triad.colorIntensity), depthTest: false});
+            arcMaterial.side = DoubleSide;
             this.arcs[dim] = EulerStep.createArc(this.startingTriad, this.endingTriad, this.rotation.axis, this.rotation.angle, rotPlane,
                 dim, arcsStartingDistance+3*dim*this.arcStripWidth, this.arcStripWidth, arcMaterial, this.numArcRadialSegments, this.arcHeightSegments);
             this.arcs[dim].renderOrder = 0;
@@ -146,8 +148,8 @@ export class EulerStep {
     }
 
     createArcArrows() {
-        const arcArrowMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, depthTest: false});
-        arcArrowMaterial.side = THREE.DoubleSide;
+        const arcArrowMaterial = new MeshBasicMaterial({color: 0xffffff, depthTest: false});
+        arcArrowMaterial.side = DoubleSide;
 
         for (let dim=0; dim<3; dim++) {
             // we will need a different arrow geometry for each arc because the radii etc. vary and will change the arrow dimensions
@@ -155,7 +157,7 @@ export class EulerStep {
                 EulerStep.arrowGeometryFromArcGeometry(this.arcs[dim].geometry, this.numArcRadialSegments, this.arcHeightSegments, this.arcStripWidth, this.triadLength*this.triadAspectRatio/2);
             this.arrowSegmentLength[dim] = arrowSegmentLength;
             this.arrowSegmentOffset[dim] = arrowSegmentOffsetLength;
-            this.arcArrows[dim] = new THREE.Mesh(arrowGeometry, arcArrowMaterial);
+            this.arcArrows[dim] = new Mesh(arrowGeometry, arcArrowMaterial);
             this.arcArrows[dim].renderOrder = 1;
             this.arcs[dim].add(this.arcArrows[dim]);
             this.arcArrows[dim].visible = false;
@@ -163,12 +165,12 @@ export class EulerStep {
     }
 
     createRotAxis() {
-        const rotAxisColor = EulerGeometry.Triad.colorFromDimAndIntensity(this.stepNumber-1, this.triad.colorIntensity);
+        const rotAxisColor = Triad.colorFromDimAndIntensity(this.stepNumber-1, this.triad.colorIntensity);
         const axisRadius = this.triadLength * this.triadAspectRatio * 0.1;
         const axisLength = this.triadLength * 1.25;
         const arrowMainRadius = this.triadLength*this.triadAspectRatio * 0.75;
         const arrowMinorRadius = this.arcStripWidth * 0.25;
-        this.rotAxis = new EulerGeometry.RotAxisWithArrow(rotAxisColor, axisRadius, axisLength, arrowMainRadius, arrowMinorRadius,
+        this.rotAxis = new RotAxisWithArrow(rotAxisColor, axisRadius, axisLength, arrowMainRadius, arrowMinorRadius,
             this.rotation.axis, this.rotation.angle);
     }
 }

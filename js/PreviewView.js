@@ -1,3 +1,5 @@
+'use strict';
+
 import {generateUUID} from "./JSHelpers.js";
 import {HumerusScapulaScene} from "./HumerusScapulaScene.js";
 import {BaseView} from "./BaseView.js";

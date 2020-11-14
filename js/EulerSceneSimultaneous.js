@@ -1,10 +1,12 @@
+'use strict';
+
 import {EulerScene} from "./EulerScene.js";
-import * as THREE from "./vendor/three.js/build/three.module.js";
-import * as EulerStep from "./EulerStep.js";
+import {Quaternion, Vector3} from "./vendor/three.js/build/three.module.js";
+import {EulerStep} from "./EulerStep.js";
 import {axisAngleFromQuat} from "./RotDecompositions.js";
 
 
-class EulerStepSimultaneous extends EulerStep.EulerStep {
+class EulerStepSimultaneous extends EulerStep {
 
     constructor(quatStart, rotation, numFrames, triadLength, triadAspectRatio, markingsStart, stepNumber, arcStripWidth, numArcRadialSegments, arcHeightSegments, simultaneous_rotations) {
         super(quatStart, rotation, numFrames, triadLength, triadAspectRatio, markingsStart, stepNumber, arcStripWidth, numArcRadialSegments, arcHeightSegments);
@@ -30,8 +32,8 @@ class EulerStepSimultaneous extends EulerStep.EulerStep {
             this.triad.quaternion.copy(this.endingTriad.quaternion);
         } else {
             const interpFactor = frameNum/this.numFrames;
-            const endQuat = (new THREE.Quaternion().setFromAxisAngle(this.simultaneous_rotations[0].axis, this.simultaneous_rotations[0].angle * interpFactor))
-                .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.simultaneous_rotations[1].angle * interpFactor));
+            const endQuat = (new Quaternion().setFromAxisAngle(this.simultaneous_rotations[0].axis, this.simultaneous_rotations[0].angle * interpFactor))
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), this.simultaneous_rotations[1].angle * interpFactor));
             this.triad.quaternion.copy(endQuat);
         }
     }
@@ -46,8 +48,8 @@ export class EulerSceneSimultaneous extends EulerScene{
 
     createSteps() {
         const finalQuat = this.rotations.reduce((accumulator, rotation) =>
-            (new THREE.Quaternion().setFromAxisAngle(rotation.axis, rotation.angle)).multiply(accumulator), new THREE.Quaternion());
-        this.quaternions = [new THREE.Quaternion(), finalQuat];
+            (new Quaternion().setFromAxisAngle(rotation.axis, rotation.angle)).multiply(accumulator), new Quaternion());
+        this.quaternions = [new Quaternion(), finalQuat];
         const rotation = axisAngleFromQuat(finalQuat);
 
         // the euler step will go from beginning to end in one step even though there are two rotations - because

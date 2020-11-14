@@ -1,13 +1,15 @@
-import * as THREE from "./vendor/three.js/build/three.module.js";
+'use strict';
+
+import {Vector3, Quaternion} from "./vendor/three.js/build/three.module.js";
 
 export class HumerusLandmarks {
     static COLS = [1, 4];
 
     constructor(landmarksData) {
         this.LandmarksData = landmarksData;
-        this.hhc = new THREE.Vector3(...this.LandmarksData[1].slice(...HumerusLandmarks.COLS));
-        this.le = new THREE.Vector3(...this.LandmarksData[2].slice(...HumerusLandmarks.COLS));
-        this.me = new THREE.Vector3(...this.LandmarksData[3].slice(...HumerusLandmarks.COLS));
+        this.hhc = new Vector3(...this.LandmarksData[1].slice(...HumerusLandmarks.COLS));
+        this.le = new Vector3(...this.LandmarksData[2].slice(...HumerusLandmarks.COLS));
+        this.me = new Vector3(...this.LandmarksData[3].slice(...HumerusLandmarks.COLS));
     }
 }
 
@@ -16,11 +18,11 @@ export class ScapulaLandmarks {
 
     constructor(landmarksData) {
         this.LandmarksData = landmarksData;
-        this.gc = new THREE.Vector3(...this.LandmarksData[1].slice(...ScapulaLandmarks.COLS));
-        this.ia = new THREE.Vector3(...this.LandmarksData[2].slice(...ScapulaLandmarks.COLS));
-        this.ts = new THREE.Vector3(...this.LandmarksData[3].slice(...ScapulaLandmarks.COLS));
-        this.pla = new THREE.Vector3(...this.LandmarksData[4].slice(...ScapulaLandmarks.COLS));
-        this.ac = new THREE.Vector3(...this.LandmarksData[5].slice(...ScapulaLandmarks.COLS));
+        this.gc = new Vector3(...this.LandmarksData[1].slice(...ScapulaLandmarks.COLS));
+        this.ia = new Vector3(...this.LandmarksData[2].slice(...ScapulaLandmarks.COLS));
+        this.ts = new Vector3(...this.LandmarksData[3].slice(...ScapulaLandmarks.COLS));
+        this.pla = new Vector3(...this.LandmarksData[4].slice(...ScapulaLandmarks.COLS));
+        this.ac = new Vector3(...this.LandmarksData[5].slice(...ScapulaLandmarks.COLS));
     }
 }
 
@@ -65,11 +67,11 @@ export class Trajectory {
     }
 
     torsoPosVector(frameNum) {
-        return new THREE.Vector3(...this.torsoPos(frameNum));
+        return new Vector3(...this.torsoPos(frameNum));
     }
 
     torsoOrientQuat(frameNum) {
-        return new THREE.Quaternion(...this.torsoOrient(frameNum));
+        return new Quaternion(...this.torsoOrient(frameNum));
     }
 
     // scapula
@@ -82,11 +84,11 @@ export class Trajectory {
     }
 
     scapPosVector(frameNum) {
-        return new THREE.Vector3(...this.scapPos(frameNum));
+        return new Vector3(...this.scapPos(frameNum));
     }
 
     scapOrientQuat(frameNum) {
-        return new THREE.Quaternion(...this.scapOrient(frameNum));
+        return new Quaternion(...this.scapOrient(frameNum));
     }
 
     // humerus
@@ -99,10 +101,10 @@ export class Trajectory {
     }
 
     humPosVector(frameNum) {
-        return new THREE.Vector3(...this.humPos(frameNum));
+        return new Vector3(...this.humPos(frameNum));
     }
 
     humOrientQuat(frameNum) {
-        return new THREE.Quaternion(...this.humOrient(frameNum));
+        return new Quaternion(...this.humOrient(frameNum));
     }
 }

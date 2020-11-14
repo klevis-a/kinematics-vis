@@ -1,3 +1,5 @@
+'use strict';
+
 import {Matrix4, Quaternion, Vector3, Matrix3} from "./vendor/three.js/build/three.module.js";
 import SVD from './vendor/svd.js'
 import {Trajectory} from "./Csv_Processor.js";
