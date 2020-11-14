@@ -87,7 +87,7 @@ export class PlotManager {
 
     poePlot() {
         const layout = this.commonPlotLayout();
-        layout.title = 'Plane of Elevation';
+        layout.title = 'Humerus Plane of Elevation';
         const traces = [
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[0], type: 'scatter', name: this.plotNames.get('HUM_EULER_YXY')},
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[1], type: 'scatter', name: this.plotNames.get('HUM_EULER_XZY')},
@@ -98,7 +98,7 @@ export class PlotManager {
 
     eaPlot() {
         const layout = this.commonPlotLayout();
-        layout.title = 'Angle of Elevation';
+        layout.title = 'Humerus Angle of Elevation';
         const traces = [
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[1], type: 'scatter', name: this.plotNames.get('HUM_EULER_YXY')},
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[0], type: 'scatter', name: this.plotNames.get('HUM_EULER_XZY')},
@@ -109,7 +109,7 @@ export class PlotManager {
 
     axialRotPlot() {
         const layout = this.commonPlotLayout();
-        layout.title = 'Axial Rotation';
+        layout.title = 'Humerus Axial Rotation';
         const traces = [
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[2], type: 'scatter', name: this.plotNames.get('HUM_EULER_YXY')},
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[2], type: 'scatter', name: this.plotNames.get('HUM_EULER_XZY')},
@@ -121,7 +121,7 @@ export class PlotManager {
 
     humerusIsbPlot() {
         const layout = this.commonPlotLayout();
-        layout.title = this.plotNames.get('HUM_EULER_YXY');
+        layout.title = 'Humerus ' + this.plotNames.get('HUM_EULER_YXY');
         const traces = [
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[0], type: 'scatter', name: 'Plane of Elevation'},
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[1], type: 'scatter', name: 'Angle of Elevation'},
@@ -133,7 +133,7 @@ export class PlotManager {
 
     humerusPhadkePlot() {
         const layout = this.commonPlotLayout();
-        layout.title = this.plotNames.get('HUM_EULER_XZY');
+        layout.title = 'Humerus ' + this.plotNames.get('HUM_EULER_XZY');
         const traces = [
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[0], type: 'scatter', name: 'Angle of Elevation'},
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[1], type: 'scatter', name: 'Angle of Flexion/Horizontal Abd/Add'},
@@ -145,7 +145,7 @@ export class PlotManager {
 
     humerusSwingTwistPlot() {
         const layout = this.commonPlotLayout();
-        layout.title = this.plotNames.get('HUM_SWING_TWIST');
+        layout.title = 'Humerus ' + this.plotNames.get('HUM_SWING_TWIST');
         const traces = [
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[0], type: 'scatter', name: 'Plane of Elevation'},
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[1], type: 'scatter', name: 'Angle of Elevation'},
