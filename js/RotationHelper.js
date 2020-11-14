@@ -9,8 +9,8 @@ import {
 } from "./RotDecompositions.js";
 
 export const HUMERUS_BASE = {
-    TORSO: 0,
-    SCAPULA: 1
+    TORSO: 'T',
+    SCAPULA: 'S'
 };
 
 export class RotationHelper {
@@ -57,45 +57,30 @@ export class RotationHelper {
                 method_traj.push(this.scapula_methods.get(method_name)(st_quat));
             });
         }
-        this.currentHumerusBase = HUMERUS_BASE.TORSO;
-        this.humQuatTraj = this.th_quat;
-        this.humRotTraj = this.th_rotations;
-        this.humPosTraj = this.th_pos;
-
     }
 
-    changeHumerusBase(newBase) {
-        switch (newBase) {
-            case HUMERUS_BASE.TORSO:
-                this.currentHumerusBase = HUMERUS_BASE.TORSO;
-                this.humQuatTraj = this.th_quat;
-                this.humRotTraj = this.th_rotations;
-                this.humPosTraj = this.th_pos;
-                break;
-            case HUMERUS_BASE.SCAPULA:
-                this.currentHumerusBase = HUMERUS_BASE.SCAPULA;
-                this.humQuatTraj = this.gh_quat;
-                this.humRotTraj = this.gh_rotations;
-                this.humPosTraj = this.gh_pos;
-                break;
-            default:
-                this.currentHumerusBase = HUMERUS_BASE.TORSO;
-                this.humQuatTraj = this.th_quat;
-                this.humRotTraj = this.th_rotations;
-                this.humPosTraj = this.th_pos;
-        }
+    humerusQuat_torso(frameNum) {
+        return this.th_quat[frameNum];
     }
 
-    humerusQuat(frameNum) {
-        return this.humQuatTraj[frameNum];
+    humerusPos_torso(frameNum) {
+        return this.th_pos[frameNum];
     }
 
-    humerusPos(frameNum) {
-        return this.humPosTraj[frameNum];
+    humerusRotation_torso(method_name, frameNum) {
+        return this.th_rotations.get(method_name)[frameNum];
     }
 
-    humerusRotation(method_name, frameNum) {
-        return this.humRotTraj.get(method_name)[frameNum];
+    humerusQuat_scapula(frameNum) {
+        return this.gh_quat[frameNum];
+    }
+
+    humerusPos_scapula(frameNum) {
+        return this.gh_pos[frameNum];
+    }
+
+    humerusRotation_scapula(method_name, frameNum) {
+        return this.gh_rotations.get(method_name)[frameNum];
     }
 
     scapQuat(framenum) {

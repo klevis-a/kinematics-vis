@@ -42,15 +42,15 @@ export class ScapulaView extends BaseView{
         this.ctrlDiv.setAttribute('id', this.uuid + '_ctrls');
     }
 
-    postDomAttach(sceneManager) {
+    postDomAttach(viewManager) {
         this.eulerScene.createCamera();
         this.eulerScene.createControls();
     }
 
-    initializeVisualOptions(sceneManager) {
-        this.showTriadsArcs({visibility: sceneManager.guiOptions.showTriadsArcs});
-        this.priorStepHumeriVisible({visibility: sceneManager.guiOptions.showAllBones});
-        this.toggleBodyPlaneVisibility({visibility: sceneManager.guiOptions.showBodyPlanes});
+    initializeVisualOptions(viewManager) {
+        this.showTriadsArcs(viewManager.guiOptions.showTriadsArcs);
+        this.priorStepHumeriVisible(viewManager.guiOptions.showAllBones);
+        this.toggleBodyPlaneVisibility(viewManager.guiOptions.showBodyPlanes);
     }
 
     get viewGeometry() {
@@ -86,34 +86,34 @@ export class ScapulaView extends BaseView{
         this.eulerScene.dispose();
     }
 
-    subscribeEvents(sceneManager) {
+    subscribeEvents(viewManager) {
         // triads/arcs visibility
-        const triadsArcsVisibilityListener = event => this.showTriadsArcs(event);
-        sceneManager.addEventListener('showTriadsArcs', triadsArcsVisibilityListener);
+        const triadsArcsVisibilityListener = event => this.showTriadsArcs(event.visibility);
+        viewManager.addEventListener('showTriadsArcs', triadsArcsVisibilityListener);
         this.sceneManagerEventListeners.set('showTriadsArcs', triadsArcsVisibilityListener);
 
         // prior step humeri visibility
-        const priorStepsHumeriVisibilityListener = event => this.priorStepHumeriVisible(event);
-        sceneManager.addEventListener('showAllBones', priorStepsHumeriVisibilityListener);
+        const priorStepsHumeriVisibilityListener = event => this.priorStepHumeriVisible(event.visibility);
+        viewManager.addEventListener('showAllBones', priorStepsHumeriVisibilityListener);
         this.sceneManagerEventListeners.set('showAllBones', priorStepsHumeriVisibilityListener);
 
         // body plane visibility
-        const bodyPlanesVisibilityListener = event => this.toggleBodyPlaneVisibility(event);
-        sceneManager.addEventListener('showBodyPlanes', bodyPlanesVisibilityListener);
+        const bodyPlanesVisibilityListener = event => this.toggleBodyPlaneVisibility(event.visibility);
+        viewManager.addEventListener('showBodyPlanes', bodyPlanesVisibilityListener);
         this.sceneManagerEventListeners.set('showBodyPlanes', bodyPlanesVisibilityListener);
     }
 
-    showTriadsArcs(event) {
-        this.eulerScene.triadsArcsVisible = event.visibility;
+    showTriadsArcs(flag) {
+        this.eulerScene.triadsArcsVisible = flag;
         this.eulerScene.showTriadsArcs();
     }
 
-    priorStepHumeriVisible(event) {
-        this.eulerScene.priorStepBonesVisible = event.visibility;
+    priorStepHumeriVisible(flag) {
+        this.eulerScene.priorStepBonesVisible = flag;
         this.eulerScene.updateBonesBasedOnStep();
     }
 
-    toggleBodyPlaneVisibility(event) {
-        this.eulerScene.toggleBodyPlaneVisibility(event.visibility);
+    toggleBodyPlaneVisibility(flag) {
+        this.eulerScene.toggleBodyPlaneVisibility(flag);
     }
 }

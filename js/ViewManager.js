@@ -3,7 +3,7 @@ import {WebGLRenderer, PerspectiveCamera, Vector3, EventDispatcher} from "./vend
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import {normalizeHumerusGeometry, normalizeScapulaGeometry} from "./StlGeometryTools.js";
-import {RotationHelper} from "./RotationHelper.js";
+import {RotationHelper, HUMERUS_BASE} from "./RotationHelper.js";
 import {HumerusView} from "./HumerusView.js";
 import {PlotManager} from "./PlotManager.js";
 import {removeAllChildNodes} from "./JSHelpers.js";
@@ -30,6 +30,7 @@ export class ViewManager {
 
         // gui options
         this.guiOptions = {
+            humerusBase: HUMERUS_BASE.TORSO,
             showAllBones: false,
             showAngles: false,
             showTriadsArcs: true,
@@ -105,6 +106,7 @@ export class ViewManager {
         };
 
         this.plotter = new PlotManager(this.rotationHelper, on_Click, on_Hover, on_Unhover, this.plotsContainerDiv, this.plotSelectorDiv, 'axialRot');
+        this.addEventListener('humerusBase', event => this.plotter.changeHumerusBase(event.humerusBase));
     }
 
     previewFrame(frameNum) {
@@ -121,7 +123,7 @@ export class ViewManager {
     }
 
     createHumerusView(method_name) {
-        const view =  new HumerusView(this.camera, this.renderer, this.rotationHelper, method_name, this.humerusGeometry, this.humerusLength, this.anglesVisLayer);
+        const view =  new HumerusView(this.camera, this.renderer, this.rotationHelper, method_name, this.humerusGeometry, this.humerusLength, this.anglesVisLayer, this.guiOptions.humerusBase);
         view.subscribeEvents(this);
         view.initializeVisualOptions(this);
         return {scene: view, div: view.parent_div};
@@ -297,6 +299,10 @@ export class ViewManager {
 
     createOptionsGUI() {
         this.optionsGUI = new GUI({resizable : false, name: 'visGUI'});
+
+        this.optionsGUI.add(this.guiOptions, 'humerusBase', {Torso: HUMERUS_BASE.TORSO, Scapula: HUMERUS_BASE.SCAPULA})
+            .name('Humerus Base').onChange(value => {this.dispatchEvent({type: 'humerusBase', humerusBase: value, frameNum: this.frameSelectorController.Timeline.value - 1});
+        });
 
         this.optionsGUI.add(this.guiOptions, 'showTriadsArcs').name('Show Triads/Arcs').onChange(value => {
             this.dispatchEvent({type: 'showTriadsArcs', visibility: value});

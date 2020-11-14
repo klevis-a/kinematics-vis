@@ -27,12 +27,12 @@ export class PreviewView extends BaseView{
         this.scene_div.setAttribute('id', this.uuid + '_scene');
     }
 
-    postDomAttach(sceneManager) {
+    postDomAttach(viewManager) {
         this.humScapScene.createCamera();
         this.humScapScene.createControls();
     }
 
-    initializeVisualOptions(sceneManager) {
+    initializeVisualOptions(viewManager) {
     }
 
     get viewGeometry() {
@@ -56,8 +56,8 @@ export class PreviewView extends BaseView{
     }
 
     previewFrame(frameNum) {
-        this.humScapScene.humerus.quaternion.copy(this.rotationHelper.humerusQuat(frameNum));
-        this.humScapScene.humerus.position.copy(this.rotationHelper.humerusPos(frameNum));
+        this.humScapScene.humerus.quaternion.copy(this.rotationHelper.humerusQuat_torso(frameNum));
+        this.humScapScene.humerus.position.copy(this.rotationHelper.humerusPos_torso(frameNum));
         this.humScapScene.scapula.quaternion.copy(this.rotationHelper.scapQuat(frameNum));
         this.humScapScene.scapula.position.copy(this.rotationHelper.scapPos(frameNum));
     }

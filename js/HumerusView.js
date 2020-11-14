@@ -9,6 +9,7 @@ import {enableAxialRot, AXIAL_ROT_METHODS} from "./EulerScene_Axial.js";
 import {EulerSceneAnimationHelper} from "./EulerSceneAnimationHelper.js";
 import {generateUUID} from "./JSHelpers.js";
 import {BaseView} from "./BaseView.js";
+import {HUMERUS_BASE} from "./RotationHelper.js";
 
 
 export class HumerusView extends BaseView{
@@ -56,11 +57,12 @@ export class HumerusView extends BaseView{
            }]
        ]);
 
-    constructor(camera, renderer, rotationHelper, method_name, humerusGeometry, humerusLength, anglesVisLayer, numAnimFrames=100, framePeriod=10) {
+    constructor(camera, renderer, rotationHelper, method_name, humerusGeometry, humerusLength, anglesVisLayer, humerusBase, numAnimFrames=100, framePeriod=10) {
         super();
         this.camera = camera;
         this.renderer = renderer;
         this.rotationHelper = rotationHelper;
+        this.setHumerusBase(humerusBase);
         this.anglesVisLayer = anglesVisLayer;
         this.method_name = method_name;
         this.numAnimFrames = numAnimFrames;
@@ -86,7 +88,7 @@ export class HumerusView extends BaseView{
         // visualization checkbox is checked
         enableAngleVis(this.eulerScene, this.anglesVisLayer, this.method_info.angle_vis_method);
         enableAxialRot(this.eulerScene, this.method_info.axial_rot_method);
-        this.eulerScene.initialize(this.rotationHelper.humerusRotation(this.method_name, 0));
+        this.eulerScene.initialize(this.humerusRotation(this.method_name, 0));
         this.eulerScene.goToStep(this.eulerScene.currentStep);
         this.eulerScene.changeSphere(this.method_info.north_pole);
         this.animationHelper = new EulerSceneAnimationHelper(this.ctrlDiv, this.eulerScene, this.numAnimFrames, this.framePeriod);
@@ -105,17 +107,17 @@ export class HumerusView extends BaseView{
         this.ctrlDiv.setAttribute('id', this.uuid + '_ctrls');
     }
 
-    postDomAttach(sceneManager) {
+    postDomAttach(viewManager) {
         this.eulerScene.createControls();
-        this.eulerScene.controls.addEventListener('start', sceneManager.trackballStartEventListener);
-        this.eulerScene.controls.addEventListener('end', sceneManager.trackballEndEventListener);
+        this.eulerScene.controls.addEventListener('start', viewManager.trackballStartEventListener);
+        this.eulerScene.controls.addEventListener('end', viewManager.trackballEndEventListener);
     }
 
-    initializeVisualOptions(sceneManager) {
-        this.showTriadsArcs({visibility: sceneManager.guiOptions.showTriadsArcs});
-        this.priorStepHumeriVisible({visibility: sceneManager.guiOptions.showAllBones});
-        this.toggleBodyPlaneVisibility({visibility: sceneManager.guiOptions.showBodyPlanes});
-        this.toggleSphereVisibility({visibility: sceneManager.guiOptions.showSphere});
+    initializeVisualOptions(viewManager) {
+        this.showTriadsArcs(viewManager.guiOptions.showTriadsArcs);
+        this.priorStepHumeriVisible(viewManager.guiOptions.showAllBones);
+        this.toggleBodyPlaneVisibility(viewManager.guiOptions.showBodyPlanes);
+        this.toggleSphereVisibility(viewManager.guiOptions.showSphere);
     }
 
     get viewGeometry() {
@@ -137,11 +139,11 @@ export class HumerusView extends BaseView{
     }
 
     previewFrame(frameNum) {
-        this.eulerScene.bone.quaternion.copy(this.rotationHelper.humerusQuat(frameNum));
+        this.eulerScene.bone.quaternion.copy(this.humerusQuat(frameNum));
     }
 
     setFrame(frameNum) {
-        this.eulerScene.reset(this.rotationHelper.humerusRotation(this.method_name, frameNum));
+        this.eulerScene.reset(this.humerusRotation(this.method_name, frameNum));
         this.animationHelper.goToStep(this.eulerScene.currentStep);
     }
 
@@ -149,43 +151,67 @@ export class HumerusView extends BaseView{
         this.eulerScene.dispose();
     }
 
-    subscribeEvents(sceneManager) {
+    subscribeEvents(viewManager) {
         // triads/arcs visibility
-        const triadsArcsVisibilityListener = event => this.showTriadsArcs(event);
-        sceneManager.addEventListener('showTriadsArcs', triadsArcsVisibilityListener);
+        const triadsArcsVisibilityListener = event => this.showTriadsArcs(event.visibility);
+        viewManager.addEventListener('showTriadsArcs', triadsArcsVisibilityListener);
         this.sceneManagerEventListeners.set('showTriadsArcs', triadsArcsVisibilityListener);
 
         // prior step humeri visibility
-        const priorStepsHumeriVisibilityListener = event => this.priorStepHumeriVisible(event);
-        sceneManager.addEventListener('showAllBones', priorStepsHumeriVisibilityListener);
+        const priorStepsHumeriVisibilityListener = event => this.priorStepHumeriVisible(event.visibility);
+        viewManager.addEventListener('showAllBones', priorStepsHumeriVisibilityListener);
         this.sceneManagerEventListeners.set('showAllBones', priorStepsHumeriVisibilityListener);
 
         // body plane visibility
-        const bodyPlanesVisibilityListener = event => this.toggleBodyPlaneVisibility(event);
-        sceneManager.addEventListener('showBodyPlanes', bodyPlanesVisibilityListener);
+        const bodyPlanesVisibilityListener = event => this.toggleBodyPlaneVisibility(event.visibility);
+        viewManager.addEventListener('showBodyPlanes', bodyPlanesVisibilityListener);
         this.sceneManagerEventListeners.set('showBodyPlanes', bodyPlanesVisibilityListener);
 
         // sphere visibility
-        const sphereVisibilityListener = event => this.toggleSphereVisibility(event);
-        sceneManager.addEventListener('showSphere', sphereVisibilityListener);
+        const sphereVisibilityListener = event => this.toggleSphereVisibility(event.visibility);
+        viewManager.addEventListener('showSphere', sphereVisibilityListener);
         this.sceneManagerEventListeners.set('showSphere', sphereVisibilityListener);
+
+        // humuerus base change
+        const humerusBaseChangeListener = event => {
+            this.setHumerusBase(event.humerusBase);
+            this.setFrame(event.frameNum)
+        };
+        viewManager.addEventListener('humerusBase', humerusBaseChangeListener);
+        this.sceneManagerEventListeners.set('humerusBase', humerusBaseChangeListener);
     }
 
-    showTriadsArcs(event) {
-        this.eulerScene.triadsArcsVisible = event.visibility;
+    showTriadsArcs(flag) {
+        this.eulerScene.triadsArcsVisible = flag;
         this.eulerScene.showTriadsArcs();
     }
 
-    priorStepHumeriVisible(event) {
-        this.eulerScene.priorStepBonesVisible = event.visibility;
+    priorStepHumeriVisible(flag) {
+        this.eulerScene.priorStepBonesVisible = flag;
         this.eulerScene.updateBonesBasedOnStep();
     }
 
-    toggleBodyPlaneVisibility(event) {
-        this.eulerScene.toggleBodyPlaneVisibility(event.visibility);
+    toggleBodyPlaneVisibility(flag) {
+        this.eulerScene.toggleBodyPlaneVisibility(flag);
     }
 
-    toggleSphereVisibility(event) {
-        this.eulerScene.toggleSphereVisibility(event.visibility);
+    toggleSphereVisibility(flag) {
+        this.eulerScene.toggleSphereVisibility(flag);
+    }
+
+    setHumerusBase(base) {
+        switch (base) {
+            case HUMERUS_BASE.TORSO:
+                this.humerusRotation = (method_name, frameNum) => this.rotationHelper.humerusRotation_torso(method_name, frameNum);
+                this.humerusQuat = frameNum => this.rotationHelper.humerusQuat_torso(frameNum);
+                break;
+            case HUMERUS_BASE.SCAPULA:
+                this.humerusRotation = (method_name, frameNum) => this.rotationHelper.humerusRotation_scapula(method_name, frameNum);
+                this.humerusQuat = frameNum => this.rotationHelper.humerusQuat_scapula(frameNum);
+                break;
+            default:
+                this.humerusRotation = (method_name, frameNum) => this.rotationHelper.humerusRotation_torso(method_name, frameNum);
+                this.humerusQuat = frameNum => this.rotationHelper.humerusQuat_torso(frameNum);
+        }
     }
 }

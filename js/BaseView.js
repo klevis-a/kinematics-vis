@@ -4,10 +4,10 @@ export class BaseView {
         this.parent_div = null;
     }
 
-    postDomAttach(sceneManager) {
+    postDomAttach(viewManager) {
     }
 
-    initializeVisualOptions(sceneManager) {
+    initializeVisualOptions(viewManager) {
     }
 
     get viewGeometry() {
