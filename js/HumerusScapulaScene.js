@@ -22,6 +22,17 @@ export class HumerusScapulaScene {
         this.initScene();
     }
 
+    addEllipsoid() {
+        const hhcDistance = this.humerus.position.length();
+        const retractFactor = 0.8;
+        const radius = hhcDistance*retractFactor;
+        const verticalScalingFactor = this.humerusLength/radius;
+        const geometry = new THREE.SphereBufferGeometry(radius, 32, 32, 0, Math.PI*2, 0, Math.PI/2);
+        geometry.applyMatrix4(new THREE.Matrix4().makeScale(1.0, verticalScalingFactor, 1.0).setPosition(0, -verticalScalingFactor*0.8*radius, 0));
+        this.ellipsoid = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({color: EulerScene.BONE_COLOR}));
+        this.scene.add(this.ellipsoid);
+    }
+
     dispose() {
         this.xAxis.geometry.dispose();
         this.xAxis.material.dispose();

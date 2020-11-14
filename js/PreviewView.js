@@ -15,6 +15,7 @@ export class PreviewView extends BaseView{
         this.sceneManagerEventListeners = new Map();
         this.animationHelper = {CurrentAnimationFnc: (t) => {}};
         this.setFrame(0);
+        this.humScapScene.addEllipsoid();
     }
 
     createDivElements() {
