@@ -19,7 +19,8 @@ export class PlotManager {
             ['HUM_EULER_YXY', "ISB: yx'y''"],
             ['HUM_EULER_XZY', "Phadke: xz'y''"],
             ['HUM_SWING_TWIST', 'Swing Twist'],
-            ['TRUE_AXIAL_ROTATION', 'True Axial Rotation']
+            ['TRUE_AXIAL_ROTATION', 'True Axial Rotation'],
+            ['SCAP_EULER_YXZ', "ISB: yx'z''"]
         ]);
 
         this.prepareData();
@@ -155,6 +156,17 @@ export class PlotManager {
         this.createPlot('humerusSwingTwist', traces, layout, layout.title);
     }
 
+    scapulaPlot() {
+        const layout = this.commonPlotLayout();
+        layout.title = 'Scapula ' + this.plotNames.get('SCAP_EULER_YXZ');
+        const traces = [
+            {x: this.frameNums, y: this.st.get('SCAP_EULER_YXZ')[0], type: 'scatter', name: 'Retraction(-)/Protraction(+)'},
+            {x: this.frameNums, y: this.st.get('SCAP_EULER_YXZ')[1], type: 'scatter', name: 'Lateral(-)/Medial(+) Rotation'},
+            {x: this.frameNums, y: this.st.get('SCAP_EULER_YXZ')[2], type: 'scatter', name: 'Anterior(-)/Posterior(+) Tilt'}
+        ];
+        this.createPlot('scap', traces, layout, layout.title);
+    }
+
     createPlots() {
         this.poePlot();
         this.eaPlot();
@@ -162,6 +174,7 @@ export class PlotManager {
         this.humerusIsbPlot();
         this.humerusPhadkePlot();
         this.humerusSwingTwistPlot();
+        this.scapulaPlot();
     }
 
     addPlotSelector() {
