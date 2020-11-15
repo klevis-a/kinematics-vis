@@ -13,7 +13,7 @@ import {defaultCamera} from "./BaseView.js";
 
 export class ViewManager {
 
-    constructor(humerusLandmarks, scapulaLandmarks, trajectory, humerusGeometry, scapulaGeometry) {
+    constructor(humerusLandmarks, scapulaLandmarks, trajectory, humerusGeometry, scapulaGeometry, initialLayout=null, guiOptions=null) {
         // humerus and scapula geometry
         this.humerusLandmarks = humerusLandmarks;
         this.scapulaLandmarks = scapulaLandmarks;
@@ -30,14 +30,18 @@ export class ViewManager {
         this.getCaptureFrameCtrlElements();
 
         // gui options
-        this.guiOptions = {
-            humerusBase: HUMERUS_BASE.TORSO,
-            showAllBones: false,
-            showAngles: false,
-            showTriadsArcs: true,
-            showBodyPlanes: false,
-            showSphere: true
-        };
+        if (guiOptions==null) {
+            this.guiOptions = {
+                humerusBase: HUMERUS_BASE.TORSO,
+                showAllBones: false,
+                showAngles: false,
+                showTriadsArcs: true,
+                showBodyPlanes: false,
+                showSphere: true
+            };
+        } else {
+            this.guiOptions = guiOptions;
+        }
 
         // torso, scapula, and humerus rotations
         this.trajectory = trajectory;
@@ -62,7 +66,11 @@ export class ViewManager {
             ['SCAP_EULER_YXZ', {creationFnc: method_name => this.createScapulaView(method_name), friendly_name: "Scapula ISB: yx'z''"}]
         ]);
 
-        this.initialViewLayout = new Map([['view1', 'HUM_EULER_YXY'], ['view2', 'SCAP_EULER_YXZ'], ['view3', 'PREVIEW']]);
+        if (initialLayout == null) {
+            this.initialViewLayout = new Map([['view1', 'HUM_EULER_YXY'], ['view2', 'SCAP_EULER_YXZ'], ['view3', 'PREVIEW']]);
+        } else {
+            this.initialViewLayout = initialLayout;
+        }
         this.createViews();
         this.createMethodDropdowns();
         this.frameSelectorController = new FrameSelectorController(this.frameTimeline, this.frameFrameNum, this.frameGoCtrl,
