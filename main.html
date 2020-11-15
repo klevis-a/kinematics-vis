@@ -10,7 +10,10 @@
 </head>
 <body>
 <div id="topContainer">
+    <div id="db-div"></div>
+    <div id="loading-div"><h3>Loading...</h3></div>
     <div id="help-btn-div"><a href="#" id="help-btn">?</a></div>
+    <div id="db-open-div"><a href="#" id="db-open-link"><img src="images/open-file-folder.svg" id="db-open-img"></a></div>
     <div id="help-div">
             <div id="close-container"><a href="#" class="close" id="help-close-btn"></a></div>
             <p>
@@ -102,9 +105,9 @@
     </div>
     <div id="datGUI"></div>
 </div>
+<script src="js/vendor/papaparse.js"></script>
 <script src="js/vendor/plotly-latest.min.js"></script>
 <script src="js/vendor/palette.js"></script>
-<script src="js/vendor/require.js"></script>
-<script type="module" src="js/main.js"></script>
+<script type="module" src="js/defaultAnalysis.js"></script>
 </body>
 </html>

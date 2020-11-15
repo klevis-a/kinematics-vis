@@ -74,7 +74,7 @@ export class ScapulaView extends BaseView{
     }
 
     updateCamera() {
-        this.eulerScene.camera.update();
+        this.eulerScene.updateCamera();
     }
 
     previewFrame(frameNum) {

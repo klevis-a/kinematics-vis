@@ -15,9 +15,11 @@ export class FrameSelectorController {
         this.Timeline.step = '1';
         this.FrameNumLbl.innerHTML = 1;
 
-        this.FrameGoCtrl.onclick = () => this.UpdateEulerScenesFnc(this.Timeline.value-1);
-        this.Timeline.oninput = () => this.handleTimeLineInput();
-        this.Timeline.addEventListener('keydown', (event) => {
+        this.onGoListener = () => this.UpdateEulerScenesFnc(this.Timeline.value-1);
+        this.FrameGoCtrl.addEventListener('click', this.onGoListener);
+        this.onTimelineInputListener = () => this.handleTimeLineInput();
+        this.Timeline.addEventListener('input', this.onTimelineInputListener);
+        this.onTimelineKeyListener = (event) => {
             if (event.keyCode === 37) { // left arrow
                 const currentVal = parseInt(this.Timeline.value);
                 if (currentVal<=this.Timeline.min) {
@@ -38,7 +40,14 @@ export class FrameSelectorController {
             }
             this.handleTimeLineInput();
             event.preventDefault();
-        });
+        };
+        this.Timeline.addEventListener('keydown', this.onTimelineKeyListener);
+    }
+
+    dispose() {
+        this.FrameGoCtrl.removeEventListener('click', this.onGoListener);
+        this.Timeline.removeEventListener('input', this.onTimelineInputListener);
+        this.Timeline.removeEventListener('keydown', this.onTimelineKeyListener);
     }
 
     handleTimeLineInput() {

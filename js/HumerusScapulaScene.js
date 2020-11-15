@@ -1,7 +1,7 @@
 'use strict';
 
 import {Scene, MeshPhongMaterial, Mesh, Color, AxesHelper, SphereBufferGeometry, MeshStandardMaterial, Matrix4,
-    Line, LineBasicMaterial, BufferGeometry, PlaneBufferGeometry, LineSegments, EdgesGeometry, PerspectiveCamera,
+    Line, LineBasicMaterial, BufferGeometry, PlaneBufferGeometry, LineSegments, EdgesGeometry,
     SpotLight, Vector3} from './vendor/three.js/build/three.module.js';
 import {divGeometry} from "./SceneHelpers.js"
 import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
@@ -47,6 +47,8 @@ export class HumerusScapulaScene {
         // the geometry for the planes is the same so only dispose it for one of them
         // the material for the planes is inherited from the axes so no need to dispose them
         this.xyPlane.geometry.dispose();
+        if (this.controls) this.controls.dispose();
+        this.scene.dispose();
     }
 
     initScene() {

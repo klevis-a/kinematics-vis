@@ -1,5 +1,5 @@
 import {divGeometry} from "./SceneHelpers.js";
-import {WebGLRenderer, PerspectiveCamera, Vector3, EventDispatcher} from "./vendor/three.js/build/three.module.js";
+import {WebGLRenderer, Vector3, EventDispatcher} from "./vendor/three.js/build/three.module.js";
 import {FrameSelectorController} from "./FrameSelectorController.js";
 import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
 import {normalizeHumerusGeometry, normalizeScapulaGeometry} from "./StlGeometryTools.js";
@@ -13,7 +13,7 @@ import {defaultCamera} from "./BaseView.js";
 
 export class ViewManager {
 
-    constructor(humerusLandmarks, scapulaLandmarks, trajectory, humerusGeometry, scapulaGeometry, initialLayout=null, guiOptions=null) {
+    constructor(humerusLandmarks, scapulaLandmarks, trajectory, humerusGeometry, scapulaGeometry, initialLayout=null, guiOptions=null, defaultPlot='axialRot') {
         // humerus and scapula geometry
         this.humerusLandmarks = humerusLandmarks;
         this.scapulaLandmarks = scapulaLandmarks;
@@ -87,7 +87,30 @@ export class ViewManager {
         this.render();
 
         // add plot
+        this.defaultPlot = defaultPlot;
         this.addPlot();
+    }
+
+    dispose() {
+        cancelAnimationFrame(this.animationHandle);
+        // dispose of timeline events
+        this.frameSelectorController.dispose();
+        // dispose of each view
+        this.viewsMap.forEach((view, view_id) => {
+            const container_div = document.getElementById(view_id);
+            this.clearView(view_id);
+            container_div.removeEventListener('dblclick', this.dblClickListener);
+            removeAllChildNodes(container_div.getElementsByClassName('method_selector')[0]);
+        });
+        // dispose of the plotter
+        this.plotter.dispose();
+        // remove resize listener for window
+        window.removeEventListener('resize', this.resizeListener);
+        // dispose of the render
+        this.renderer.dispose();
+        // dispose of datGUI
+        this.optionsGUI.destroy();
+        removeAllChildNodes(document.getElementById('datGUI'));
     }
 
     addPlot() {
@@ -114,7 +137,7 @@ export class ViewManager {
             });
         };
 
-        this.plotter = new PlotManager(this.rotationHelper, on_Click, on_Hover, on_Unhover, this.plotsContainerDiv, this.plotSelectorDiv, 'axialRot');
+        this.plotter = new PlotManager(this.rotationHelper, on_Click, on_Hover, on_Unhover, this.plotsContainerDiv, this.plotSelectorDiv, this.defaultPlot);
         this.addEventListener('humerusBase', event => this.plotter.changeHumerusBase(event.humerusBase));
     }
 
@@ -267,7 +290,7 @@ export class ViewManager {
 
     addDblClickDivListener() {
         const sceneManager = this;
-        const dblClickListener = function () {
+        this.dblClickListener = function () {
             if (sceneManager.active_view_id == null) {
                 sceneManager.active_view_id = this.id;
                 sceneManager.viewsMap.forEach((view, view_id) => {
@@ -292,19 +315,20 @@ export class ViewManager {
             sceneManager.updateCamera();
             sceneManager.viewsMap.forEach((view, view_id) => view.updateCamera());
         };
-        this.viewsMap.forEach((scene, view_id) => document.getElementById(view_id).addEventListener('dblclick', dblClickListener));
+        this.viewsMap.forEach((scene, view_id) => document.getElementById(view_id).addEventListener('dblclick', this.dblClickListener));
     }
 
     addWindowResizeListener() {
-        window.addEventListener('resize', () => {
+        this.resizeListener = () => {
             this.renderer.setSize(this.viewsContainer.clientWidth, this.viewsContainer.clientHeight);
             // there is only one camera in order to enable linking between the scenes
             this.updateCamera();
-        });
+        };
+        window.addEventListener('resize', this.resizeListener);
     }
 
     createOptionsGUI() {
-        this.optionsGUI = new GUI({resizable : false, name: 'visGUI'});
+        this.optionsGUI = new GUI({resizable : false, name: 'visGUI', autoPlace: false});
 
         this.optionsGUI.add(this.guiOptions, 'humerusBase', {Torso: HUMERUS_BASE.TORSO, Scapula: HUMERUS_BASE.SCAPULA})
             .name('Humerus Base').onChange(value => {this.dispatchEvent({type: 'humerusBase', humerusBase: value, frameNum: this.frameSelectorController.Timeline.value - 1});

@@ -1,7 +1,7 @@
 'use strict';
 
 import {MathUtils} from "./vendor/three.js/build/three.module.js";
-import {range} from "./JSHelpers.js";
+import {range, removeAllChildNodes} from "./JSHelpers.js";
 import {realAxialRotation} from "./RotDecompositions.js";
 import {HUMERUS_BASE} from "./RotationHelper.js";
 
@@ -28,8 +28,15 @@ export class PlotManager {
         ]);
 
         this.prepareData();
+        this.allPlots = [];
         this.createPlots();
         this.addPlotSelector();
+    }
+
+    dispose() {
+        this.allPlots.forEach(div_id => Plotly.purge(div_id));
+        removeAllChildNodes(this.plotSelectorDiv);
+        removeAllChildNodes(this.plotContainerDiv);
     }
 
     setHumerusSpec(humerusBase) {
@@ -107,6 +114,7 @@ export class PlotManager {
             .on('plotly_unhover', this.onUnhover);
         this.plotMap.set(div_id, friendly_name);
         plotDiv.style.display = (div_id === this.defaultPlot) ? 'block' : 'none';
+        this.allPlots.push(div_id);
     }
 
     poePlot() {

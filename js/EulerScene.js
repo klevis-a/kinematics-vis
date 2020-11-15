@@ -1,7 +1,7 @@
 'use strict';
 
 import {Scene, Color, Quaternion, LineBasicMaterial, BufferGeometry, PlaneBufferGeometry, EdgesGeometry,
-    Line, LineSegments, Vector3, PerspectiveCamera, HemisphereLight, SpotLight, EventDispatcher} from './vendor/three.js/build/three.module.js';
+    Line, LineSegments, Vector3, HemisphereLight, SpotLight, EventDispatcher} from './vendor/three.js/build/three.module.js';
 import {divGeometry} from "./SceneHelpers.js"
 import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
 import {Triad} from "./EulerGeometry.js";
@@ -51,6 +51,7 @@ export class EulerScene {
         // the material for the planes is inherited from the axes so no need to dispose them
         this.xyPlane.geometry.dispose();
         this.steps.forEach(step => step.dispose());
+        if (this.controls) this.controls.dispose();
         this.scene.dispose();
     }
 

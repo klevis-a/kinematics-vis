@@ -70,5 +70,6 @@ export class PreviewView extends BaseView{
     }
 
     dispose() {
+        this.humScapScene.dispose();
     }
 }
