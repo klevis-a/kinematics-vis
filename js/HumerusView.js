@@ -6,7 +6,7 @@ import {EulerScene} from "./EulerScene.js";
 import {EulerSceneSimultaneous} from "./EulerSceneSimultaneous.js";
 import {enableBone} from "./EulerScene_Bone.js";
 import {enableSphere} from "./EulerScene_Sphere.js";
-import {enableAngleVis} from "./EulerScene_AngleVis.js";
+import {enableAngleVis, updateAxialRotVis_Euler, updateAxialRotVis_SwingTwist, updateAxialRotVis_ShortestPath} from "./EulerScene_AngleVis.js";
 import {enableAxialRot, AXIAL_ROT_METHODS} from "./EulerScene_Axial.js";
 import {EulerSceneAnimationHelper} from "./EulerSceneAnimationHelper.js";
 import {generateUUID} from "./JSHelpers.js";
@@ -18,6 +18,7 @@ export class HumerusView extends BaseView{
     static METHODS = new Map([
        ['HUM_EULER_YXY', {
            angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
+           axial_rot_vis_method: updateAxialRotVis_Euler,
            axial_rot_method: AXIAL_ROT_METHODS.EULER,
            north_pole: new Vector3(0, 1, 0),
            scene_class: EulerScene
@@ -25,6 +26,7 @@ export class HumerusView extends BaseView{
 
        ['HUM_EULER_XZY', {
            angle_vis_method: Euler_xzy_angle_geometry.createAngleObjects,
+           axial_rot_vis_method: updateAxialRotVis_Euler,
            axial_rot_method: AXIAL_ROT_METHODS.EULER,
            north_pole: new Vector3(1, 0, 0),
            scene_class: EulerScene
@@ -32,6 +34,7 @@ export class HumerusView extends BaseView{
 
        ['HUM_SVD', {
            angle_vis_method: AnglesVisualizationSVD.createAngleObjects,
+           axial_rot_vis_method: updateAxialRotVis_SwingTwist,
            axial_rot_method: AXIAL_ROT_METHODS.SVD,
            north_pole: new Vector3(0, 1, 0),
            scene_class: EulerScene
@@ -39,6 +42,7 @@ export class HumerusView extends BaseView{
 
        ['HUM_SHORTEST_PATH', {
            angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
+           axial_rot_vis_method: updateAxialRotVis_ShortestPath,
            axial_rot_method: AXIAL_ROT_METHODS.ONE_STEP,
            north_pole: new Vector3(0, 1, 0),
            scene_class: EulerScene
@@ -46,6 +50,7 @@ export class HumerusView extends BaseView{
 
        ['HUM_SWING_TWIST', {
            angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
+           axial_rot_vis_method: updateAxialRotVis_SwingTwist,
            axial_rot_method: AXIAL_ROT_METHODS.SWING_TWIST,
            north_pole: new Vector3(0, 1, 0),
            scene_class: EulerScene
@@ -53,6 +58,7 @@ export class HumerusView extends BaseView{
 
        ['HUM_SIMULTANEOUS', {
            angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
+           axial_rot_vis_method: updateAxialRotVis_SwingTwist,
            axial_rot_method: AXIAL_ROT_METHODS.SIMULTANEOUS,
            north_pole: new Vector3(0, 1, 0),
            scene_class: EulerSceneSimultaneous
@@ -87,9 +93,10 @@ export class HumerusView extends BaseView{
         enableBone(this.eulerScene, this.humerusGeometry);
         enableSphere(this.eulerScene);
         // enableAngleVis should be called after enableSphere in order to get the sphere to show up when the angle
-        // visualization checkbox is checked
-        enableAngleVis(this.eulerScene, this.anglesVisLayer, this.method_info.angle_vis_method);
+        // visualization checkbox is checked, and it should be called after enableAxialRot in order to get the axial
+        // rotation lines to show up when the visualization checkbox is checked
         enableAxialRot(this.eulerScene, this.method_info.axial_rot_method);
+        enableAngleVis(this.eulerScene, this.anglesVisLayer, this.method_info.angle_vis_method, this.method_info.axial_rot_vis_method);
         this.eulerScene.initialize(this.humerusRotation(this.method_name, 0));
         this.eulerScene.goToStep(this.eulerScene.currentStep);
         this.eulerScene.changeSphere(this.method_info.north_pole);

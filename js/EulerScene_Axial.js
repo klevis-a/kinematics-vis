@@ -5,7 +5,7 @@ import {MeshBasicMaterial, Mesh, Group, Vector3, CircleBufferGeometry, PlaneBuff
 import {EulerScene} from "./EulerScene.js";
 
 EulerScene.AXIAL_PLANE_MATERIAL = new MeshBasicMaterial({color: 0xffffff, side: DoubleSide, depthTest: false, visible: false});
-EulerScene.XLINE_MATERIAL = new MeshBasicMaterial({color: 0xff0000, side: DoubleSide, depthTest: false});
+EulerScene.XLINE_MATERIAL = new MeshBasicMaterial({color: 0x0000ff, side: DoubleSide, depthTest: false});
 EulerScene.XLINE_MATERIAL_BLACK = new MeshBasicMaterial({color: 0x000000, side: DoubleSide, depthTest: false});
 
 export const AXIAL_ROT_METHODS = {
@@ -68,7 +68,6 @@ export function initAxialRotation() {
 }
 
 export function updateAxialRotationFrame_shortestPath(frameNum) {
-    this.steps[this.currentStep].triad.updateMatrixWorld();
     this.xLine.getWorldPosition(this.noAxialGroup.position);
     this.xLine.getWorldQuaternion(this.noAxialGroup.quaternion);
     this.noAxialGroup.rotateY(-Math.PI / 2);
@@ -83,7 +82,6 @@ export function updateAxialRotationFrame_shortestPath(frameNum) {
 }
 
 export function updateAxialRotationFrame_swingTwist() {
-    this.steps[this.currentStep].triad.updateMatrixWorld();
     const currentHumeralAxis = this.steps[this.currentStep].triad.arrowAxis(1);
     this.noAxialGroup.quaternion.setFromUnitVectors(new Vector3(0, 1, 0), currentHumeralAxis);
     this.noAxialGroup.position.copy(new Vector3().copy(currentHumeralAxis).multiplyScalar(-this.humerusLength));
@@ -126,7 +124,6 @@ export function updateAxialRotationStep_shortestPath() {
 }
 
 function updateZeroAxialLine_Euler(scene) {
-    scene.steps[scene.currentStep].triad.updateMatrixWorld();
     const currentHumeralAxis = scene.steps[scene.currentStep].triad.arrowAxis(1);
     scene.noAxialGroup.setRotationFromQuaternion(scene.steps[scene.currentStep].triad.quaternion);
     scene.noAxialGroup.position.copy(new Vector3().copy(currentHumeralAxis).multiplyScalar(-scene.humerusLength));
@@ -159,6 +156,7 @@ export function enableAxialRot(boneScene, updateFnc) {
 
     boneScene.addEventListener('frameChange', function (event) {
         const scene = event.target;
+        scene.steps[scene.currentStep].triad.updateMatrixWorld();
         scene.updateAxialRotationFrame(event.frameNum);
     });
 
