@@ -250,7 +250,7 @@ body {
     transform: rotate(-45deg);
 }
 
-#close-container {
+.close-container {
     position: absolute;
     right: 0;
     top: 0;
