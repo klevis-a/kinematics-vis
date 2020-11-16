@@ -19,62 +19,60 @@
             <p>
             <b>Introduction</b>
             <br/>
-            The purpose of this application is to highlight differences between various orientation decomposition
-            sequences for the humerus, with an emphasis on axial rotation. Because the user interface is a work in
-            progress, this documentation aims to provide just enough guidance to allow for meaningful interaction with
-            the application. Once the application is more complete, these instructions will be updated.
+            This application enables you to visually analyze the 3D motion of the humerus and scapula during various
+            single-plane shoulder motions. It decomposes the orientation of the humerus and scapula via commonly utilized
+            methods in shoulder biomechanics research. This allows you to visually compare differences between these methods.
             </p>
 
             <p>
             <b>Frame Selection</b>
             <br/>
             The slider bar at the top of the page allows you to select the frame in the data capture which you would
-            like to analyze. Notice that as you change the frame number, the orientation of the semi-transparent humerus
-            in each view is updated. Once you have chosen a frame to analyze, click the downward facing arrow next to
-            the slider bar. This action decomposes the chosen humerus orientation in all 4 views.
+            like to analyze. Notice that as you change the frame number, the orientation of the humerus and scapula
+            in each view is updated. This same functionality can be achieved using the plots on the lower-right
+            quadrant by hovering over a plot-line. Once you have chosen a frame to analyze, click the downward facing arrow
+            next to the slider bar. This same functionality can be achieved by clicking a point on a plot.
+
             </p>
 
             <p>
             <b>The Views</b>
             <br/>
-            Each of the 4 views decomposes the humerus orientation according to the label shown in its lower-left or
-            lower-right corner. It's important to keep in mind that all decompositions express the orientation of the
-            humerus with respect to the torso. As such, the humerus is initially aligned with the torso coordinate
-            system (the triad in the middle of the view) and rotated to its final orientation via a sequence of
-            sub-rotations. The two decompositions of interest are "Intrinsic" and "Axial". The "SVD" and "One Step"
-            decomposition are ideas that I have experimented with, but will likely not be included in the final version
-            of the application. In all views the elbow is represented by a thin red rectangle attached to the humerus.
-            Axial rotation is illustrated by the angle between the striped and solid thin red rectangle.
-            <br/><br/>
-            "Intrinsic" performs a yx'y'' intrinsic Euler angle decomposition of the humerus
-            orientation according to guidelines provided by the International Society of Biomechanics (ISB). The third
-            sub-rotation (y'') is defined as axial rotation by ISB. "Axial Decomposition" decomposes the orientation of
-            the humerus into two sub-rotations. The first sub-rotation performs the smallest rotation possible to align
-            the long axis of the humerus from its initial state (aligned with the torso) to its final state. The second
-            sub-rotation performs a rotation around the long axis of the humerus to account for axial rotation.
+            The lower-right view plots the components of the decomposed orientation of the humerus/scapula as specified
+            in the adjustable label in the upper-left corner of this quadrant. Each of the remaining 3 views
+            decompose the humerus or scapula orientation according to the adjustable label shown in the upper-left or
+            upper-right corner of the quadrant. In all views, the elbow is represented by a thin black or blue rectangle
+            attached to the humerus. Axial rotation is illustrated by the angle between the black (starting) and blue
+            (ending) rectangle.
             </p>
 
             <p>
             <b>Interactions</b>
             <br/>
-            The views are linked to each other so as you rotate, pan, or zoom in one view, the same action happens in
-            the other 3 views. Rotate by dragging the left mouse button, zoom using the scroll-wheel, and pan by
+            Rotate by dragging the left mouse button, zoom using the scroll-wheel, and pan by
             dragging the right mouse button. To maximize one of the views, double-click on it. Another double-click
-            brings you back to the 4-pane view.
+            brings you back to the 4-pane view. The humerus views are linked to each other so as you rotate, pan, or zoom
+            in one view, the same action happens in the other humerus views.
             </p>
 
             <p>
             <b>Animations</b>
             <br/>
-            Once you have selected a frame to decompose (see <b>Frame Selection</b>) the application allows you to
-            animate the sub-rotations associated with each decomposition. All the decompositions depicted contain at
-            most 3 sub-rotations. The state buttons at bottom of the application allow you to choose which sub-rotation
-            you would like to animate. Once you select a sub-rotation, the play/pause button and slide bar at the bottom
-            of the page provide control of the animation for the selected sub-rotation. Again, the views are linked - a
-            sub-rotation will be animated in all views. No animation will occur if a view does not contain the selected
-            sub-rotation. For example, axial decomposition contains only 2 sub-rotations, so nothing will happen in that
-            view when you animate sub-rotation #3. This portion of the user interface will likely change significantly
-            in the future.
+            Once you have selected a frame to decompose (see <b>Frame Selection</b>), the application allows you to
+            animate the sub-rotations associated with each decomposition. The state buttons at bottom of the application
+            allow you to choose which sub-rotation you would like to animate. Once you select a sub-rotation, the
+            play/pause button and slide bar at the bottom  of each quadrant provide control of the animation for the
+            selected sub-rotation.
+            </p>
+
+            <p>
+            <b>Options</b>
+            <br/>
+            The <b>Open Controls</b> button in the lower-right corner of the page provides various configuration options
+            for the application. Notably, the <b>Humerus Base</b> option allows you to change whether the humerus is
+            decomposed and plotted by measuring its orientation against the <b>Torso</b> or <b>Scapula</b>. The
+            <b>Visualize Angles</b> option allows you to display a simple visualization of the humerus angles as measured
+            by a particular decomposition sequence.
             </p>
     </div>
     <div id="views">
