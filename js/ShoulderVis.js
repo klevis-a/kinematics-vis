@@ -139,6 +139,9 @@ export class ShoulderVis {
             this.dbCloseBtn.setAttribute('class', 'close');
             this.dbCloseBtn.setAttribute('id', 'db-close-btn');
             this.dbCloseBtn.addEventListener('click', () => this.dbDiv.style.display = 'none');
+        }).then(() => {
+            this.loadingDiv.style.display = 'none';
+            this.dbDiv.style.display = 'block';
         });
     }
 
