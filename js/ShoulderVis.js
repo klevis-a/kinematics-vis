@@ -13,7 +13,8 @@ function loadJson(jsonFile) {
 
 function loadCsv(url, hasHeader=false) {
     return new Promise((resolve, reject) => {
-        Papa.parse(url, {download: true, dynamicTyping: true, skipEmptyLines: true, header: hasHeader, complete: results => {resolve(results)}});
+        Papa.parse(url, {download: !(url instanceof File), dynamicTyping: true, skipEmptyLines: true, header: hasHeader,
+            complete: results => {resolve(results)}});
     });
 }
 
@@ -47,6 +48,7 @@ export class ShoulderVis {
         this.initialLayout = initialLayout;
         this.guiOptions = guiOptions;
         this.dbDiv = document.getElementById('db-div');
+        this.fileSelectorsDiv = document.getElementById('file-selectors');
         this.loadingDiv = document.getElementById('loading-div');
         this.viewManager = null;
         this.defaultPlot = defaultPlot;
@@ -57,10 +59,11 @@ export class ShoulderVis {
         this.closeBtn.addEventListener('click', () => this.helpDiv.style.display = 'none');
         this.helpBtn.addEventListener('click', () => this.helpDiv.style.display = 'block');
         this.dbBtn.addEventListener('click', () => this.dbDiv.style.display = 'block');
+        this.createFileSelector();
         this.createDbSelector();
     }
 
-    resetViewManager() {
+    resetViewManagerDb() {
         if (this.viewManager != null) {
             this.viewManager.dispose();
         }
@@ -69,6 +72,22 @@ export class ShoulderVis {
         const humerusStlFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['humerus_stl_smooth_file'];
         const scapulaStlFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['scapula_stl_smooth_file'];
         const trajectoryFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['activities'][this.activitySelector.value];
+        createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, this.initialLayout, this.guiOptions, this.defaultPlot)
+            .then(viewManager => {
+                this.viewManager = viewManager;
+                this.loadingDiv.style.display = 'none'
+            });
+    }
+
+    resetViewManagerManual() {
+        if (this.viewManager != null) {
+            this.viewManager.dispose();
+        }
+        const humerusLandmarksFile = this.humerusLandmarksFile.files[0];
+        const scapulaLandmarksFile = this.scapulaLandmarksFile.files[0];
+        const humerusStlFile = this.humerusStlFile.files[0];
+        const scapulaStlFile = this.scapulaStlFile.files[0];
+        const trajectoryFile = this.trajectoryFile.files[0];
         createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, this.initialLayout, this.guiOptions, this.defaultPlot)
             .then(viewManager => {
                 this.viewManager = viewManager;
@@ -100,18 +119,21 @@ export class ShoulderVis {
             this.dbCloseBtn.setAttribute('href', '#');
             this.dbCloseBtn.setAttribute('class', 'close');
             this.dbCloseBtn.setAttribute('id', 'db-close-btn');
-            this.dbCloseBtn.addEventListener('click', () => this.dbDiv.style.display = 'none');
+            this.dbCloseBtn.addEventListener('click', () => {
+                this.dbDiv.style.display = 'none';
+                this.fileSelectorsDiv.style.display = 'none';
+            });
 
             // create subject selector
-            this.subjectSelectorDiv = this.dbDiv.appendChild(document.createElement('div'));
-            this.subjectSelectorDiv.setAttribute('class', 'dbSelectDiv');
-            this.subjectSelector = this.subjectSelectorDiv.appendChild(document.createElement('select'));
+            const subjectSelectorDiv = this.dbDiv.appendChild(document.createElement('div'));
+            subjectSelectorDiv.setAttribute('class', 'dbSelectDiv');
+            this.subjectSelector = subjectSelectorDiv.appendChild(document.createElement('select'));
             this.subjectSelector.setAttribute('id', 'subjectsSelect');
 
             // create activities selector
-            this.activitySelectorDiv = this.dbDiv.appendChild(document.createElement('div'));
-            this.activitySelectorDiv.setAttribute('class', 'dbSelectDiv');
-            this.activitySelector = this.activitySelectorDiv.appendChild(document.createElement('select'));
+            const activitySelectorDiv = this.dbDiv.appendChild(document.createElement('div'));
+            activitySelectorDiv.setAttribute('class', 'dbSelectDiv');
+            this.activitySelector = activitySelectorDiv.appendChild(document.createElement('select'));
             this.activitySelector.setAttribute('id', 'activitiesSelect');
 
             // populate the subject and activities selectors
@@ -129,15 +151,28 @@ export class ShoulderVis {
             this.subjectSelector.addEventListener('change', e => this.populateSubjectActivities(e.target.value));
 
             // add analyze button
-            this.analyzeBtnDiv = this.dbDiv.appendChild(document.createElement('div'));
-            this.analyzeBtnDiv.setAttribute('class', 'dbSelectDiv');
-            this.analyzeBtn = this.analyzeBtnDiv.appendChild(document.createElement('button'));
-            this.analyzeBtn.setAttribute('type', 'button');
-            this.analyzeBtn.innerHTML = 'Analyze';
-            this.analyzeBtn.addEventListener('click', () => {
-                this.resetViewManager();
+            const analyzeBtnDiv = this.dbDiv.appendChild(document.createElement('div'));
+            analyzeBtnDiv.setAttribute('class', 'dbSelectDiv');
+            this.analyzeDbBtn = analyzeBtnDiv.appendChild(document.createElement('button'));
+            this.analyzeDbBtn.setAttribute('type', 'button');
+            this.analyzeDbBtn.innerHTML = 'Analyze';
+            this.analyzeDbBtn.addEventListener('click', () => {
+                this.resetViewManagerDb();
+                this.fileSelectorsDiv.style.display = 'none';
                 this.dbDiv.style.display = 'none';
                 this.loadingDiv.style.display = 'block';
+            });
+
+            // add manual file selection link
+            const manualFileLinkDiv = this.dbDiv.appendChild(document.createElement('div'));
+            manualFileLinkDiv.setAttribute('class', 'manualDbLink');
+            this.manualFileLink = manualFileLinkDiv.appendChild(document.createElement('a'));
+            this.manualFileLink.setAttribute('href', '#');
+            this.manualFileLink.innerHTML = 'Manual File Selection';
+            this.manualFileLink.setAttribute('id', 'manual-file-link');
+            this.manualFileLink.addEventListener('click', () => {
+                this.dbDiv.style.display = 'none';
+                this.fileSelectorsDiv.style.display = 'block';
             });
         })
         .then(() => {
@@ -145,4 +180,66 @@ export class ShoulderVis {
             this.dbDiv.style.display = 'block';
         });
     }
+
+    createFileSelector() {
+        // add close button
+        const fsCloseBtnDiv = this.fileSelectorsDiv.appendChild(document.createElement('div'));
+        fsCloseBtnDiv.setAttribute('class', 'close-container');
+        this.fsCloseBtn = fsCloseBtnDiv.appendChild(document.createElement('a'));
+        this.fsCloseBtn.setAttribute('href', '#');
+        this.fsCloseBtn.setAttribute('class', 'close');
+        this.fsCloseBtn.setAttribute('id', 'db-close-btn');
+        this.fsCloseBtn.addEventListener('click', () => {
+            this.dbDiv.style.display = 'none';
+            this.fileSelectorsDiv.style.display = 'none';
+        });
+
+        let fileTrajectoryDiv, humerusLandmarksDiv, scapulaLandmarksDiv, humerusStlDiv, scapulaStlDiv;
+        [fileTrajectoryDiv, this.trajectoryFile] = createIndFileSelector('trajectoryFile', 'Trajectory', 'dbSelectDiv');
+        this.fileSelectorsDiv.appendChild(fileTrajectoryDiv);
+        [humerusLandmarksDiv, this.humerusLandmarksFile] = createIndFileSelector('humerusLandmarksFile', 'Humerus Landmarks', 'dbSelectDiv');
+        this.fileSelectorsDiv.appendChild(humerusLandmarksDiv);
+        [scapulaLandmarksDiv, this.scapulaLandmarksFile] = createIndFileSelector('scapulaLandmarksFile', 'Scapula Landmarks', 'dbSelectDiv');
+        this.fileSelectorsDiv.appendChild(scapulaLandmarksDiv);
+        [humerusStlDiv, this.humerusStlFile] = createIndFileSelector('humerusStlFile', 'Humerus STL', 'dbSelectDiv');
+        this.fileSelectorsDiv.appendChild(humerusStlDiv);
+        [scapulaStlDiv, this.scapulaStlFile] = createIndFileSelector('scapulaStlFile', 'Scapula STL', 'dbSelectDiv');
+        this.fileSelectorsDiv.appendChild(scapulaStlDiv);
+
+        // add analyze button
+        const analyzeBtnDiv = this.fileSelectorsDiv.appendChild(document.createElement('div'));
+        analyzeBtnDiv.setAttribute('class', 'dbSelectDiv');
+        this.analyzeFsBtn = analyzeBtnDiv.appendChild(document.createElement('button'));
+        this.analyzeFsBtn.setAttribute('type', 'button');
+        this.analyzeFsBtn.innerHTML = 'Analyze';
+        this.analyzeFsBtn.addEventListener('click', () => {
+            this.resetViewManagerManual();
+            this.fileSelectorsDiv.style.display = 'none';
+            this.loadingDiv.style.display = 'block';
+        });
+
+        // add db selection link
+        const dbLinkDiv = this.fileSelectorsDiv.appendChild(document.createElement('div'));
+        dbLinkDiv.setAttribute('class', 'manualDbLink');
+        this.dbLink = dbLinkDiv.appendChild(document.createElement('a'));
+        this.dbLink.setAttribute('href', '#');
+        this.dbLink.innerHTML = 'Use Database';
+        this.dbLink.setAttribute('id', 'db-selection-link');
+        this.dbLink.addEventListener('click', () => {
+            this.dbDiv.style.display = 'block';
+            this.fileSelectorsDiv.style.display = 'none';
+        });
+    }
+}
+
+function createIndFileSelector(id, labelText, divClass) {
+    const fileSelectorDiv = document.createElement('div');
+    fileSelectorDiv.setAttribute('class', divClass);
+    const fileSelectorLabel = fileSelectorDiv.appendChild(document.createElement('label'));
+    fileSelectorLabel.setAttribute('for', id);
+    fileSelectorLabel.innerHTML = '<b>' + labelText + '</b>';
+    const fileSelector = fileSelectorDiv.appendChild(document.createElement('input'));
+    fileSelector.setAttribute('type', 'file');
+    fileSelector.setAttribute('id', id);
+    return [fileSelectorDiv, fileSelector];
 }
