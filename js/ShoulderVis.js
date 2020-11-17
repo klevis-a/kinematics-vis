@@ -93,6 +93,15 @@ export class ShoulderVis {
         loadJson(this.dbSummaryFile).then(dbSummary => {
             this.dbSummary = dbSummary;
 
+            // add close button
+            const dbCloseBtnDiv = this.dbDiv.appendChild(document.createElement('div'));
+            dbCloseBtnDiv.setAttribute('class', 'close-container');
+            this.dbCloseBtn = dbCloseBtnDiv.appendChild(document.createElement('a'));
+            this.dbCloseBtn.setAttribute('href', '#');
+            this.dbCloseBtn.setAttribute('class', 'close');
+            this.dbCloseBtn.setAttribute('id', 'db-close-btn');
+            this.dbCloseBtn.addEventListener('click', () => this.dbDiv.style.display = 'none');
+
             // create subject selector
             this.subjectSelectorDiv = this.dbDiv.appendChild(document.createElement('div'));
             this.subjectSelectorDiv.setAttribute('class', 'dbSelectDiv');
@@ -130,19 +139,10 @@ export class ShoulderVis {
                 this.dbDiv.style.display = 'none';
                 this.loadingDiv.style.display = 'block';
             });
-
-            // add close button
-            const dbCloseBtnDiv = this.dbDiv.appendChild(document.createElement('div'));
-            dbCloseBtnDiv.setAttribute('class', 'close-container');
-            this.dbCloseBtn = dbCloseBtnDiv.appendChild(document.createElement('a'));
-            this.dbCloseBtn.setAttribute('href', '#');
-            this.dbCloseBtn.setAttribute('class', 'close');
-            this.dbCloseBtn.setAttribute('id', 'db-close-btn');
-            this.dbCloseBtn.addEventListener('click', () => this.dbDiv.style.display = 'none');
-        }).then(() => {
+        })
+        .then(() => {
             this.loadingDiv.style.display = 'none';
             this.dbDiv.style.display = 'block';
         });
     }
-
 }
