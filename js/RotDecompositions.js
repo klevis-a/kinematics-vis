@@ -336,7 +336,16 @@ function addMatrices (A, B) {
     }
 
     return C;
-};
+}
+
+export function trajQuatMat3(quatTraj) {
+    const traj_mat3 = [];
+    for(let i=0; i<quatTraj.length; i++) {
+        const mat3 = new Matrix3().setFromMatrix4((new Matrix4()).makeRotationFromQuaternion(quatTraj[i]));
+        traj_mat3.push(mat3);
+    }
+    return traj_mat3;
+}
 
 export function angularVelocity(traj_mat3) {
     // time between frames in seconds
@@ -367,17 +376,12 @@ export function angularVelocity(traj_mat3) {
     return angVel;
 }
 
-
 export function realAxialRotation(quatTraj) {
     // time between frames in seconds
     const dt = Trajectory.FRAME_PERIOD;
 
     // first represent as matrix3
-    const traj_mat3 = [];
-    for(let i=0; i<quatTraj.length; i++) {
-        const mat3 = new Matrix3().setFromMatrix4((new Matrix4()).makeRotationFromQuaternion(quatTraj[i]));
-        traj_mat3.push(mat3);
-    }
+    const traj_mat3=trajQuatMat3(quatTraj);
 
     // compute angular velocity
     const angular_velocity = angularVelocity(traj_mat3);
@@ -406,4 +410,23 @@ export function realAxialRotation(quatTraj) {
     }
 
     return axialRot;
+}
+
+export function shr(stQuatTraj, ghQuatTraj) {
+    const stMat3 = trajQuatMat3(stQuatTraj);
+    const ghMat3 = trajQuatMat3(ghQuatTraj);
+    const stAngVel = angularVelocity(stMat3);
+    const ghAngVel = angularVelocity(ghMat3);
+    const ghAngVel_torso = ghAngVel.map((angVel, idx) => new Vector3().copy(angVel).applyQuaternion(stQuatTraj[idx]));
+    const shr = ghAngVel_torso.map((gh, idx) => {
+        const currentShr = [];
+        for(let m=0; m<3; m++) {
+            currentShr.push([]);
+            for (let n=0; n<3; n++) {
+                currentShr[m].push(gh.getComponent(m)/stAngVel[idx].getComponent(n));
+            }
+        }
+        return currentShr;
+    });
+    return shr;
 }

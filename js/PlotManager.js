@@ -2,7 +2,7 @@
 
 import {MathUtils} from "./vendor/three.js/build/three.module.js";
 import {range, removeAllChildNodes} from "./JSHelpers.js";
-import {realAxialRotation} from "./RotDecompositions.js";
+import {realAxialRotation, shr} from "./RotDecompositions.js";
 import {HUMERUS_BASE} from "./RotationHelper.js";
 
 export class PlotManager {
@@ -69,6 +69,8 @@ export class PlotManager {
         this.gh.set('HUM_SWING_TWIST', []);
         this.st = new Map();
         this.st.set('SCAP_EULER_YXZ', [[],[],[]]);
+        this.shr = [[[], [], []], [[], [], []], [[], [], []]];
+        const shr_temp = shr(this.rotationHelper.st_quat, this.rotationHelper.gh_quat);
 
         for(let i=0; i<this.rotationHelper.trajectory.NumFrames; i++) {
             for(let j=0; j<3; j++) {
@@ -78,6 +80,20 @@ export class PlotManager {
                 this.gh.get('HUM_EULER_XZY')[j].push(MathUtils.radToDeg(this.rotationHelper.gh_rotations.get('HUM_EULER_XZY')[i][j].angle));
                 this.st.get('SCAP_EULER_YXZ')[j].push(MathUtils.radToDeg(this.rotationHelper.st_rotations.get('SCAP_EULER_YXZ')[i][j].angle));
             }
+
+            for(let m=0; m<3; m++) {
+                for(let n=0; n<3; n++) {
+                    this.shr[m][n].push(shr_temp[i][m][n]);
+                }
+            }
+
+            // if (i < this.rotationHelper.trajectory.NumFrames - 1) {
+            //     for(let m=0; m<3; m++) {
+            //         for(let n=0; n<3; n++) {
+            //             this.shr[m][n].push(this.rotationHelper.shr[i][m][n]);
+            //         }
+            //     }
+            // }
 
             this.th.get('HUM_SWING_TWIST').push(MathUtils.radToDeg(this.rotationHelper.th_rotations.get('HUM_SWING_TWIST')[i][1].angle));
             this.gh.get('HUM_SWING_TWIST').push(MathUtils.radToDeg(this.rotationHelper.gh_rotations.get('HUM_SWING_TWIST')[i][1].angle));
@@ -115,6 +131,30 @@ export class PlotManager {
         this.plotMap.set(div_id, friendly_name);
         plotDiv.style.display = (div_id === this.defaultPlot) ? 'block' : 'none';
         this.allPlots.push(div_id);
+    }
+
+    shrPlot() {
+        const layout = this.shrLayout();
+        this.createPlot('shr', this.shrTraces(), layout, layout.title);
+    }
+
+    shrTraces() {
+        const shrFrameNums = this.frameNums.slice(0, this.frameNums.length-1);
+        const shrNames = ['X', 'Y', 'Z'];
+        const shrTraces = [];
+        for(let m=0; m<3; m++) {
+            for (let n=0; n<3; n++) {
+                shrTraces.push({x: shrFrameNums, y: this.shr[m][n], type: 'scatter', name: shrNames[m] + '/' + shrNames[n]})
+            }
+        }
+        return shrTraces;
+    }
+
+    shrLayout() {
+        const layout = this.commonPlotLayout();
+        layout.title = 'Scapulohumeral Rhythm';
+        layout.yaxis.title = 'Ratio GH/ST';
+        return layout;
     }
 
     poePlot() {
@@ -268,6 +308,7 @@ export class PlotManager {
         this.humerusPhadkePlot();
         this.humerusSwingTwistPlot();
         this.scapulaPlot();
+        // this.shrPlot();
     }
 
     addPlotSelector() {

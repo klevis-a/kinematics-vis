@@ -1,6 +1,6 @@
-import {Matrix4, Quaternion, Vector3} from "./vendor/three.js/build/three.module.js";
+import {Matrix4, Quaternion, Vector3, Matrix3} from "./vendor/three.js/build/three.module.js";
 import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, EulerDecomposition_RZ$$_RX$_RY,
-    ShortestPath, SwingTwist, svdDecomp} from "./RotDecompositions.js";
+    ShortestPath, SwingTwist, svdDecomp, axisAngleFromQuat} from "./RotDecompositions.js";
 
 export const HUMERUS_BASE = {
     TORSO: 'T',
@@ -21,6 +21,9 @@ export class RotationHelper {
         this.th_pos = [];
         this.st_pos = [];
         this.gh_pos = [];
+        // this.gh_delta = [];
+        // this.st_delta = [];
+        // this.shr = [];
         for(let i=0; i<this.trajectory.NumFrames; i++) {
             const torsoPose = new Matrix4().makeRotationFromQuaternion(this.trajectory.torsoOrientQuat(i)).setPosition(this.trajectory.torsoPosVector(i));
             const scapulaPose = new Matrix4().makeRotationFromQuaternion(this.trajectory.scapOrientQuat(i)).setPosition(this.trajectory.scapPosVector(i));
@@ -34,6 +37,24 @@ export class RotationHelper {
             const th_pos = new Vector3().setFromMatrixPosition(thPose);
             const gh_pos = new Vector3().setFromMatrixPosition(ghPose);
             const st_pos = new Vector3().setFromMatrixPosition(stPose);
+
+            // used for SHR computations using axis angle representation
+            // if (i > 0) {
+            //     const st_delta_quat = new Quaternion().multiplyQuaternions(st_quat, new Quaternion().copy(this.st_quat[this.st_quat.length-1]).conjugate());
+            //     const gh_delta_quat = new Quaternion().multiplyQuaternions(gh_quat, new Quaternion().copy(this.gh_quat[this.gh_quat.length-1]).conjugate());
+            //     const {axis: stAxis, angle: stAngle} = axisAngleFromQuat(st_delta_quat);
+            //     const {axis: ghAxis, angle: ghAngle} = axisAngleFromQuat(gh_delta_quat);
+            //     this.st_delta.push(stAxis.multiplyScalar(stAngle));
+            //     this.gh_delta.push(ghAxis.multiplyScalar(ghAngle));
+            //     const shr = []; // gh/st, rows are gh, columns are st
+            //     for(let m=0; m<3; m++) {
+            //         shr.push([]);
+            //         for(let n=0; n<3; n++) {
+            //             shr[m].push(this.gh_delta[this.gh_delta.length-1].getComponent(m)/this.st_delta[this.st_delta.length-1].getComponent(n));
+            //         }
+            //     }
+            //     this.shr.push(shr);
+            // }
 
             this.th_quat.push(th_quat);
             this.gh_quat.push(gh_quat);
