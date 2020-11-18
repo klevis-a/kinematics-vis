@@ -83,6 +83,14 @@ export class ViewManager {
         this.addDblClickDivListener();
         this.addWindowResizeListener();
 
+        // switch to displaying angles if the guiOptions dictate it
+        if (this.guiOptions.showAngles) {
+            this.camera.layers.set(this.anglesVisLayer);
+        }
+        else {
+            this.camera.layers.set(0);
+        }
+
         // render scenes
         this.render();
 
@@ -137,7 +145,7 @@ export class ViewManager {
             });
         };
 
-        this.plotter = new PlotManager(this.rotationHelper, on_Click, on_Hover, on_Unhover, this.plotsContainerDiv, this.plotSelectorDiv, this.defaultPlot);
+        this.plotter = new PlotManager(this.rotationHelper, on_Click, on_Hover, on_Unhover, this.plotsContainerDiv, this.plotSelectorDiv, this.defaultPlot, this.guiOptions.humerusBase);
         this.addEventListener('humerusBase', event => this.plotter.changeHumerusBase(event.humerusBase));
     }
 
