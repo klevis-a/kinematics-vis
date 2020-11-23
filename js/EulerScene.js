@@ -102,6 +102,7 @@ export class EulerScene {
            } else {
                step.deactivate();
            }
+            step.triad.updateMatrixWorld();
         });
 
         this.dispatchEvent({type: 'stepChange'});
