@@ -53,7 +53,11 @@ export class ViewManager {
         this.createRenderer();
         this.trackballStartEventListener = event => this.CurrentControl = event.target;
         this.trackballEndEventListener = event => {
-            this.viewsMap.forEach(scene => scene.controls.target.copy(event.target.target));
+            this.viewsMap.forEach(view => {
+                if (view instanceof  HumerusView) {
+                    view.controls.target.copy(event.target.target);
+                }
+            });
         };
         this.active_view_id = null;
         this.anglesVisLayer = 1;
