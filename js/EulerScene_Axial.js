@@ -36,7 +36,7 @@ export const AXIAL_ROT_METHODS = {
 };
 
 export function initAxialRotation() {
-    //this is the axial plane that simply goes along with the the humerus
+    //this is the axial plane that simply goes along with the humerus
     this.axialPlane = new Mesh(this.PLANE_GEOMETRY, EulerScene.AXIAL_PLANE_MATERIAL);
     this.axialPlane.name = 'axialPlane';
     this.axialPlane.renderOrder = 2;
@@ -50,6 +50,20 @@ export function initAxialRotation() {
     this.xLine.renderOrder = 4;
     this.xLine.rotateY(Math.PI/2);
     this.axialPlane.add(this.xLine);
+
+    //this is the axial plane that simply goes along with the preview humerus
+    this.axialPlaneHum = new Mesh(this.PLANE_GEOMETRY, EulerScene.AXIAL_PLANE_MATERIAL);
+    this.axialPlaneHum.name = 'axialPlaneHum';
+    this.axialPlaneHum.renderOrder = 2;
+    this.axialPlaneHum.position.set(0, 0, 0);
+    this.axialPlaneHum.translateY(-this.humerusLength);
+    this.bone.add(this.axialPlaneHum);
+
+    this.xLineHum = new Mesh(this.THIN_LINE_GEOMETRY, EulerScene.XLINE_MATERIAL);
+    this.xLineHum.name = 'xLineHum';
+    this.xLineHum.renderOrder = 4;
+    this.xLineHum.rotateY(Math.PI/2);
+    this.axialPlaneHum.add(this.xLineHum);
 
 
     //this is the axial group that only moves with the humeral axis (i.e. no axial rotation)
