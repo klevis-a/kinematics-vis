@@ -41,10 +41,9 @@ export class ShoulderVis {
         ['WFE', 'Weighted Forward Elevation'],
     ]);
 
-    constructor(dbBasePath, dbSummaryFile, defaultSubject, initialLayout=null, guiOptions=null, defaultPlot='axialRot') {
+    constructor(dbBasePath, dbSummaryFile, initialLayout=null, guiOptions=null, defaultPlot='axialRot') {
         this.dbBasePath = dbBasePath;
         this.dbSummaryFile = this.dbBasePath + '/' + dbSummaryFile;
-        this.defaultSubject = defaultSubject;
         this.initialLayout = initialLayout;
         this.guiOptions = guiOptions;
         this.dbDiv = document.getElementById('db-div');
@@ -141,7 +140,7 @@ export class ShoulderVis {
                 const subjectOption = this.subjectSelector.appendChild(document.createElement('option'));
                 subjectOption.setAttribute('value', subject);
                 subjectOption.innerHTML = subject;
-                if (subject === this.defaultSubject) {
+                if ('default' in this.dbSummary[subject]) {
                     subjectOption.setAttribute('selected', 'selected');
                     this.populateSubjectActivities(subject);
                 }
