@@ -4,9 +4,5 @@ This repository contains code that creates an animated and interactive Javascrip
 
 This is a list of items that need to be completed before this code is available for public release:
 
-* Determine how to create an "installation" procedure, mainly how to easily obtain external dependencies (such as three.js).
-* Comments!
-* Refactor user interface to conform to associated manuscript.
-* Application should allow a user to pick an arbitrary humerus trajectory.
-* Application should allow user to navigate the library of humerus trajectories associated with manuscript.
+* Expand comments.
 * Add license.
