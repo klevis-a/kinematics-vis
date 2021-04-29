@@ -1,4 +1,4 @@
-This JavaScript application enables biomechanics researchers to visualize and analyze shoulder joint kinematics. It is built on top of [three.js](https://threejs.org/), a Javascript 3D library. Although presently this application is specialized for analyzing and visualizing the shoulder joint, it should be easy to extend its functionality to other joints.
+This JavaScript application enables biomechanics researchers to visualize and analyze shoulder joint kinematics. It is built on top of [three.js](https://threejs.org/), a JavaScript 3D library. Although presently this application is specialized for analyzing and visualizing the shoulder joint, it should be easy to extend its functionality to other joints.
 
 Checkout the [live code demo](https://shouldervis.chpc.utah.edu/kinevis/main.html) currently hosted at the [University of Utah Center for High Performance Computing](https://www.chpc.utah.edu/).
 
