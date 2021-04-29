@@ -386,12 +386,6 @@ export function realAxialRotation(quatTraj) {
     // compute angular velocity
     const angular_velocity = angularVelocity(traj_mat3);
 
-    // first find handle the rotation from identity to the resting humerus orientation
-    const shortestAxisAngle = new ShortestPath(quatTraj[0]).rotationSequence[0];
-    const shortestAngle = shortestAxisAngle.angle * shortestAxisAngle.axis.y;
-
-    // now handle the rest of the trajectory
-
     // first project the angular velocity vector onto the shaft axis for each frame
     const angVel_proj = [];
     for(let i=0; i<quatTraj.length; i++) {
@@ -402,7 +396,7 @@ export function realAxialRotation(quatTraj) {
     const axialRot = [];
     for(let i=0; i<quatTraj.length; i++) {
         if (i===0) {
-            axialRot.push(shortestAngle);
+            axialRot.push(0.0);
         }
         else {
             axialRot.push(axialRot[axialRot.length-1] + ((angVel_proj[i] + angVel_proj[i-1])/2)*dt);

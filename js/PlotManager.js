@@ -214,7 +214,7 @@ export class PlotManager {
 
     axialRotLayout() {
         const layout = this.commonPlotLayout();
-        layout.title = 'Humerus Axial Rotation';
+        layout.title = 'Humerus Axial Orientation';
         return layout;
     }
 
@@ -228,7 +228,7 @@ export class PlotManager {
         return [
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[0], type: 'scatter', name: 'Plane of Elevation'},
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[1], type: 'scatter', name: 'Angle of Elevation'},
-            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[2], type: 'scatter', name: 'Axial Rotation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[2], type: 'scatter', name: 'Axial Orientation'},
             {x: this.frameNums, y: this[this.humerusSpec].get('TRUE_AXIAL_ROTATION'), type: 'scatter', name: this.plotNames.get('TRUE_AXIAL_ROTATION')}
         ];
     }
@@ -249,7 +249,7 @@ export class PlotManager {
         return [
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[0], type: 'scatter', name: 'Angle of Elevation'},
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[1], type: 'scatter', name: 'Angle of Flexion/Horizontal Abd/Add'},
-            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[2], type: 'scatter', name: 'Axial Rotation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[2], type: 'scatter', name: 'Axial Orientation'},
             {x: this.frameNums, y: this[this.humerusSpec].get('TRUE_AXIAL_ROTATION'), type: 'scatter', name: this.plotNames.get('TRUE_AXIAL_ROTATION')}
         ];
     }
@@ -270,7 +270,7 @@ export class PlotManager {
         return [
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[0], type: 'scatter', name: 'Plane of Elevation'},
             {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[1], type: 'scatter', name: 'Angle of Elevation'},
-            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_SWING_TWIST'), type: 'scatter', name: 'Axial Rotation'},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_SWING_TWIST'), type: 'scatter', name: 'Axial Orientation'},
             {x: this.frameNums, y: this[this.humerusSpec].get('TRUE_AXIAL_ROTATION'), type: 'scatter', name: this.plotNames.get('TRUE_AXIAL_ROTATION')}
         ];
     }
