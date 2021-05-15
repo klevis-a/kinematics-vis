@@ -119,12 +119,12 @@ export class EulerScene {
         this.dispatchEvent({type: 'removeSteps'});
     }
 
-    reset(rotations) {
+    reset(rotations, overallFrameNum) {
         console.assert(this.rotations.length === rotations.length);
         this.rotations = rotations;
         this.removeSteps();
         this.createSteps();
-        this.dispatchEvent({type: 'reset'});
+        this.dispatchEvent({type: 'reset', overallFrameNum: overallFrameNum});
         this.showTriadsArcs();
     }
 
@@ -145,6 +145,8 @@ export class EulerScene {
 
     renderSceneGraph() {
         this.spotlight.position.addVectors(this.camera.position, new Vector3().setFromMatrixColumn(this.camera.matrixWorld, 2).multiplyScalar(10));
+        const {contentLeft: left, contentTop: top, contentWidth: width, contentHeight: height, aspectRatio: ratio} = this.viewGeometry;
+        this.dispatchEvent({type: 'preRender', contentWidth: width, contentHeight: height});
         this.renderer.render(this.scene, this.camera);
     }
 

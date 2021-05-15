@@ -35,6 +35,7 @@ export class ViewManager {
                 humerusBase: HUMERUS_BASE.TORSO,
                 showAllBones: false,
                 showAngles: false,
+                showArea: false,
                 showTriadsArcs: true,
                 showBodyPlanes: false,
                 showSphere: true
@@ -61,6 +62,7 @@ export class ViewManager {
         };
         this.active_view_id = null;
         this.anglesVisLayer = 1;
+        this.areaVisLayer = 2;
         this.presentedMethods = new Map([
             ['HUM_EULER_YXY', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus ISB: yx'y''"}],
             ['HUM_EULER_XZY', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus Phadke: xz'y''"}],
@@ -90,6 +92,13 @@ export class ViewManager {
         // switch to displaying angles if the guiOptions dictate it
         if (this.guiOptions.showAngles) {
             this.camera.layers.set(this.anglesVisLayer);
+        }
+        else {
+            this.camera.layers.set(0);
+        }
+
+        if (this.guiOptions.showArea) {
+            this.camera.layers.set(this.areaVisLayer);
         }
         else {
             this.camera.layers.set(0);
@@ -167,7 +176,8 @@ export class ViewManager {
     }
 
     createHumerusView(method_name) {
-        const view =  new HumerusView(this.camera, this.renderer, this.rotationHelper, method_name, this.humerusGeometry, this.humerusLength, this.anglesVisLayer, this.guiOptions.humerusBase);
+        const view =  new HumerusView(this.camera, this.renderer, this.rotationHelper, method_name, this.humerusGeometry,
+            this.humerusLength, this.anglesVisLayer, this.areaVisLayer, this.guiOptions.humerusBase);
         view.subscribeEvents(this);
         view.initializeVisualOptions(this);
         return {scene: view, div: view.parent_div};
@@ -354,9 +364,20 @@ export class ViewManager {
             this.dispatchEvent({type:'showAllBones', visibility: value});
         });
 
-        this.optionsGUI.add(this.guiOptions, 'showAngles').name('Visualize Angles').onChange(value => {
+        this.optionsGUI.add(this.guiOptions, 'showAngles').name('Visualize Angles').listen().onChange(value => {
             if (value) {
                 this.camera.layers.set(this.anglesVisLayer);
+                this.guiOptions.showArea = false;
+            }
+            else {
+                this.camera.layers.set(0);
+            }
+        });
+
+        this.optionsGUI.add(this.guiOptions, 'showArea').name('Spherical Area').listen().onChange(value => {
+            if (value) {
+                this.camera.layers.set(this.areaVisLayer);
+                this.guiOptions.showAngles = false;
             }
             else {
                 this.camera.layers.set(0);

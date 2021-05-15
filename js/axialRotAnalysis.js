@@ -7,6 +7,7 @@ const guiOptions = {
     humerusBase: HUMERUS_BASE.TORSO,
     showAllBones: false,
     showAngles: false,
+    showArea: false,
     showTriadsArcs: true,
     showBodyPlanes: false,
     showSphere: true

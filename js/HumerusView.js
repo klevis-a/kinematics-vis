@@ -12,6 +12,7 @@ import {EulerSceneAnimationHelper} from "./EulerSceneAnimationHelper.js";
 import {generateUUID} from "./JSHelpers.js";
 import {BaseView} from "./BaseView.js";
 import {HUMERUS_BASE} from "./RotationHelper.js";
+import {enableSphereArea, update_area_vis_xzy, update_area_vis_yxy} from "./EulerScene_SphereAreaVis.js";
 
 
 export class HumerusView extends BaseView{
@@ -19,6 +20,8 @@ export class HumerusView extends BaseView{
        ['HUM_EULER_YXY', {
            angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
            axial_rot_vis_method: updateAxialRotVis_Euler,
+           area_vis_method: update_area_vis_yxy,
+           area_vis_method_decomp: 'HUM_EULER_YXY',
            axial_rot_method: AXIAL_ROT_METHODS.EULER,
            north_pole: new Vector3(0, 1, 0),
            scene_class: EulerScene
@@ -27,6 +30,8 @@ export class HumerusView extends BaseView{
        ['HUM_EULER_XZY', {
            angle_vis_method: Euler_xzy_angle_geometry.createAngleObjects,
            axial_rot_vis_method: updateAxialRotVis_Euler,
+           area_vis_method: update_area_vis_xzy,
+           area_vis_method_decomp: 'HUM_EULER_XZY',
            axial_rot_method: AXIAL_ROT_METHODS.EULER,
            north_pole: new Vector3(1, 0, 0),
            scene_class: EulerScene
@@ -51,6 +56,8 @@ export class HumerusView extends BaseView{
        ['HUM_SWING_TWIST', {
            angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
            axial_rot_vis_method: updateAxialRotVis_SwingTwist,
+           area_vis_method: update_area_vis_yxy,
+           area_vis_method_decomp: 'HUM_EULER_YXY',
            axial_rot_method: AXIAL_ROT_METHODS.SWING_TWIST,
            north_pole: new Vector3(0, 1, 0),
            scene_class: EulerScene
@@ -59,19 +66,22 @@ export class HumerusView extends BaseView{
        ['HUM_SIMULTANEOUS', {
            angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
            axial_rot_vis_method: updateAxialRotVis_SwingTwist,
+           area_vis_method: update_area_vis_yxy,
+           area_vis_method_decomp: 'HUM_EULER_YXY',
            axial_rot_method: AXIAL_ROT_METHODS.SIMULTANEOUS,
            north_pole: new Vector3(0, 1, 0),
            scene_class: EulerSceneSimultaneous
            }]
        ]);
 
-    constructor(camera, renderer, rotationHelper, method_name, humerusGeometry, humerusLength, anglesVisLayer, humerusBase, numAnimFrames=100, framePeriod=10) {
+    constructor(camera, renderer, rotationHelper, method_name, humerusGeometry, humerusLength, anglesVisLayer, areaVisLayer, humerusBase, numAnimFrames=100, framePeriod=10) {
         super();
         this.camera = camera;
         this.renderer = renderer;
         this.rotationHelper = rotationHelper;
         this.setHumerusBase(humerusBase);
         this.anglesVisLayer = anglesVisLayer;
+        this.areaVisLayer = areaVisLayer;
         this.method_name = method_name;
         this.numAnimFrames = numAnimFrames;
         this.framePeriod = framePeriod;
@@ -97,6 +107,7 @@ export class HumerusView extends BaseView{
         // rotation lines to show up when the visualization checkbox is checked
         enableAxialRot(this.eulerScene, this.method_info.axial_rot_method);
         enableAngleVis(this.eulerScene, this.anglesVisLayer, this.method_info.angle_vis_method, this.method_info.axial_rot_vis_method);
+        enableSphereArea(this.eulerScene, this.areaVisLayer, frameNum => this.humerusQuat(frameNum), frameNum => this.humerusRotation(this.method_info.area_vis_method_decomp, frameNum), this.method_info.area_vis_method);
         this.eulerScene.initialize(this.humerusRotation(this.method_name, 0));
         this.eulerScene.goToStep(this.eulerScene.currentStep);
         this.eulerScene.changeSphere(this.method_info.north_pole);
@@ -153,7 +164,7 @@ export class HumerusView extends BaseView{
 
     setFrame(frameNum) {
         this.previewFrame(frameNum);
-        this.eulerScene.reset(this.humerusRotation(this.method_name, frameNum));
+        this.eulerScene.reset(this.humerusRotation(this.method_name, frameNum), frameNum);
         this.animationHelper.goToStep(this.eulerScene.currentStep);
     }
 
