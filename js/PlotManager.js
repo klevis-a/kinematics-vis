@@ -197,6 +197,26 @@ export class PlotManager {
         ];
     }
 
+    axialOrientPlot() {
+        const layout = this.axialOrientLayout();
+        this.createPlot('axialOrient', this.axialOrientTraces(), layout, layout.title);
+        this.humerusBasePlots.set('axialOrient', {traces: () => this.axialOrientTraces(), layout: () => this.axialOrientLayout()});
+    }
+
+    axialOrientTraces() {
+        return [
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[2], type: 'scatter', name: this.plotNames.get('HUM_EULER_YXY')},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[2], type: 'scatter', name: this.plotNames.get('HUM_EULER_XZY')},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_SWING_TWIST'), type: 'scatter', name: this.plotNames.get('HUM_SWING_TWIST')},
+        ];
+    }
+
+    axialOrientLayout() {
+        const layout = this.commonPlotLayout();
+        layout.title = 'Humerus Axial Orientation';
+        return layout;
+    }
+
     axialRotPlot() {
         const layout = this.axialRotLayout();
         this.createPlot('axialRot', this.axialRotTraces(), layout, layout.title);
@@ -205,16 +225,19 @@ export class PlotManager {
 
     axialRotTraces() {
         return [
-            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[2], type: 'scatter', name: this.plotNames.get('HUM_EULER_YXY')},
-            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[2], type: 'scatter', name: this.plotNames.get('HUM_EULER_XZY')},
-            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_SWING_TWIST'), type: 'scatter', name: this.plotNames.get('HUM_SWING_TWIST')},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_YXY')[2].map((x, idx, arr) => x - arr[0]),
+                type: 'scatter', name: this.plotNames.get('HUM_EULER_YXY')},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_EULER_XZY')[2].map((x, idx, arr) => x - arr[0]),
+                type: 'scatter', name: this.plotNames.get('HUM_EULER_XZY')},
+            {x: this.frameNums, y: this[this.humerusSpec].get('HUM_SWING_TWIST').map((x, idx, arr) => x - arr[0]),
+                type: 'scatter', name: this.plotNames.get('HUM_SWING_TWIST')},
             {x: this.frameNums, y: this[this.humerusSpec].get('TRUE_AXIAL_ROTATION'), type: 'scatter', name: this.plotNames.get('TRUE_AXIAL_ROTATION')}
         ];
     }
 
     axialRotLayout() {
         const layout = this.commonPlotLayout();
-        layout.title = 'Humerus Axial Orientation';
+        layout.title = 'Humerus Axial Rotation';
         return layout;
     }
 
@@ -303,6 +326,7 @@ export class PlotManager {
     createPlots() {
         this.poePlot();
         this.eaPlot();
+        this.axialOrientPlot();
         this.axialRotPlot();
         this.humerusIsbPlot();
         this.humerusPhadkePlot();
