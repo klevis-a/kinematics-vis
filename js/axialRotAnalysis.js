@@ -15,4 +15,4 @@ const guiOptions = {
 
 const initialViewLayout = new Map([['view1', 'HUM_EULER_YXY'], ['view2', 'HUM_EULER_XZY'], ['view3', 'HUM_SWING_TWIST']]);
 
-const shoulderVis = new ShoulderVis('./csv', 'db_summary.json', 'N005_F_R_47', initialViewLayout, guiOptions, 'axialRot');
+const shoulderVis = new ShoulderVis('./csv', 'db_summary.json', initialViewLayout, guiOptions, 'axialRot');
