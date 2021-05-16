@@ -18,7 +18,7 @@ function loadCsv(url, hasHeader=false) {
     });
 }
 
-function createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, initialLayout=null, guiOptions=null, defaultPlot='axialRot') {
+export function createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, initialLayout=null, guiOptions=null, defaultPlot='axialRot') {
     return Promise.all([loadCsv(humerusLandmarksFile), loadCsv(scapulaLandmarksFile), loadCsv(trajectoryFile),
         promiseLoadSTL(humerusStlFile), promiseLoadSTL(scapulaStlFile)])
         .then(([humerusLandmarksCsv, scapulaLandmarksCsv, trajectory, humerusGeometry, scapulaGeometry]) => {

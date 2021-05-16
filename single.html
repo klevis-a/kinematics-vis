@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizing the Decomposition of Humeral Orientation into Sub-Rotations</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="styles/main.css" rel="stylesheet" type="text/css">
+    <link href="styles/sliderStyle.css" rel="stylesheet" type="text/css">
+    <link href="styles/stateCtrlStyle.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div id="topContainer">
+    <div id="loading-div"><h3>Loading...</h3></div>
+    <div id="help-btn-div"><a href="#" id="help-btn">?</a></div>
+    <div id="help-div">
+            <div class="close-container"><a href="#" class="close" id="help-close-btn"></a></div>
+            <p>
+            <b>Introduction</b>
+            <br/>
+            This application enables you to visually analyze the 3D motion of the humerus and scapula during various
+            single-plane shoulder motions. It decomposes the orientation of the humerus and scapula via commonly utilized
+            methods in shoulder biomechanics research. This allows you to visually compare differences between these methods.
+            </p>
+
+            <p>
+            <b>Frame Selection</b>
+            <br/>
+            The slider bar at the top of the page allows you to select the frame in the data capture which you would
+            like to analyze. Notice that as you change the frame number, the orientation of the humerus and scapula
+            in each view is updated. This same functionality can be achieved using the plots on the lower-right
+            quadrant by hovering over a plot-line. Once you have chosen a frame to analyze, click the downward facing arrow
+            next to the slider bar. This same functionality can be achieved by clicking a point on a plot.
+
+            </p>
+
+            <p>
+            <b>The Views</b>
+            <br/>
+            The lower-right view plots the components of the decomposed orientation of the humerus/scapula as specified
+            in the adjustable label in the upper-left corner of this quadrant. Each of the remaining 3 views
+            decompose the humerus or scapula orientation according to the adjustable label shown in the upper-left or
+            upper-right corner of the quadrant. In all views, the elbow is represented by a thin black or blue rectangle
+            attached to the humerus. Axial orientation is illustrated by the angle between the black (starting) and blue
+            (ending) rectangle.
+            </p>
+
+            <p>
+            <b>Interactions</b>
+            <br/>
+            Rotate by dragging the left mouse button, zoom using the scroll-wheel, and pan by
+            dragging the right mouse button. To maximize one of the views, double-click on it. Another double-click
+            brings you back to the 4-pane view. The humerus views are linked to each other so as you rotate, pan, or zoom
+            in one view, the same action happens in the other humerus views.
+            </p>
+
+            <p>
+            <b>Animations</b>
+            <br/>
+            Once you have selected a frame to decompose (see <b>Frame Selection</b>), the application allows you to
+            animate the sub-rotations associated with each decomposition. The state buttons at bottom of the application
+            allow you to choose which sub-rotation you would like to animate. Once you select a sub-rotation, the
+            play/pause button and slide bar at the bottom  of each quadrant provide control of the animation for the
+            selected sub-rotation.
+            </p>
+
+            <p>
+            <b>Options</b>
+            <br/>
+            The <b>Open Controls</b> button in the lower-right corner of the page provides various configuration options
+            for the application. Notably, the <b>Humerus Base</b> option allows you to change whether the humerus is
+            decomposed and plotted by measuring its orientation against the <b>Torso</b> or <b>Scapula</b>. The
+            <b>Visualize Angles</b> option allows you to display a simple visualization of the humerus angles as measured
+            by a particular decomposition sequence. The <b>Spherical Area</b> option enables the visualization of the
+            actual path traversed by the distal humerus (blue), and the path assumed by the chosen decomposition sequence
+            (brown). The spherical area between these two trajectories describes the difference between true and apparent
+            axial rotation for the xz'y'' and Swing Twist decompositions.
+            </p>
+    </div>
+    <div id="views">
+        <canvas id="canvas"></canvas>
+        <div id="view1" class="quarter">
+            <div id="view1_animation" class="view_container_div"></div>
+            <div id="view1_selector" class="method_selector method_selector_left"></div>
+        </div>
+        <div id="view2" class="quarter">
+            <div id="view2_animation" class="view_container_div"></div>
+            <div id="view2_selector" class="method_selector method_selector_right"></div>
+        </div>
+        <div id="view3" class="quarter">
+            <div id="view3_animation" class="view_container_div"></div>
+            <div id="view3_selector" class="method_selector method_selector_left"></div>
+        </div>
+        <div id="view4" class="quarter">
+            <div id="plots" class="plotContainerDiv"></div>
+            <div id="plotSelector" class="plotSelector"></div>
+        </div>
+    </div>
+    <div id="captureFrameControl">
+        <div class="timelineCtrl">
+            <div id="captureFrameGoCtrl" class="go"></div>
+            <div class="sliderDiv"><input type="range" min="0" max="99" value="0" step="any" class="slider" id="captureFrameTimeline"></div>
+            <div id="captureFrameNum" class="frameNum"></div>
+        </div>
+    </div>
+    <div id="datGUI"></div>
+</div>
+<script src="js/vendor/plotly.min.js"></script>
+<script src="js/vendor/papaparse.min.js"></script>
+<script src="js/vendor/palette.js"></script>
+<script type="module" src="js/singleAnalysis.js"></script>
+</body>
+</html>
