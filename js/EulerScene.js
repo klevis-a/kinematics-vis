@@ -52,6 +52,7 @@ export class EulerScene {
         this.xyPlane.geometry.dispose();
         this.steps.forEach(step => step.dispose());
         if (this.controls) this.controls.dispose();
+        this.dispatchEvent({type: 'dispose'});
         this.scene.dispose();
     }
 

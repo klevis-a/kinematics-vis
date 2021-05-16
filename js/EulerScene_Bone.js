@@ -50,4 +50,15 @@ export function enableBone(boneScene, boneGeometry) {
             step.triad.add(boneMesh);
         });
     });
+
+    boneScene.addEventListener('dispose', function (event) {
+        const scene = event.target;
+        disposeBones(scene);
+    });
+}
+
+function disposeBones(boneScene) {
+    boneScene.bone.material.dispose();
+    boneScene.step0Bone.material.dispose();
+    boneScene.boneGeometry.dispose();
 }

@@ -178,4 +178,14 @@ export function enableAxialRot(boneScene, updateFnc) {
         const scene = event.target;
         initAxialRotation.call(scene);
     });
+
+    boneScene.addEventListener('dispose', function (event) {
+        const scene = event.target;
+        disposeAxial(scene);
+    });
+}
+
+function disposeAxial(boneScene) {
+    boneScene.PLANE_GEOMETRY.dispose();
+    boneScene.THIN_LINE_GEOMETRY.dispose();
 }

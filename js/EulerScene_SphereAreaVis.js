@@ -194,5 +194,17 @@ export function enableSphereArea(boneScene, visLayer, quatFnc, eulFnc, visFnc) {
         scene.actualPathMat.resolution.set(contentWidth, contentHeight);
         scene.decompPathMat.resolution.set(contentWidth, contentHeight);
     });
+
+    boneScene.addEventListener('dispose', function (event) {
+        const scene = event.target;
+        disposeSphereArea(scene);
+    });
 }
 
+function disposeSphereArea(boneScene) {
+    boneScene.actualPathMat.dispose();
+    boneScene.decompPathMat.dispose();
+    if (boneScene.areaVis) {
+        boneScene.areaVis.children.forEach(child => child.geometry.dispose());
+    }
+}

@@ -125,4 +125,13 @@ export function enableAngleVis(boneScene, visLayer, visFunc, axialRotVisFnc) {
         const scene = event.target;
         scene.update_angles_vis();
     });
+    boneScene.addEventListener('dispose', function (event) {
+        const scene = event.target;
+        disposeAngleVis(scene);
+    });
+}
+
+function disposeAngleVis(boneScene) {
+    boneScene.initTriad_angles.dispose();
+    boneScene.finalTriad_angles.dispose();
 }

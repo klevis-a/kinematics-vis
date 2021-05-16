@@ -84,4 +84,16 @@ export function enableSphere(boneScene) {
         scene.addFinalLatitudeLongitude();
         scene.toggleSphereVisibility(scene.sphere.visible);
     });
+    boneScene.addEventListener('dispose', function (event) {
+        const scene = event.target;
+        disposeSphere(scene);
+    });
+}
+
+function disposeSphere(boneScene) {
+    boneScene.sphere.geometry.dispose();
+    boneScene.sphereEdgesMaterial.dispose();
+    boneScene.finalLatLongMaterial.dispose();
+    boneScene.finalLongitude.geometry.dispose();
+    boneScene.finalLatitude.geometry.dispose();
 }
