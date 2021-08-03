@@ -68,8 +68,8 @@ export class ShoulderVis {
         }
         const humerusLandmarksFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['humerus_landmarks_file'];
         const scapulaLandmarksFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['scapula_landmarks_file'];
-        const humerusStlFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['humerus_stl_smooth_file'];
-        const scapulaStlFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['scapula_stl_smooth_file'];
+        const humerusStlFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['humerus_stl_file'];
+        const scapulaStlFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['scapula_stl_file'];
         const trajectoryFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['activities'][this.activitySelector.value];
         createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, this.initialLayout, this.guiOptions, this.defaultPlot)
             .then(viewManager => {
@@ -98,12 +98,10 @@ export class ShoulderVis {
         removeAllChildNodes(this.activitySelector);
         // iterate over the activityFriendNames map because it also establishes the order in which the activities should be populated
         const activitiesArray = Object.keys(this.dbSummary[subject]['activities']);
-        ShoulderVis.ActivityFriendlyNames.forEach((friendlyName, activityKey) => {
-            if (activitiesArray.includes(activityKey)) {
-                const activityOption = this.activitySelector.appendChild(document.createElement('option'));
-                activityOption.setAttribute('value', activityKey);
-                activityOption.innerHTML = friendlyName;
-            }
+        activitiesArray.forEach(friendlyName => {
+            const activityOption = this.activitySelector.appendChild(document.createElement('option'));
+            activityOption.setAttribute('value', friendlyName);
+            activityOption.innerHTML = friendlyName;
         });
     }
 
