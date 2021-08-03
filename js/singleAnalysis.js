@@ -7,6 +7,7 @@ const scapulaLandmarksFile = get_url_param('slf');
 const humerusStlFile = get_url_param('hsf');
 const scapulaStlFile = get_url_param('ssf');
 const trajectoryFile = get_url_param('tf');
+const freq = get_url_param('freq');
 
 const guiOptions = {
     humerusBase: HUMERUS_BASE.TORSO,
@@ -28,7 +29,7 @@ closeBtn.addEventListener('click', () => helpDiv.style.display = 'none');
 
 let viewManager = null;
 const loadingDiv = document.getElementById('loading-div');
-createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, initialViewLayout, guiOptions, 'axialRot')
+createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, freq, initialViewLayout, guiOptions, 'axialRot')
     .then(viewManager => {
         viewManager = viewManager;
         loadingDiv.style.display = 'none'

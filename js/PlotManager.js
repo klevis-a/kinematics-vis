@@ -70,7 +70,7 @@ export class PlotManager {
         this.st = new Map();
         this.st.set('SCAP_EULER_YXZ', [[],[],[]]);
         this.shr = [[[], [], []], [[], [], []], [[], [], []]];
-        const shr_temp = shr(this.rotationHelper.st_quat, this.rotationHelper.gh_quat);
+        const shr_temp = shr(this.rotationHelper.st_quat, this.rotationHelper.gh_quat, this.rotationHelper.trajectory.FramePeriod);
 
         for(let i=0; i<this.rotationHelper.trajectory.NumFrames; i++) {
             for(let j=0; j<3; j++) {
@@ -99,8 +99,10 @@ export class PlotManager {
             this.gh.get('HUM_SWING_TWIST').push(MathUtils.radToDeg(this.rotationHelper.gh_rotations.get('HUM_SWING_TWIST')[i][1].angle));
         }
 
-        this.th.set('TRUE_AXIAL_ROTATION', realAxialRotation(this.rotationHelper.th_quat).map(val => MathUtils.radToDeg(val)));
-        this.gh.set('TRUE_AXIAL_ROTATION', realAxialRotation(this.rotationHelper.gh_quat).map(val => MathUtils.radToDeg(val)));
+        this.th.set('TRUE_AXIAL_ROTATION', realAxialRotation(this.rotationHelper.th_quat,
+            this.rotationHelper.trajectory.FramePeriod).map(val => MathUtils.radToDeg(val)));
+        this.gh.set('TRUE_AXIAL_ROTATION', realAxialRotation(this.rotationHelper.gh_quat,
+            this.rotationHelper.trajectory.FramePeriod).map(val => MathUtils.radToDeg(val)));
     }
 
     commonPlotLayout() {

@@ -27,10 +27,6 @@ export class ScapulaLandmarks {
 }
 
 export class Trajectory {
-    static get FRAME_PERIOD() {
-        return 0.01;
-    }
-
     static get TORSO_POS() {
         return [0, 3];
     }
@@ -52,9 +48,10 @@ export class Trajectory {
         return [17, 21];
     }
 
-    constructor(trajData) {
+    constructor(trajData, freq) {
         this.TimeSeries = trajData.slice(1);
         this.NumFrames = this.TimeSeries.length;
+        this.FramePeriod = 1/freq;
     }
 
     // torso

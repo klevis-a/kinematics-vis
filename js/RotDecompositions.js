@@ -347,10 +347,7 @@ export function trajQuatMat3(quatTraj) {
     return traj_mat3;
 }
 
-export function angularVelocity(traj_mat3) {
-    // time between frames in seconds
-    const dt = Trajectory.FRAME_PERIOD;
-
+export function angularVelocity(traj_mat3, dt) {
     //compute the symmetric derivative of matrix3
     const traj_derivative = [];
     for(let i=0; i<traj_mat3.length; i++) {
@@ -376,15 +373,12 @@ export function angularVelocity(traj_mat3) {
     return angVel;
 }
 
-export function realAxialRotation(quatTraj) {
-    // time between frames in seconds
-    const dt = Trajectory.FRAME_PERIOD;
-
+export function realAxialRotation(quatTraj, dt) {
     // first represent as matrix3
     const traj_mat3=trajQuatMat3(quatTraj);
 
     // compute angular velocity
-    const angular_velocity = angularVelocity(traj_mat3);
+    const angular_velocity = angularVelocity(traj_mat3, dt);
 
     // first project the angular velocity vector onto the shaft axis for each frame
     const angVel_proj = [];
@@ -406,11 +400,11 @@ export function realAxialRotation(quatTraj) {
     return axialRot;
 }
 
-export function shr(stQuatTraj, ghQuatTraj) {
+export function shr(stQuatTraj, ghQuatTraj, dt) {
     const stMat3 = trajQuatMat3(stQuatTraj);
     const ghMat3 = trajQuatMat3(ghQuatTraj);
-    const stAngVel = angularVelocity(stMat3);
-    const ghAngVel = angularVelocity(ghMat3);
+    const stAngVel = angularVelocity(stMat3, dt);
+    const ghAngVel = angularVelocity(ghMat3, dt);
     const ghAngVel_torso = ghAngVel.map((angVel, idx) => new Vector3().copy(angVel).applyQuaternion(stQuatTraj[idx]));
     const shr = ghAngVel_torso.map((gh, idx) => {
         const currentShr = [];

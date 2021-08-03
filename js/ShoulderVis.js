@@ -18,13 +18,13 @@ function loadCsv(url, hasHeader=false) {
     });
 }
 
-export function createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, initialLayout=null, guiOptions=null, defaultPlot='axialRot') {
+export function createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, freq, initialLayout=null, guiOptions=null, defaultPlot='axialRot') {
     return Promise.all([loadCsv(humerusLandmarksFile), loadCsv(scapulaLandmarksFile), loadCsv(trajectoryFile),
         promiseLoadSTL(humerusStlFile), promiseLoadSTL(scapulaStlFile)])
         .then(([humerusLandmarksCsv, scapulaLandmarksCsv, trajectory, humerusGeometry, scapulaGeometry]) => {
             const humerusLandmarks = new HumerusLandmarks(humerusLandmarksCsv.data);
             const scapulaLandmarks = new ScapulaLandmarks(scapulaLandmarksCsv.data);
-            const humerusTrajectory = new Trajectory(trajectory.data);
+            const humerusTrajectory = new Trajectory(trajectory.data, freq);
             return  new ViewManager(humerusLandmarks, scapulaLandmarks, humerusTrajectory, humerusGeometry, scapulaGeometry, initialLayout, guiOptions, defaultPlot);
         });
 }
@@ -70,8 +70,9 @@ export class ShoulderVis {
         const scapulaLandmarksFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['scapula_landmarks_file'];
         const humerusStlFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['humerus_stl_file'];
         const scapulaStlFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['config']['scapula_stl_file'];
-        const trajectoryFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['activities'][this.activitySelector.value];
-        createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, this.initialLayout, this.guiOptions, this.defaultPlot)
+        const trajectoryFile = this.dbBasePath + '/' +  this.dbSummary[this.subjectSelector.value]['activities'][this.activitySelector.value]['trajectory'];
+        const freq = this.dbSummary[this.subjectSelector.value]['activities'][this.activitySelector.value]['freq']
+        createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, freq, this.initialLayout, this.guiOptions, this.defaultPlot)
             .then(viewManager => {
                 this.viewManager = viewManager;
                 this.loadingDiv.style.display = 'none'
@@ -87,7 +88,8 @@ export class ShoulderVis {
         const humerusStlFile = this.humerusStlFile.files[0];
         const scapulaStlFile = this.scapulaStlFile.files[0];
         const trajectoryFile = this.trajectoryFile.files[0];
-        createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile, this.initialLayout, this.guiOptions, this.defaultPlot)
+        createViewManager(humerusLandmarksFile, scapulaLandmarksFile, trajectoryFile, humerusStlFile, scapulaStlFile,
+            parseFloat(this.freqInput.value), this.initialLayout, this.guiOptions, this.defaultPlot)
             .then(viewManager => {
                 this.viewManager = viewManager;
                 this.loadingDiv.style.display = 'none'
@@ -202,6 +204,18 @@ export class ShoulderVis {
         this.fileSelectorsDiv.appendChild(humerusStlDiv);
         [scapulaStlDiv, this.scapulaStlFile] = createIndFileSelector('scapulaStlFile', 'Scapula STL', 'dbSelectDiv');
         this.fileSelectorsDiv.appendChild(scapulaStlDiv);
+
+        // add frequency
+        const freqDiv = document.createElement('div');
+        freqDiv.setAttribute('class', 'dbSelectDiv');
+        const freqLabel = freqDiv.appendChild(document.createElement('label'));
+        freqLabel.setAttribute('for', 'freq');
+        freqLabel.innerHTML = '<b>' + 'Frequency (Hz)  ' + '</b>';
+        this.freqInput = freqDiv.appendChild(document.createElement('input'));
+        this.freqInput.setAttribute('type', 'text');
+        this.freqInput.setAttribute('id', 'freq');
+        this.freqInput.setAttribute('size', '4');
+        this.fileSelectorsDiv.appendChild(freqDiv);
 
         // add analyze button
         const analyzeBtnDiv = this.fileSelectorsDiv.appendChild(document.createElement('div'));
