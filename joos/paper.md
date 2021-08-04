@@ -49,14 +49,15 @@ Human motion analysis is a complex topic. Biomechanists, clinicians, and trainee
 
 # Mathematics
 
-The reader is referred to the following relevant references for the underlying mathematical frameworks that underpin ‘kinematics-vis’: 
+Minimally, kinematic analysis in biomechanics can be thought of as three steps:
 
-* ISB recommendation on definitions of joint coordinate systems of various joints for the reporting of human joint motion--part II: shoulder, elbow, wrist and hand [@Wu:2005].
-* Comparison of glenohumeral motion using different rotation sequences [@Phadke:2011].
-* Determination of axial rotation angles of limb segments — a new method [@Cheng:2000]. 
-* New mathematical definition and calculation of axial rotation of anatomical joints [@Miyazaki:1991].
-* Beyond Euler/Cardan analysis: True glenohumeral axial rotation during arm elevation and rotation [@Aliaj:2021].
-* A survey of human shoulder kinematic representations [@Krishnan:2019].
+1. Establishing an orthogonal coordinate system associated with each bone of interest via bony landmarks.
+2. Tracking the position and orientation (pose) of the bones of interest with respect to each other and/or an external coordinate system of interest.
+3. Quantifying the position and orientation of the bones of interest by utilizing various decomposition techniques. For example, orientation is frequently decomposed via a specific Euler/Cardan sequence.
+
+Each of these three steps can be accomplished in a variety of ways. In order to standardize these steps and increase reproducibility between biomechanics laboratories, the International Society of Biomechanics (ISB) has issued guidelines via a series of journal articles [@Wu:2005]. However, there is still debate on whether these guidelines are appropriate for all investigations [@Phadke:2011]. The excellent review article by [@Krishnan:2019] provides an overview of the multitude of functional kinematic representations of the shoulder joint and provides a succinct introduction to the underlying mathematics.
+
+The mathematical representation of orientation (3D rotations) can be difficult to understand because 3D rotations are unintuitive for most biomechanics researchers. Finite 3D rotations cannot be added and do not commute - therefore they do not form a vector space but belong to the mathematical group termed SO(3). Typically, long bone axial orientation/rotation is the kinematic component that is subject to the most debate and misunderstanding [@Cheng:2000; @Miyazaki:1991]. With the visual insights gleaned from the presented software, we demonstrated how to correctly measure axial rotation for long bones [@Aliaj:2021; @Miyazaki:1991].
 
 # Figures
 
