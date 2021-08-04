@@ -48,3 +48,7 @@ python3 -m http.server
 Instructions for interacting with the UI are provided within the web application. Once you access the web app click the question mark that appears at the top of the upper right quadrant.
 
 A simple way to provide an input dataset for the web app is to utilize the sample dataset (downloadData.sh or downloadData.bat). Once the sample dataset has been downloaded, click the folder icon (top of the upper left quadrant), and select a trial to analyze. To analyze your own data see `INPUT_FILES.md` for creating file formats compatible with this web app.
+
+### Contributing
+
+See the [CONTRIBUTING](CONTRIBUTING.md) document for details on contributing to the project by reporting a bug, submitting a fix, or proposing new features.
