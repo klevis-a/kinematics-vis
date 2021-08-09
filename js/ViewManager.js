@@ -334,8 +334,10 @@ export class ViewManager {
                     current_view.style.display = 'block';
                 });
             }
-            sceneManager.updateCamera();
-            sceneManager.viewsMap.forEach((view, view_id) => view.updateCamera());
+
+            // Plotly plots only get updated on a window resize event. But the resize event actually takes care of
+            // updating the cameras as well, so we might as well call it to kill two birds with one stone.
+            window.dispatchEvent(new Event('resize'));
         };
         this.viewsMap.forEach((scene, view_id) => document.getElementById(view_id).addEventListener('dblclick', this.dblClickListener));
     }
@@ -343,8 +345,9 @@ export class ViewManager {
     addWindowResizeListener() {
         this.resizeListener = () => {
             this.renderer.setSize(this.viewsContainer.clientWidth, this.viewsContainer.clientHeight);
-            // there is only one camera in order to enable linking between the scenes
+            // there is only one camera in order to enable linking between the humerus views
             this.updateCamera();
+            this.viewsMap.forEach((view, view_id) => view.updateCamera());
         };
         window.addEventListener('resize', this.resizeListener);
     }
