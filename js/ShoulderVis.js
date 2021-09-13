@@ -30,16 +30,6 @@ export function createViewManager(humerusLandmarksFile, scapulaLandmarksFile, tr
 }
 
 export class ShoulderVis {
-    static ActivityFriendlyNames = new Map([
-        ['SA', 'Scapular Plane Abduction'],
-        ['CA', 'Coronal Plane Abduction'],
-        ['FE', 'Forward Elevation'],
-        ['ERa90', 'External Rotation at 90 &deg; of Abduction'],
-        ['ERaR', 'External Rotation at Rest'],
-        ['WCA', 'Weighted Coronal Plane Abduction'],
-        ['WSA', 'Weighted Scapular Plane Abduction'],
-        ['WFE', 'Weighted Forward Elevation'],
-    ]);
 
     constructor(dbBasePath, dbSummaryFile, initialLayout=null, guiOptions=null, defaultPlot='axialRot') {
         this.dbBasePath = dbBasePath;
