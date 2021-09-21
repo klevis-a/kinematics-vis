@@ -1,8 +1,8 @@
 'use strict';
 
 import {Object3D, MeshPhongMaterial, Mesh, CylinderBufferGeometry, MeshBasicMaterial, SphereBufferGeometry,
-    TubeBufferGeometry, Curve, Vector3, DoubleSide} from "./vendor/three.js/build/three.module.js";
-import {BufferGeometryUtils} from "./vendor/three.js/examples/jsm/utils/BufferGeometryUtils.js"
+    TubeBufferGeometry, Curve, Vector3, DoubleSide} from "three";
+import {BufferGeometryUtils} from "three/examples/jsm/utils/BufferGeometryUtils.js"
 
 export class FatArrow extends Object3D {
     constructor(lineWidth, lineLength, coneRadius, coneHeight, color, markings, markingsStart, markingsEnd) {
@@ -74,9 +74,9 @@ export class FatArrow extends Object3D {
 
 export class Triad extends Object3D{
     static originMaterial = new MeshPhongMaterial({color: 0x000000});
-    static reds = palette('cb-Reds',5);
-    static greens = palette('cb-Greens',5);
-    static blues = palette('cb-Blues',5);
+    static reds = ['fee5d9', 'fcae91', 'fb6a4a', 'de2d26', 'a50f15'];
+    static greens = ['edf8e9', 'bae4b3', '74c476', '31a354', '006d2c'];
+    static blues = ['eff3ff', 'bdd7e7', '6baed6', '3182bd', '08519c'];
     static triadMaterialColors = ['reds', 'greens', 'blues'];
 
     static intFromColor(col) {

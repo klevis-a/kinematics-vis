@@ -1,7 +1,7 @@
 'use strict';
 
 import {EulerScene} from "./EulerScene.js";
-import {Quaternion, Vector3} from "./vendor/three.js/build/three.module.js";
+import {Quaternion, Vector3} from "three";
 import {EulerStep} from "./EulerStep.js";
 import {axisAngleFromQuat} from "./RotDecompositions.js";
 

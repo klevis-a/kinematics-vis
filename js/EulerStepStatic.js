@@ -1,6 +1,6 @@
 'use strict';
 
-import {Vector3, CylinderBufferGeometry, Mesh, Geometry, Face3, Matrix4} from "./vendor/three.js/build/three.module.js";
+import {Vector3, CylinderBufferGeometry, Mesh, Geometry, Face3, Matrix4} from "three";
 
 export function createArc(triad1, triad2, rotAxis, rotAngle, rotPlane, dim, stripBottomDistance, stripWidth, arcMaterial, radialSegments, heightSegments) {
     let coneAxis;

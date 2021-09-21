@@ -1,6 +1,6 @@
 'use strict';
 
-import {STLLoader} from "./vendor/three.js/examples/jsm/loaders/STLLoader.js";
+import {STLLoader} from "three/examples/jsm/loaders/STLLoader.js";
 
 export function promiseLoadSTL(url, onprogress = function () {})
 {

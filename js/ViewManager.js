@@ -1,7 +1,7 @@
 import {divGeometry} from "./SceneHelpers.js";
-import {WebGLRenderer, Vector3, EventDispatcher} from "./vendor/three.js/build/three.module.js";
+import {WebGLRenderer, Vector3, EventDispatcher} from "three";
 import {FrameSelectorController} from "./FrameSelectorController.js";
-import {GUI} from "./vendor/three.js/examples/jsm/libs/dat.gui.module.js";
+import {GUI} from "three/examples/jsm/libs/dat.gui.module.js";
 import {normalizeHumerusGeometry, normalizeScapulaGeometry} from "./StlGeometryTools.js";
 import {RotationHelper, HUMERUS_BASE} from "./RotationHelper.js";
 import {HumerusView} from "./HumerusView.js";

@@ -1,0 +1,30 @@
+{
+  "name": "kinematics-vis",
+  "version": "0.1.0",
+  "description": "JavaScript application for visualizing and analyzing shoulder joint kinematics.",
+  "main": "defaultAnalysis.js",
+  "repository": "https://github.com/klevis-a/kinematics-vis.git",
+  "author": "Klevis Aliaj <klevis.a@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "papaparse": "5.3.0",
+    "plotly.js-dist-min": "1.57.0",
+    "svd-js": "1.1.1",
+    "three": "0.116.0"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^9.0.1",
+    "html-webpack-plugin": "^5.3.2",
+    "run-script-os": "^1.1.6",
+    "webpack": "^5.53.0",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.2.1"
+  },
+  "scripts": {
+    "build": "webpack",
+    "fetch_data": "run-script-os",
+    "fetch_data:win32": "downloadData.bat",
+    "fetch_data:linux": "./downloadData.sh"
+  }
+}

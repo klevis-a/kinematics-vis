@@ -1,6 +1,6 @@
 'use strict';
 
-import {Vector3} from "./vendor/three.js/build/three.module.js";
+import {Vector3} from "three";
 import {AnglesVisualizationSVD, Euler_xzy_angle_geometry, Euler_yxy_angle_geometry} from "./EulerAnglesGeometry.js";
 import {EulerScene} from "./EulerScene.js";
 import {EulerSceneSimultaneous} from "./EulerSceneSimultaneous.js";

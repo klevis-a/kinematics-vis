@@ -1,9 +1,10 @@
 'use strict';
 
-import {MathUtils} from "./vendor/three.js/build/three.module.js";
+import {MathUtils} from "three";
 import {range, removeAllChildNodes} from "./JSHelpers.js";
 import {realAxialRotation, shr} from "./RotDecompositions.js";
 import {HUMERUS_BASE} from "./RotationHelper.js";
+import Plotly from 'plotly.js-dist-min'
 
 export class PlotManager {
     constructor(rotationHelper, onClick, onHover, onUnhover, plotContainerDiv, plotSelectorDiv, defaultPlot, humerusBase=HUMERUS_BASE.TORSO) {

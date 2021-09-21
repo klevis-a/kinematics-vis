@@ -1,7 +1,7 @@
 'use strict';
 
 import {createArc, arrowGeometryFromArcGeometry, updateFlatArcArrow}  from "./EulerStepStatic.js";
-import {Quaternion, Plane, MeshBasicMaterial, DoubleSide, Mesh} from "./vendor/three.js/build/three.module.js";
+import {Quaternion, Plane, MeshBasicMaterial, DoubleSide, Mesh} from "three";
 import {Triad, RotAxisWithArrow} from "./EulerGeometry.js";
 
 export class EulerStep {

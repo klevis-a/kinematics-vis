@@ -2,9 +2,9 @@
 
 import {Scene, MeshPhongMaterial, Mesh, Color, AxesHelper, SphereBufferGeometry, MeshStandardMaterial, Matrix4,
     Line, LineBasicMaterial, BufferGeometry, PlaneBufferGeometry, LineSegments, EdgesGeometry,
-    SpotLight, Vector3} from './vendor/three.js/build/three.module.js';
+    SpotLight, Vector3} from "three";
 import {divGeometry} from "./SceneHelpers.js"
-import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
+import {TrackballControls} from "three/examples/jsm/controls/TrackballControls.js";
 import {EulerScene} from "./EulerScene.js";
 import {defaultCamera} from "./BaseView.js";
 

@@ -1,9 +1,9 @@
 'use strict';
 
 import {Scene, Color, Quaternion, LineBasicMaterial, BufferGeometry, PlaneBufferGeometry, EdgesGeometry,
-    Line, LineSegments, Vector3, HemisphereLight, SpotLight, EventDispatcher} from './vendor/three.js/build/three.module.js';
+    Line, LineSegments, Vector3, HemisphereLight, SpotLight, EventDispatcher} from 'three';
 import {divGeometry} from "./SceneHelpers.js"
-import {TrackballControls} from "./vendor/three.js/examples/jsm/controls/TrackballControls.js";
+import {TrackballControls} from "three/examples/jsm/controls/TrackballControls.js";
 import {Triad} from "./EulerGeometry.js";
 import {EulerStep} from "./EulerStep.js"
 import {defaultCamera} from "./BaseView.js";

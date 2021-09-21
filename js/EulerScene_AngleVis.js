@@ -1,6 +1,6 @@
 'use strict';
 
-import {Mesh, Group, Vector3} from "./vendor/three.js/build/three.module.js";
+import {Mesh, Group, Vector3} from "three";
 import {Triad} from "./EulerGeometry.js";
 import {EulerScene} from "./EulerScene.js";
 

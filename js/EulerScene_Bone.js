@@ -1,7 +1,7 @@
 'use strict';
 
 import {EulerScene} from "./EulerScene.js";
-import {MeshPhongMaterial, Mesh} from "./vendor/three.js/build/three.module.js";
+import {MeshPhongMaterial, Mesh} from "three";
 
 EulerScene.BONE_COLOR = 0xe3dac9;
 EulerScene.BONE_MATERIAL = new MeshPhongMaterial({color: EulerScene.BONE_COLOR, opacity: 0.9, transparent: true});

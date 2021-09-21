@@ -15,4 +15,4 @@ const guiOptions = {
 
 const initialViewLayout = new Map([['view1', 'HUM_EULER_YXY'], ['view2', 'SCAP_EULER_YXZ'], ['view3', 'PREVIEW']]);
 
-const shoulderVis = new ShoulderVis('./csv', 'db_summary.json', initialViewLayout, guiOptions, 'humerusIsb');
+const shoulderVis = new ShoulderVis(DATA_DIR, 'db_summary.json', initialViewLayout, guiOptions, 'humerusIsb');

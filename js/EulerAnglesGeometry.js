@@ -1,7 +1,7 @@
 'use strict';
 
 import {LineBasicMaterial, MeshBasicMaterial, Line, Mesh, Group, Vector3, BufferGeometry,
-    RingBufferGeometry, PlaneBufferGeometry, DoubleSide, Matrix4} from "./vendor/three.js/build/three.module.js";
+    RingBufferGeometry, PlaneBufferGeometry, DoubleSide, Matrix4} from "three";
 
 
 export class Euler_yxy_angle_geometry {
