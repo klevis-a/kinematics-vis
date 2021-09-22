@@ -1,8 +1,7 @@
 'use strict';
 
-import {Matrix4, Quaternion, Vector3, Matrix3} from "./vendor/three.js/build/three.module.js";
-import SVD from './vendor/svd.js'
-import {Trajectory} from "./Csv_Processor.js";
+import {Matrix4, Quaternion, Vector3, Matrix3} from "three";
+import {SVD} from "svd-js";
 
 
 export function axisAngleFromQuat(quat) {

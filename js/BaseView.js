@@ -1,6 +1,6 @@
 'use strict';
 
-import {PerspectiveCamera} from "./vendor/three.js/build/three.module.js";
+import {PerspectiveCamera} from "three";
 
 export class BaseView {
 

@@ -1,3 +1,4 @@
-curl https://shouldervis.chpc.utah.edu/kinevis/csv.zip --output csv.zip
-powershell.exe -NoP -NonI -Command "Expand-Archive '.\csv.zip' '.\csv\'"
-del csv.zip
+if not exist "data" mkdir data
+curl https://shouldervis.chpc.utah.edu/kinevis/healthy.zip --output data\healthy.zip
+powershell.exe -NoP -NonI -Command "Expand-Archive '.\data\healthy.zip' '.\data\healthy\'"
+del data\healthy.zip

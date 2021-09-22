@@ -1,6 +1,6 @@
-import {Matrix4, Quaternion, Vector3, Matrix3} from "./vendor/three.js/build/three.module.js";
+import {Matrix4, Quaternion, Vector3} from "three";
 import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, EulerDecomposition_RZ$$_RX$_RY,
-    ShortestPath, SwingTwist, svdDecomp, axisAngleFromQuat} from "./RotDecompositions.js";
+    ShortestPath, SwingTwist, svdDecomp} from "./RotDecompositions.js";
 
 export const HUMERUS_BASE = {
     TORSO: 'T',

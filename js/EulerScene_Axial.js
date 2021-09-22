@@ -1,7 +1,7 @@
 'use strict';
 
 import {MeshBasicMaterial, Mesh, Group, Vector3, CircleBufferGeometry, PlaneBufferGeometry,
-    DoubleSide} from "./vendor/three.js/build/three.module.js";
+    DoubleSide} from "three";
 import {EulerScene} from "./EulerScene.js";
 
 EulerScene.AXIAL_PLANE_MATERIAL = new MeshBasicMaterial({color: 0xffffff, side: DoubleSide, depthTest: false, visible: false});

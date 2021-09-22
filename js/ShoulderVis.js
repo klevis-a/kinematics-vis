@@ -4,6 +4,8 @@ import {removeAllChildNodes} from "./JSHelpers.js";
 import {promiseLoadSTL} from "./MiscThreeHelpers.js";
 import {HumerusLandmarks, ScapulaLandmarks, Trajectory} from "./Csv_Processor.js";
 import {ViewManager} from "./ViewManager.js";
+import Plotly from 'plotly.js-dist-min';
+import Papa from 'papaparse';
 
 function loadJson(jsonFile) {
     return new Promise(function (resolve, reject) {

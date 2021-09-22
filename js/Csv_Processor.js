@@ -1,6 +1,6 @@
 'use strict';
 
-import {Vector3, Quaternion} from "./vendor/three.js/build/three.module.js";
+import {Vector3, Quaternion} from "three";
 
 export class HumerusLandmarks {
     static COLS = [1, 4];

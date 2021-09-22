@@ -1,6 +1,6 @@
 'use strict';
 
-import {Box3} from "./vendor/three.js/build/three.module.js";
+import {Box3} from "three";
 
 export function boundingBox_objects(objects) {
     const bb = new Box3();

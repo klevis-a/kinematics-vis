@@ -1,8 +1,10 @@
 
 .idea/
 
-js/vendor
+data/
 
-csv/
+node_modules/
 
-csv_add/
+dist/
+
+yarn-error.log

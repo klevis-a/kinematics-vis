@@ -2,7 +2,7 @@
 
 import {EulerScene} from "./EulerScene.js";
 import {SphereBufferGeometry, EdgesGeometry, LineBasicMaterial, LineSegments, Vector3, Plane,
-    CircleBufferGeometry, Quaternion} from "./vendor/three.js/build/three.module.js";
+    CircleBufferGeometry, Quaternion} from "three";
 
 EulerScene.prototype.addSphere = function(northPole) {
     this.northPole = northPole;

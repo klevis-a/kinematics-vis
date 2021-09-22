@@ -8,50 +8,44 @@ Checkout the [live code demo](https://shouldervis.chpc.utah.edu/kinevis/main.htm
 
 ### Installation
 
+This repository depends on [Yarn](https://github.com/yarnpkg/yarn) as a package manager. Please [install Yarn](https://yarnpkg.com/en/docs/install) before proceeding.
+
 ##### Clone repository
 ```
 git clone https://github.com/klevis-a/kinematics-vis.git
 cd kinematics-vis
 ```
 
-##### Download code dependencies and data repository
+##### Install dependencies and build
 
-###### Windows
 ```
-downloadDeps.bat
-downloadData.bat
-```
-
-###### Linux
-```
-./downloadDeps.sh
-./downloadData.sh
+yarn install
+yarn build
 ```
 
-##### Start web server
+##### Download sample dataset
 
-The Python 3 Simple HTTP server is utilized below, but any web server will work.
-
-###### Windows
 ```
-python -m http.server
+yarn fetch_data
 ```
 
-###### Linux
+##### Start `webpack` development server
+
 ```
-python3 -m http.server
+yarn webpack serve
 ```
 
 ##### Access web application
 
-[http://localhost:8000/main.html](http://localhost:8000/main.html)
+[http://localhost:9000/main.html](http://localhost:9000/main.html)
 
 ### Usage
-Instructions for interacting with the UI are provided within the web application. Once you access the web app click the question mark that appears at the top of the upper right quadrant.
+Instructions for interacting with the UI are provided within the web application. Once you access the web app click the question mark that appears at the top of the upper right quadrant. A simple way to provide an input dataset for the web app is to utilize the sample dataset (`yarn fetch_data`). Once the sample dataset has been downloaded, click the folder icon (top of the upper left quadrant), and select a trial to analyze.
 
 ![Help](help_pointer.png)
 
-A simple way to provide an input dataset for the web app is to utilize the sample dataset (downloadData.sh or downloadData.bat). Once the sample dataset has been downloaded, click the folder icon (top of the upper left quadrant), and select a trial to analyze. To analyze your own data see `INPUT_FILES.md` for creating file formats compatible with this web app.
+### Analyzing your own datasets
+To analyze your own data see [INPUT_FILES.md](INPUT_FILES.md) for creating file formats compatible with this web app. To specify your own dataset directory edit the `DATA_DIR` variable within `webpack.config.js`.
 
 ### Contributing
 
