@@ -4,10 +4,18 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-    entry: './js/defaultAnalysis.js',
+    entry: {
+        'main': './js/defaultAnalysis.js',
+        'single': './js/singleAnalysis.js'
+    },
     output: {
-        filename: 'main.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist'),
+    },
+    optimization: {
+        splitChunks: {
+        chunks: "all"
+        }
     },
     mode: 'development',
     plugins: [
@@ -19,7 +27,13 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({
             filename: "main.html",
-            template: 'main.html'
+            template: 'main.html',
+            chunks: ['main']
+        }),
+        new HtmlWebpackPlugin({
+            filename: "single.html",
+            template: 'single.html',
+            chunks: ['single']
         }),
         // Note: devServer below serves data directory at its root. Therefore, ./healthy is mapped to data/healthy.
         // When using your own dataset, modify the variable below and the devServer static directory (if using devServer).
