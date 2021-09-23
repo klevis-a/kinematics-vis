@@ -15,16 +15,16 @@
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.1",
+    "gulp": "^4.0.2",
+    "gulp-download": "^0.0.1",
+    "gulp-unzip": "^1.1.0",
     "html-webpack-plugin": "^5.3.2",
-    "run-script-os": "^1.1.6",
     "webpack": "^5.53.0",
     "webpack-cli": "^4.8.0",
     "webpack-dev-server": "^4.2.1"
   },
   "scripts": {
     "build": "webpack",
-    "fetch_data": "run-script-os",
-    "fetch_data:win32": "downloadData.bat",
-    "fetch_data:linux": "./downloadData.sh"
+    "fetch_data": "gulp fetch_data"
   }
 }
