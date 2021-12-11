@@ -47,6 +47,9 @@ Instructions for interacting with the UI are provided within the web application
 ### Analyzing your own datasets
 To analyze your own data see [INPUT_FILES.md](INPUT_FILES.md) for creating file formats compatible with this web app. To specify your own dataset directory edit the `DATA_DIR` variable within `webpack.config.js`.
 
+### Manual Testing of the User Interface
+See [MANUAL_TESTING.md](MANUAL_TESTING.md) for a list of test cases that cover the basic functionality of the user interface.
+
 ### Contributing
 
 See the [CONTRIBUTING](CONTRIBUTING.md) document for details on contributing to the project by reporting a bug, submitting a fix, or proposing new features.
