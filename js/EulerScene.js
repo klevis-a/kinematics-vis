@@ -36,6 +36,7 @@ export class EulerScene {
         this.markingsStart = markingStart;
         this.currentStep = 0;
         this.triadsArcsVisible = true;
+        this.startingQuat = new Quaternion();
         this.initScene();
     }
 
@@ -64,7 +65,7 @@ export class EulerScene {
     }
 
     createSteps() {
-        this.quaternions = [new Quaternion()];
+        this.quaternions = [this.startingQuat];
 
         this.rotations.forEach(rotation => {
             const lastQuat = this.quaternions[this.quaternions.length-1];

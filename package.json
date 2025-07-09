@@ -25,6 +25,7 @@
   },
   "scripts": {
     "build": "webpack",
-    "fetch_data": "gulp fetch_data"
+    "fetch_data": "gulp fetch_data",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider webpack serve --open"
   }
 }

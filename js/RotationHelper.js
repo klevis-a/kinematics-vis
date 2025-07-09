@@ -1,6 +1,6 @@
-import {Matrix4, Quaternion, Vector3} from "three";
+import {Matrix3, Matrix4, Quaternion, Vector3} from "three";
 import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, EulerDecomposition_RZ$$_RX$_RY,
-    ShortestPath, SwingTwist, svdDecomp} from "./RotDecompositions.js";
+    ShortestPath, ShortestPathStartEnd, SwingTwist, svdDecomp} from "./RotDecompositions.js";
 
 export const HUMERUS_BASE = {
     TORSO: 'T',
@@ -16,8 +16,10 @@ export class RotationHelper {
         this.gh_rotations = new Map(Array.from(this.humerus_methods, ([method_name, value]) => [method_name, []]));
         this.st_rotations = new Map(Array.from(this.scapula_methods, ([method_name, value]) => [method_name, []]));
         this.th_quat = [];
+        this.th_rot_mat = []
         this.st_quat = [];
         this.gh_quat = [];
+        this.gh_rot_mat = [];
         this.th_pos = [];
         this.st_pos = [];
         this.gh_pos = [];
@@ -57,16 +59,26 @@ export class RotationHelper {
             // }
 
             this.th_quat.push(th_quat);
+            this.th_rot_mat.push(new Matrix3().setFromMatrix4(thPose));
             this.gh_quat.push(gh_quat);
+            this.gh_rot_mat.push(new Matrix3().setFromMatrix4(ghPose));
             this.st_quat.push(st_quat);
             this.th_pos.push(th_pos);
             this.gh_pos.push(gh_pos);
             this.st_pos.push(st_pos);
             this.th_rotations.forEach((method_traj, method_name) => {
-                method_traj.push(this.humerus_methods.get(method_name)(th_quat));
+                if (method_name === 'HUM_SHORTEST_PATH_START_END') {
+                    method_traj.push(this.humerus_methods.get(method_name)(new Quaternion().multiplyQuaternions(th_quat, new Quaternion().copy(this.th_quat[0]).conjugate())));
+                } else {
+                    method_traj.push(this.humerus_methods.get(method_name)(th_quat));
+                }
             });
             this.gh_rotations.forEach((method_traj, method_name) => {
-                method_traj.push(this.humerus_methods.get(method_name)(gh_quat));
+                if (method_name === 'HUM_SHORTEST_PATH_START_END') {
+                    method_traj.push(this.humerus_methods.get(method_name)(new Quaternion().multiplyQuaternions(gh_quat, new Quaternion().copy(this.gh_quat[0]).conjugate())));
+                } else {
+                    method_traj.push(this.humerus_methods.get(method_name)(gh_quat));
+                }
             });
             this.st_rotations.forEach((method_traj, method_name) => {
                 method_traj.push(this.scapula_methods.get(method_name)(st_quat));
@@ -133,6 +145,11 @@ Object.defineProperty(RotationHelper.prototype, 'humerus_methods', {
             }],
 
             ['HUM_SHORTEST_PATH', frameQuat => {
+                const oneStepDecomp = new ShortestPath(frameQuat);
+                return oneStepDecomp.rotationSequence;
+            }],
+
+            ['HUM_SHORTEST_PATH_START_END', frameQuat => {
                 const oneStepDecomp = new ShortestPath(frameQuat);
                 return oneStepDecomp.rotationSequence;
             }],

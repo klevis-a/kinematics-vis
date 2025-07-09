@@ -6,13 +6,14 @@ import {EulerScene} from "./EulerScene.js";
 import {EulerSceneSimultaneous} from "./EulerSceneSimultaneous.js";
 import {enableBone} from "./EulerScene_Bone.js";
 import {enableSphere} from "./EulerScene_Sphere.js";
+import {enableConeVis} from "./EulerScene_ConeVis.js";
 import {enableAngleVis, updateAxialRotVis_Euler, updateAxialRotVis_SwingTwist, updateAxialRotVis_ShortestPath} from "./EulerScene_AngleVis.js";
 import {enableAxialRot, AXIAL_ROT_METHODS} from "./EulerScene_Axial.js";
 import {EulerSceneAnimationHelper} from "./EulerSceneAnimationHelper.js";
 import {generateUUID} from "./JSHelpers.js";
 import {BaseView} from "./BaseView.js";
 import {HUMERUS_BASE} from "./RotationHelper.js";
-import {enableSphereArea, update_area_vis_xzy, update_area_vis_yxy} from "./EulerScene_SphereAreaVis.js";
+import {enableSphereArea, update_area_vis_xzy, update_area_vis_yxy, update_area_vis_shortest_path, update_area_vis_shortest_path_start_end} from "./EulerScene_SphereAreaVis.js";
 
 
 export class HumerusView extends BaseView{
@@ -48,6 +49,18 @@ export class HumerusView extends BaseView{
        ['HUM_SHORTEST_PATH', {
            angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
            axial_rot_vis_method: updateAxialRotVis_ShortestPath,
+           area_vis_method: update_area_vis_shortest_path,
+           area_vis_method_decomp: 'HUM_SHORTEST_PATH',
+           axial_rot_method: AXIAL_ROT_METHODS.ONE_STEP,
+           north_pole: new Vector3(0, 1, 0),
+           scene_class: EulerScene
+           }],
+
+       ['HUM_SHORTEST_PATH_START_END', {
+           angle_vis_method: Euler_yxy_angle_geometry.createAngleObjects,
+           axial_rot_vis_method: updateAxialRotVis_ShortestPath,
+           area_vis_method: update_area_vis_shortest_path_start_end,
+           area_vis_method_decomp: 'HUM_SHORTEST_PATH_START_END',
            axial_rot_method: AXIAL_ROT_METHODS.ONE_STEP,
            north_pole: new Vector3(0, 1, 0),
            scene_class: EulerScene
@@ -108,6 +121,11 @@ export class HumerusView extends BaseView{
         enableAxialRot(this.eulerScene, this.method_info.axial_rot_method);
         enableAngleVis(this.eulerScene, this.anglesVisLayer, this.method_info.angle_vis_method, this.method_info.axial_rot_vis_method);
         enableSphereArea(this.eulerScene, this.areaVisLayer, frameNum => this.humerusQuat(frameNum), frameNum => this.humerusRotation(this.method_info.area_vis_method_decomp, frameNum), this.method_info.area_vis_method);
+
+        if (this.method_name === 'HUM_SHORTEST_PATH_START_END') {
+            this.eulerScene.startingQuat = this.humerusQuat(0);
+            enableConeVis(this.eulerScene);
+        }
         this.eulerScene.initialize(this.humerusRotation(this.method_name, 0));
         this.eulerScene.goToStep(this.eulerScene.currentStep);
         this.eulerScene.changeSphere(this.method_info.north_pole);
@@ -233,6 +251,11 @@ export class HumerusView extends BaseView{
             default:
                 this.humerusRotation = (method_name, frameNum) => this.rotationHelper.humerusRotation_torso(method_name, frameNum);
                 this.humerusQuat = frameNum => this.rotationHelper.humerusQuat_torso(frameNum);
+        }
+
+        if (this.method_name === 'HUM_SHORTEST_PATH_START_END') {
+            this.eulerScene.startingQuat = this.humerusQuat(0);
+            // enableConeVis(this.eulerScene);
         }
     }
 }

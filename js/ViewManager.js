@@ -10,6 +10,7 @@ import {removeAllChildNodes} from "./JSHelpers.js";
 import {PreviewView} from "./PreviewView.js";
 import {ScapulaView} from "./ScapulaView.js";
 import {defaultCamera} from "./BaseView.js";
+import {HumerusViewAngVelocity} from "./HumerusViewAngVelocity";
 
 export class ViewManager {
 
@@ -69,7 +70,10 @@ export class ViewManager {
             ['HUM_SWING_TWIST', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus Swing Twist"}],
             ['HUM_SIMULTANEOUS', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus Simultaneous"}],
             ['PREVIEW', {creationFnc: method_name => this.createPreviewView(method_name), friendly_name: "Preview"}],
-            ['SCAP_EULER_YXZ', {creationFnc: method_name => this.createScapulaView(method_name), friendly_name: "Scapula ISB: yx'z''"}]
+            ['ANGULAR_VELOCITY', {creationFnc: method_name => this.createAngVelocityView(method_name), friendly_name: "Angular Velocity"}],
+            ['SCAP_EULER_YXZ', {creationFnc: method_name => this.createScapulaView(method_name), friendly_name: "Scapula ISB: yx'z''"}],
+            ['HUM_SHORTEST_PATH', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "One Axis"}],
+            ['HUM_SHORTEST_PATH_START_END', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "One Axis (Start to End)"}]
         ]);
 
         if (initialLayout == null) {
@@ -185,6 +189,12 @@ export class ViewManager {
 
     createPreviewView(method_name) {
         const view = new PreviewView(this.renderer, this.rotationHelper, this.humerusGeometry, this.scapulaGeometry, this.humerusLength);
+        return {scene: view, div: view.parent_div};
+    }
+
+    createAngVelocityView(method_name) {
+        const view = new HumerusViewAngVelocity(this.renderer, this.rotationHelper, this.humerusGeometry, this.humerusLength, this.guiOptions.humerusBase);
+        view.subscribeEvents(this);
         return {scene: view, div: view.parent_div};
     }
 

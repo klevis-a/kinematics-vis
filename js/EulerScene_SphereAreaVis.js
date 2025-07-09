@@ -3,6 +3,7 @@ import {Group, Matrix4, Mesh, Quaternion, Vector3} from "three";
 import {LineMaterial} from "three/examples/jsm/lines/LineMaterial.js";
 import {LineGeometry} from "three/examples/jsm/lines/LineGeometry.js";
 import {Line2} from "three/examples/jsm/lines/Line2.js";
+import {axisAngleFromQuat} from "./RotDecompositions.js";
 
 EulerScene.prototype.prepare_scene_for_area_vis = function(quatFnc) {
     const recursiveEnable = child => child.layers.enable(this.areaVisLayer);
@@ -166,6 +167,123 @@ export function update_area_vis_xzy(quatFnc, eulFnc, frameNum) {
     this.areaVis.add(toZeroLine);
     this.areaVis.add(fromZeroLine);
     this.areaVis.add(elevateLine);
+    this.areaVis.layers.set(this.areaVisLayer);
+    this.scene.add(this.areaVis);
+}
+
+export function update_area_vis_shortest_path(quatFnc, eulFnc, frameNum) {
+    if (this.areaVis) {
+        this.areaVis.children.forEach(child => child.geometry.dispose());
+        this.scene.remove(this.areaVis);
+    }
+
+    const actualPathPoints = [];
+
+    // actual trajectory
+    for(let i=0; i<=frameNum; i++) {
+        const currentQuat = quatFnc(i);
+        const currentMat = new Matrix4().makeRotationFromQuaternion(currentQuat);
+        const longAxis = new Vector3();
+        currentMat.extractBasis(new Vector3(), longAxis, new Vector3());
+        longAxis.multiplyScalar(-this.humerusLength);
+        actualPathPoints.push(longAxis.x, longAxis.y, longAxis.z);
+    }
+
+    const toEndPoints = [];
+    const endDecomp = eulFnc(frameNum);
+    // shortest path trajectory - direct rotation along single axis
+    for(let i=0; i<=frameNum; i++) {
+        const currentFrac = i/frameNum;
+        const currentQuat = new Quaternion().setFromAxisAngle(endDecomp[0].axis, endDecomp[0].angle * currentFrac);
+        const currentMat = new Matrix4().makeRotationFromQuaternion(currentQuat);
+        const longAxis = new Vector3();
+        currentMat.extractBasis(new Vector3(), longAxis, new Vector3());
+        longAxis.multiplyScalar(-this.humerusLength);
+        toEndPoints.push(longAxis.x, longAxis.y, longAxis.z);
+    }
+
+    const fromStartPoints = [];
+    const startDecomp = eulFnc(0);
+    // shortest path trajectory - direct rotation along single axis
+    for(let i=frameNum; i>=0; i--) {
+        const currentFrac = i/frameNum;
+        const currentQuat = new Quaternion().setFromAxisAngle(startDecomp[0].axis, startDecomp[0].angle * currentFrac);
+        const currentMat = new Matrix4().makeRotationFromQuaternion(currentQuat);
+        const longAxis = new Vector3();
+        currentMat.extractBasis(new Vector3(), longAxis, new Vector3());
+        longAxis.multiplyScalar(-this.humerusLength);
+        fromStartPoints.push(longAxis.x, longAxis.y, longAxis.z);
+    }
+
+    const actualPathGeometry = new LineGeometry().setPositions(actualPathPoints);
+    const actualLine = new Line2(actualPathGeometry, this.actualPathMat);
+    actualLine.layers.set(this.areaVisLayer);
+
+    const toEndGeometry = new LineGeometry().setPositions(toEndPoints);
+    const toEndLine = new Line2(toEndGeometry, this.decompPathMat);
+    toEndLine.layers.set(this.areaVisLayer);
+
+    const fromStartGeometry = new LineGeometry().setPositions(fromStartPoints);
+    const fromStartLine = new Line2(fromStartGeometry, this.decompPathMat);
+    fromStartLine.layers.set(this.areaVisLayer);
+
+    this.areaVis = new Group();
+    this.areaVis.add(actualLine);
+    this.areaVis.add(toEndLine);
+    this.areaVis.add(fromStartLine);
+
+    this.areaVis.layers.set(this.areaVisLayer);
+    this.scene.add(this.areaVis);
+}
+
+export function update_area_vis_shortest_path_start_end(quatFnc, eulFnc, frameNum) {
+    if (this.areaVis) {
+        this.areaVis.children.forEach(child => child.geometry.dispose());
+        this.scene.remove(this.areaVis);
+    }
+
+    const actualPathPoints = [];
+
+    // actual trajectory
+    for(let i=0; i<=frameNum; i++) {
+        const currentQuat = quatFnc(i);
+        const currentMat = new Matrix4().makeRotationFromQuaternion(currentQuat);
+        const longAxis = new Vector3();
+        currentMat.extractBasis(new Vector3(), longAxis, new Vector3());
+        longAxis.multiplyScalar(-this.humerusLength);
+        actualPathPoints.push(longAxis.x, longAxis.y, longAxis.z);
+    }
+
+    const toEndPoints = [];
+    const endQuat = quatFnc(frameNum);
+    const startQuat = quatFnc(0);
+    const rotQuat = new Quaternion().copy(startQuat).conjugate().multiply(endQuat);
+    const {axis: axis, angle: angle} = axisAngleFromQuat(rotQuat);
+
+    // shortest path trajectory - direct rotation along single axis
+    for(let i=0; i<=frameNum; i++) {
+        const currentFrac = i/frameNum;
+        const currentRotQuat = new Quaternion().setFromAxisAngle(axis, angle * currentFrac);
+        const currentQuat = new Quaternion().copy(startQuat).multiply(currentRotQuat);
+        const currentMat = new Matrix4().makeRotationFromQuaternion(currentQuat);
+        const longAxis = new Vector3();
+        currentMat.extractBasis(new Vector3(), longAxis, new Vector3());
+        longAxis.multiplyScalar(-this.humerusLength);
+        toEndPoints.push(longAxis.x, longAxis.y, longAxis.z);
+    }
+
+    const actualPathGeometry = new LineGeometry().setPositions(actualPathPoints);
+    const actualLine = new Line2(actualPathGeometry, this.actualPathMat);
+    actualLine.layers.set(this.areaVisLayer);
+
+    const toEndGeometry = new LineGeometry().setPositions(toEndPoints);
+    const toEndLine = new Line2(toEndGeometry, this.decompPathMat);
+    toEndLine.layers.set(this.areaVisLayer);
+
+    this.areaVis = new Group();
+    this.areaVis.add(actualLine);
+    this.areaVis.add(toEndLine);
+
     this.areaVis.layers.set(this.areaVisLayer);
     this.scene.add(this.areaVis);
 }

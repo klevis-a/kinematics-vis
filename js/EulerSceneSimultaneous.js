@@ -23,7 +23,7 @@ class EulerStepSimultaneous extends EulerStep {
     createRotAxis() {
         super.createRotAxis();
         // the rotation axis is non-constant and doesn't make sense to show
-        this.rotAxis.visible = false;
+        // this.rotAxis.visible = false;
     }
 
     updateTriad(frameNum) {

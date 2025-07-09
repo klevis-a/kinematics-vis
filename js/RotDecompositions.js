@@ -234,6 +234,19 @@ export class ShortestPath {
     }
 }
 
+export class ShortestPathStartEnd {
+    constructor(startQuat, endQuat) {
+        this.startQuat = startQuat;
+        this.endQuat = endQuat;
+        // Compute relative rotation from start to end: q_relative = q_end * q_start^(-1)
+        this.relativeQuat = new Quaternion().multiplyQuaternions(endQuat, new Quaternion().copy(startQuat).conjugate());
+        const {axis: axis, angle: angle} = axisAngleFromQuat(this.relativeQuat);
+        this.rotationSequence = [
+            new AxisAngle(axis, angle)
+        ];
+    }
+}
+
 export class SwingTwist {
     constructor(quat, axialAxis) {
         this.quat = quat;
