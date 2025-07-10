@@ -72,9 +72,82 @@ To use custom datasets:
 2. Ensure data structure matches requirements in `INPUT_FILES.md`
 3. Restart dev server to apply changes
 
+## Refactored Architecture (New)
+
+A new component-based architecture has been implemented to improve maintainability and extensibility:
+
+### New Architecture Components
+
+**BaseScene** (`js/scene/BaseScene.js`)
+- Core scene management with component orchestration
+- Predictable lifecycle: `initialize()`, `reset()`, `setFrame()`, `dispose()`
+- Component management: `addComponent()`, `removeComponent()`, `getComponent()`
+
+**SceneComponent** (`js/scene/SceneComponent.js`)
+- Interface for all scene features
+- Lifecycle methods: `onInitialize()`, `onReset()`, `onSetFrame()`, `onDispose()`
+- Clean separation of concerns
+
+**EulerDecompositionScene** (`js/scene/EulerDecompositionScene.js`)
+- Specialized scene for Euler angle decomposition
+- Replaces the monolithic `EulerScene` approach
+- Uses component system for features
+
+**Scene Components** (`js/scene/components/`)
+- `BoneComponent` - Bone visualization and animation
+- `SphereComponent` - Sphere visualization
+- `ConeComponent` - Cone visualization for swept motion
+- Each component handles its own lifecycle and resources
+
+**Refactored Views** (`js/view/`)
+- `BaseView` - Simplified view management
+- `HumerusView` - Uses new component-based scene system
+- Clear separation between view logic and scene management
+
+### Key Improvements
+
+1. **Predictable Execution Order**: Components execute in the order they're added
+2. **Clear Dependencies**: No hidden event-driven dependencies
+3. **Easy Extension**: Add new features by creating new components
+4. **Better Testing**: Components can be tested independently
+5. **Improved Maintainability**: Clear separation of concerns
+
+### Migration Notes
+
+- New architecture coexists with existing code
+- Gradual migration possible
+- See `js/REFACTORING_GUIDE.md` for detailed migration instructions
+- Examples available in `js/example/RefactoredExample.js`
+- Test suite in `js/test/RefactoredArchitectureTest.js`
+
+### Using the New Architecture
+
+```javascript
+// Create scene
+const scene = new EulerDecompositionScene(element, renderer, camera, numFrames);
+
+// Add components
+scene.addComponent('bone', new BoneComponent(geometry));
+scene.addComponent('sphere', new SphereComponent());
+scene.addComponent('cone', new ConeComponent(length));
+
+// Initialize
+await scene.initialize();
+
+// Update with data
+await scene.reset({rotations: data});
+
+// Set frame
+await scene.setFrame(frameNum);
+```
+
 ## File Structure Notes
 
 - `js/` - Main application source code
+  - `scene/` - New component-based scene architecture
+  - `view/` - Refactored view classes
+  - `example/` - Usage examples for new architecture
+  - `test/` - Test suite for refactored components
 - `data/healthy/` - Sample shoulder kinematics dataset
 - `dist/` - Webpack build output
 - `styles/` - CSS files
