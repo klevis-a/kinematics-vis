@@ -75,6 +75,8 @@ Uses **monkey-patching** pattern for modular feature addition:
 - Abstract base class for all view types
 - Lifecycle management: `postDomAttach()`, `initializeVisualOptions()`, `renderSceneGraph()`
 - DOM element creation and camera utilities
+- A scene is supposed to encompass all scene objects, such as 3D elements and the three.js scene object itself. 
+- A view encompasses a scene and its control elements (such as 1, 2, 3 buttons) 
 
 #### **Specialized Views**
 - **HumerusView**: Humerus bone analysis with multiple rotation methods

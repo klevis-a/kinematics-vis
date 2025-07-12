@@ -72,6 +72,7 @@ export class HumerusViewAngVelocity extends BaseView {
     }
 
     previewFrame(frameNum) {
+        console.log(this.humerusQuat(frameNum))
         this.angVelocityScene.humerus.quaternion.copy(this.humerusQuat(frameNum));
         this.angVelocityScene.angVelocityVector.quaternion.copy(new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), this.angVelocity[frameNum].normalize()))
     }

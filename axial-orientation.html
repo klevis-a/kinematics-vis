@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Axial Orientation Trajectory</title>
+    <link href="./styles/main.css" rel="stylesheet">
+    <link href="./styles/sliderStyle.css" rel="stylesheet">
+    <link href="./styles/stateCtrlStyle.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="help-div" class="help-div">
+        <h1>Axial Orientation Trajectory View</h1>
+        <p>This is a custom view for showcasing axial orientation trajectory concepts.</p>
+        <p><strong>Features:</strong></p>
+        <ul>
+            <li>Humerus bone with attached triad showing orientation</li>
+            <li>Globe (wireframe sphere) for spatial reference</li>
+            <li>Angular velocity vector visualization</li>
+            <li>Axial plane (forearm representation)</li>
+            <li>Four custom trajectories (Trial1-Trial4)</li>
+        </ul>
+        <p><strong>Controls:</strong></p>
+        <ul>
+            <li>Use the timeline slider to navigate through frames</li>
+            <li>Toggle trajectory visibility using the Trial buttons</li>
+            <li>Mouse controls: Left click + drag to rotate, Right click + drag to pan, Scroll to zoom</li>
+        </ul>
+        <button id="help-close-btn">Close</button>
+    </div>
+
+    <div id="content-div">
+        <div id="view-div" class="view-container">
+            <!-- The custom view will be inserted here -->
+        </div>
+        
+        <div id="timeline-div" class="timeline-container">
+            <!-- Timeline controls will be inserted here -->
+        </div>
+    </div>
+
+    <div id="loading-div" class="loading-div">
+        <h2>Loading Custom Data...</h2>
+        <p>Please wait while the custom trajectories and humerus model are loaded.</p>
+    </div>
+
+    <button id="help-btn" class="help-btn">?</button>
+
+    <script type="module">
+        import { AxialOrientationTrajectoryView } from './js/AxialOrientationTrajectoryView.js';
+        import { FrameSelectorController } from './js/FrameSelectorController.js';
+        import { WebGLRenderer } from 'three';
+
+        class AxialOrientationApp {
+            constructor() {
+                this.renderer = null;
+                this.view = null;
+                this.frameSelectorController = null;
+                this.isInitialized = false;
+            }
+
+            async initialize() {
+                try {
+                    // Show loading
+                    document.getElementById('loading-div').style.display = 'block';
+                    
+                    // Create renderer
+                    this.renderer = new WebGLRenderer({ antialias: true });
+                    this.renderer.setPixelRatio(window.devicePixelRatio);
+                    this.renderer.shadowMap.enabled = true;
+                    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+                    // Create the custom view
+                    this.view = new AxialOrientationTrajectoryView(this.renderer);
+                    await this.view.initialize();
+
+                    // Add view to DOM
+                    const viewDiv = document.getElementById('view-div');
+                    viewDiv.appendChild(this.view.parent_div);
+                    
+                    // Post DOM attach
+                    await this.view.postDomAttach(null);
+
+                    // Create frame selector controller
+                    const timelineDiv = document.getElementById('timeline-div');
+                    const maxFrames = this.view.getMaxFrames();
+                    
+                    this.frameSelectorController = new FrameSelectorController(
+                        timelineDiv,
+                        maxFrames,
+                        (frameNum) => this.view.previewFrame(frameNum), // preview callback
+                        (frameNum) => this.view.setFrame(frameNum)      // set callback
+                    );
+
+                    // Set up rendering loop
+                    this.startRenderLoop();
+
+                    // Set up window resize handler
+                    window.addEventListener('resize', () => this.onWindowResize());
+
+                    // Set up help button
+                    document.getElementById('help-btn').addEventListener('click', () => {
+                        document.getElementById('help-div').style.display = 'block';
+                    });
+                    
+                    document.getElementById('help-close-btn').addEventListener('click', () => {
+                        document.getElementById('help-div').style.display = 'none';
+                    });
+
+                    // Hide loading, show content
+                    document.getElementById('loading-div').style.display = 'none';
+                    document.getElementById('content-div').style.display = 'block';
+                    
+                    // Initial frame setup
+                    this.view.setFrame(0);
+                    
+                    this.isInitialized = true;
+                    console.log('Axial Orientation Trajectory app initialized successfully');
+
+                } catch (error) {
+                    console.error('Failed to initialize app:', error);
+                    document.getElementById('loading-div').innerHTML = 
+                        '<h2>Error Loading</h2><p>Failed to load custom data. Please check the console for details.</p>';
+                }
+            }
+
+            startRenderLoop() {
+                const render = () => {
+                    if (this.view && this.view.controls) {
+                        this.view.updateControls();
+                    }
+                    
+                    if (this.view) {
+                        this.updateRendererSize();
+                        this.view.renderSceneGraph();
+                    }
+                    
+                    requestAnimationFrame(render);
+                };
+                render();
+            }
+
+            updateRendererSize() {
+                const viewDiv = document.getElementById('view-div');
+                const rect = viewDiv.getBoundingClientRect();
+                this.renderer.setSize(rect.width, rect.height);
+                
+                if (this.view) {
+                    this.view.updateCamera();
+                }
+            }
+
+            onWindowResize() {
+                this.updateRendererSize();
+            }
+        }
+
+        // Initialize the app when the page loads
+        const app = new AxialOrientationApp();
+        app.initialize();
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        #content-div {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #view-div {
+            width: 100%;
+            height: calc(100vh - 80px);
+            position: relative;
+        }
+
+        #timeline-div {
+            width: 100%;
+            height: 80px;
+            background-color: #f5f5f5;
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .loading-div {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .help-div {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .help-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .help-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</body>
+</html>

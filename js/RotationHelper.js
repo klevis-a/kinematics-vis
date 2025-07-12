@@ -1,6 +1,8 @@
 import {Matrix3, Matrix4, Quaternion, Vector3} from "three";
-import {EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, EulerDecomposition_RZ$$_RX$_RY,
-    ShortestPath, ShortestPathStartEnd, SwingTwist, svdDecomp} from "./RotDecompositions.js";
+import {
+    EulerDecomposition_RY$$_RX$_RY, EulerDecomposition_RY$$_RZ$_RX, EulerDecomposition_RZ$$_RX$_RY,
+    ShortestPath, ShortestPathStartEnd, SwingTwist, svdDecomp, AxisAngle, axisAngleFromQuat
+} from "./RotDecompositions.js";
 
 export const HUMERUS_BASE = {
     TORSO: 'T',
@@ -120,6 +122,26 @@ export class RotationHelper {
 
     scapulaRotation(method_name, frameNum) {
         return this.st_rotations.get(method_name)[frameNum];
+    }
+
+    twoRotations() {
+        const exampleRotation1 = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 4);
+        const exampleRotation2 = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 4);
+        const exampleRotation = new Quaternion().multiplyQuaternions(exampleRotation1, exampleRotation2);
+        const decomp = [new AxisAngle(new Vector3(0, 0, 1), Math.PI / 4), new AxisAngle(new Vector3(1, 0, 0), Math.PI / 4)];
+
+        return [exampleRotation, decomp];
+    }
+
+    oneRotation() {
+        const exampleRotation1 = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 4);
+        const exampleRotation2 = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 4);
+        const exampleRotation = new Quaternion().multiplyQuaternions(exampleRotation1, exampleRotation2);
+        const obj = axisAngleFromQuat(exampleRotation)
+        console.log(obj);
+        const decomp = [new AxisAngle(new Vector3(obj.axis.x, obj.axis.y, obj.axis.z), obj.angle)];
+
+        return [exampleRotation, decomp];
     }
 }
 

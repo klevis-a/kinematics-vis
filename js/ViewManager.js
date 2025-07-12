@@ -11,6 +11,9 @@ import {PreviewView} from "./PreviewView.js";
 import {ScapulaView} from "./ScapulaView.js";
 import {defaultCamera} from "./BaseView.js";
 import {HumerusViewAngVelocity} from "./HumerusViewAngVelocity";
+import {AxialOrientationTrajectoryView} from "./AxialOrientationTrajectoryView";
+import {RotationView} from "./RotationView";
+import {RotationView1} from "./RotationView1";
 
 export class ViewManager {
 
@@ -69,8 +72,11 @@ export class ViewManager {
             ['HUM_EULER_XZY', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus Phadke: xz'y''"}],
             ['HUM_SWING_TWIST', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus Swing Twist"}],
             ['HUM_SIMULTANEOUS', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "Humerus Simultaneous"}],
+            ['ROTATION', {creationFnc: method_name => this.createRotationDecompView(method_name), friendly_name: "Rotation Decomposition"}],
+            ['ROTATION1', {creationFnc: method_name => this.createRotationDecompView1(method_name), friendly_name: "Rotation Decomposition 1"}],
             ['PREVIEW', {creationFnc: method_name => this.createPreviewView(method_name), friendly_name: "Preview"}],
             ['ANGULAR_VELOCITY', {creationFnc: method_name => this.createAngVelocityView(method_name), friendly_name: "Angular Velocity"}],
+            ['AXIAL_ORIENTATION', {creationFnc: method_name => this.createAxialOrientationView(method_name), friendly_name: "Axial Orientation"}],
             ['SCAP_EULER_YXZ', {creationFnc: method_name => this.createScapulaView(method_name), friendly_name: "Scapula ISB: yx'z''"}],
             ['HUM_SHORTEST_PATH', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "One Axis"}],
             ['HUM_SHORTEST_PATH_START_END', {creationFnc: method_name => this.createHumerusView(method_name), friendly_name: "One Axis (Start to End)"}]
@@ -187,6 +193,18 @@ export class ViewManager {
         return {scene: view, div: view.parent_div};
     }
 
+    createRotationDecompView(method_name) {
+        const view =  new RotationView(this.camera, this.renderer, this.rotationHelper, "HUM_SWING_TWIST", this.humerusGeometry,
+            this.humerusLength, this.anglesVisLayer, this.areaVisLayer, this.guiOptions.humerusBase);
+        return {scene: view, div: view.parent_div};
+    }
+
+    createRotationDecompView1(method_name) {
+        const view =  new RotationView1(this.camera, this.renderer, this.rotationHelper, "HUM_SWING_TWIST", this.humerusGeometry,
+            this.humerusLength, this.anglesVisLayer, this.areaVisLayer, this.guiOptions.humerusBase);
+        return {scene: view, div: view.parent_div};
+    }
+
     createPreviewView(method_name) {
         const view = new PreviewView(this.renderer, this.rotationHelper, this.humerusGeometry, this.scapulaGeometry, this.humerusLength);
         return {scene: view, div: view.parent_div};
@@ -194,6 +212,13 @@ export class ViewManager {
 
     createAngVelocityView(method_name) {
         const view = new HumerusViewAngVelocity(this.renderer, this.rotationHelper, this.humerusGeometry, this.humerusLength, this.guiOptions.humerusBase);
+        view.subscribeEvents(this);
+        return {scene: view, div: view.parent_div};
+    }
+
+    createAxialOrientationView(method_name) {
+        const view = new AxialOrientationTrajectoryView(this.rotationHelper, this.renderer, this.humerusGeometry, this.humerusLength);
+        console.log("View created")
         view.subscribeEvents(this);
         return {scene: view, div: view.parent_div};
     }
